@@ -1,0 +1,11 @@
+{
+  "name": "magzog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "default.js",
+  "scripts": {
+    "start": "tsc && cp ./src/*.html ./dist && cp ./src/*.css ./dist && cp ./src/resources/* ./dist/resources/"
+  },
+  "author": "Sing Graajae Cho",
+  "license": "ISC"
+}
