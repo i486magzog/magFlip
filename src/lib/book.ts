@@ -23,9 +23,10 @@ export class Book implements IBookData {
     };
   };
   // 
-  elementOnShelf: Element;
-  element: Element;
-  pageContainerEl: Element;
+  elementOnShelf: HTMLElement;
+  element: HTMLElement;
+  pageContainerEl: HTMLElement;
+  flippingPageIndex: number = 0;
 
   constructor(book:IBookData) {
     // TODO: id should be unique and exist.
@@ -111,7 +112,10 @@ export class Book implements IBookData {
     }
 
     pageSamples.forEach((pageSample) => {
-      const page = new Page(pageSample);
+      const page = new Page(pageSample, { 
+        clicked: this.pageClicked,
+        mousemoved: this.pageActive
+      });
       this.addPage(page, page.index);
     });
 
@@ -121,19 +125,19 @@ export class Book implements IBookData {
   }
 
   setReadyToOpen() { 
-    const el = this.element as HTMLDivElement;
-    el.style.width = `${Math.round(this.size.width/2)}px`;
+    const el = this.element as HTMLElement;
+    el.style.width = `${Math.round(this.size.width)}px`;
     el.style.height = `${this.size.height}px`;
     el.classList.add("ready-to-open");
   }
   addPage(page: Page, index: number) { this.pages[index] = page; }
   removePage(index: number) { delete this.pages[index]; }
   getPage(index: number){ return this.pages[index]; }
-  getPageEl(index: number):Element { return this.pages[index].element; }
+  getPageEl(index: number):HTMLElement { return this.pages[index].element; }
   clearPageEls() { this.pageContainerEl.innerHTML = ""; }
   appendPageEl(pageIndex: number) { this.pageContainerEl.appendChild(this.getPageEl(pageIndex)); }
 
-  createBookElement(): { bookOnShelfEl: Element, bookEl: Element, containerEl: Element } {
+  createBookElement(): { bookOnShelfEl: HTMLElement, bookEl: HTMLElement, containerEl: HTMLElement } {
     const bookOnShelfEl = document.createElement('div');
     bookOnShelfEl.className = "book-on-shelf";
     const coverEl = document.createElement('img');
@@ -152,4 +156,13 @@ export class Book implements IBookData {
 
     return { bookOnShelfEl: bookOnShelfEl, bookEl: bookEl, containerEl: containerEl };
   }
+
+  // addEventListener(page:Page){
+  //   page.element.addEventListener('click', (e:Event) => {
+  //     e.currentTarget
+  //   })
+  // }
+
+  pageClicked(event:Event, param:any){ this.flippingPageIndex = (param as Page).index; }
+  pageActive(event:Event, param:any){ ; }
 }

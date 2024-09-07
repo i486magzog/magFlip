@@ -22,7 +22,7 @@ export enum PageType {
 }
 
 export enum DefaultSize {
-  bookWidth = 1200,
+  bookWidth = 600,
   bookHeight = 900,
   pageWidth = 600,
   pageHeight = 900,
@@ -39,6 +39,54 @@ export enum BookStatus {
   Close = "Close",
 }
 
+export enum EventStatus {
+  None = "none",
+  AutoFlipInCorner = "autoFlipInCorner",
+  AutoFlipOutCorner = "autoFlipOutCorner",
+  Flipping = "flipping",
+  FlippingOut = "flippingOut"
+}
+
+export enum Zone {
+  LT="lt",
+  LC="lc",
+  LB="lb",
+  RT="rt",
+  RC="rc",
+  RB="rb"
+}
+
+export interface ZoneEventParams {
+  zone: Zone,
+  // backPage1El: HTMLElement,
+  // backPage2El: HTMLElement 
+}
+
+export interface EventHandlers {
+  clicked: (event:Event, param:any)=>void
+  mousemoved: (event:Event, param:any)=>void
+}
+
+export interface Point {
+  x: number,
+  y: number
+}
+
+export interface Rect {
+  top: number,
+  left: number,
+  width: number,
+  height: number,
+  bottom: number,
+  right: number,
+}
+export interface Box {
+  x: number,
+  y: number,
+  width: number,
+  height:number
+}
+
 export interface IBookData {
   id: string;
   status: BookStatus;
@@ -46,6 +94,9 @@ export interface IBookData {
   author: string;
   type: BookType;
   publication?: IPublication;
+  /**
+   * The book size when it is close.
+   */
   size:IBookSize;
   thumbnails: {
     spine: string;

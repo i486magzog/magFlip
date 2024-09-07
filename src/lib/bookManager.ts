@@ -53,7 +53,7 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2022-09-01"
           },
-          size: { width: 1200, height: 900 },
+          size: { width: 600, height: 900 },
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -75,7 +75,7 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2023-09-01"
           },
-          size: { width: 1200, height: 900 },
+          size: { width: 600, height: 900 },
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -97,7 +97,7 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2024-09-01"
           },
-          size: { width: 1200, height: 900 },
+          size: { width: 600, height: 900 },
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -119,7 +119,7 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2025-09-01"
           },
-          size: { width: 1200, height: 900 },
+          size: { width: 600, height: 900 },
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -141,7 +141,7 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2026-09-01"
           },
-          size: { width: 1200, height: 900 },
+          size: { width: 600, height: 900 },
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",

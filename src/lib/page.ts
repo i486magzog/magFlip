@@ -1,4 +1,4 @@
-import { DefaultSize, IPageSize, IPageData, PageType } from "./models.js";
+import { DefaultSize, IPageSize, IPageData, PageType, EventHandlers } from "./models.js";
 /**
  * Page class
  */
@@ -14,9 +14,9 @@ export class Page implements IPageData {
     ignore: boolean;
     content: any;
     
-    element: Element;
+    element: HTMLElement;
     
-    constructor(page:IPageData) {
+    constructor(page:IPageData, eventHandlers:EventHandlers|null = null) {
       // TODO: id should be unique and exist.
       this.id = page.id;
       this.type = page.type || PageType.Page;
@@ -27,6 +27,7 @@ export class Page implements IPageData {
       this.ignore = page.ignore || false;
       this.content = page.content || "";
       this.element = this.createPageElement(page);
+      this.addEventListener(eventHandlers);
     }
   
     static emptyPage(index:number):Page { return this.createEmptyOrBlankPage(index, PageType.Empty); }
@@ -47,7 +48,7 @@ export class Page implements IPageData {
      * @param page 
      * @returns 
      */
-    createPageElement(page: IPageData):Element {
+    createPageElement(page: IPageData):HTMLElement {
       const pageEl = document.createElement('div');
       pageEl.className = "page";
       pageEl.setAttribute('pageIdx', `${page.index}`);
@@ -89,5 +90,10 @@ export class Page implements IPageData {
         pageEl.appendChild(contentEl);
       }
       return pageEl;
+    }
+
+    addEventListener(handlers:EventHandlers|null){
+      this.element.addEventListener('click', (event:Event) => { handlers?.clicked(event, this) })
+      this.element.addEventListener('mousemove', (event:Event) => { handlers?.mousemoved(event, this) })
     }
   }
