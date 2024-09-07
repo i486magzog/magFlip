@@ -43,37 +43,6 @@ export class BookViewer extends Flipping {
 
   pageContainerRect?:Rect;
   bottomCenter:Point = {x:0, y:0}
-  // private zoneWidth = 25;
-  // private zone?:{ 
-  //   width: number,
-  //   height: number,
-  //   lt: Box,
-  //   lc: Box,
-  //   lb: Box,
-
-  //   rt: Box,
-  //   rc: Box,
-  //   rb: Box,
-  // };
-  
-  // private openPageEl: HTMLElement|undefined;
-  // private backPage1El: HTMLElement|undefined;
-  // private backPage2El: HTMLElement|undefined;
-  // this.flippingPages.element.openPage = this.book?.getPage(this.flippingPages.index.openPage)?.element
-  // this.flippingPages.element.backPage1 = this.book?.getPage(this.flippingPages.index.backPage1)?.element
-  // this.flippingPages.element.backPage2 = this.book?.getPage(this.flippingPages.index.backPage2)?.element
-  // flippingPages: {
-  //   index: {
-  //     openPage: number;
-  //     backPage1: number;
-  //     backPage2: number;
-  //   },
-  //   element: {
-  //     openPage: HTMLElement|undefined;
-  //     backPage1: HTMLElement|undefined;
-  //     backPage2: HTMLElement|undefined;
-  //   }
-  // }
 
   private get openPage():Page|undefined { return this.isLeftPageActive ? this.windows[2].page : this.windows[3].page; }
   private get backPage1():Page|undefined { return this.isLeftPageActive ? this.windows[1].page : this.windows[4].page; }
@@ -81,17 +50,6 @@ export class BookViewer extends Flipping {
   private get openPageEl():HTMLElement|undefined { return this.openPage?.element; }
   private get backPage1El():HTMLElement|undefined { return this.backPage1?.element; }
   private get backPage2El():HTMLElement|undefined { return this.backPage2?.element; }
-
-  // setWindowPageEls(isLeftPageActive:boolean, activeOpenPageIndex:number){
-  //   this.isLeftPageActive = isLeftPageActive;
-  //   this.curActiveOpenPageIndex = activeOpenPageIndex;
-
-  //   this.openPageEl = this.book?.getPage(activeOpenPageIndex)?.element;
-  //   const backPage1Index = isLeftPageActive ? activeOpenPageIndex - 1 : activeOpenPageIndex + 1;
-  //   this.backPage1El = this.book?.getPage(backPage1Index)?.element;
-  //   const backPage2Index = isLeftPageActive ? activeOpenPageIndex - 2 : activeOpenPageIndex + 2;
-  //   this.backPage2El = this.book?.getPage(backPage2Index)?.element;
-  // }
 
   constructor(bookManager:BookManager, viewerId?:string) {
     super();
@@ -108,20 +66,7 @@ export class BookViewer extends Flipping {
       mask1Shape: this.maskShapeOnBackPage1,
       mask2Shape: this.maskShapeOnBackPage2 } = this.createElements());
     
-    // this.curLeftOpenPageIndex = -1;
-    // this.curRightOpenPageIndex = 0;
-    // this.flippingPages = {
-    //   index: {
-    //     openPage: 0,
-    //     backPage1: 1,
-    //     backPage2: 2
-    //   },
-    //   element: {
-    //     openPage: undefined,
-    //     backPage1: undefined,
-    //     backPage2: undefined
-    //   }
-    // };
+    this.addEventListeners();
   }
 
   createElements():ViewerElements {    
@@ -282,8 +227,6 @@ export class BookViewer extends Flipping {
     if(openPageIndex == 0){ book.setReadyToOpen(); }
     this.loadPages(newIndexRange);
     this.showPages(newIndexRange.start);
-
-    this.addEventListeners();
   }
   /**
    * Close the book on the viewer.
@@ -322,22 +265,6 @@ export class BookViewer extends Flipping {
       else { this.bottomCenter = { x: pageContainerRect.left, y: pageContainerRect.bottom }}
     }
   }
-  // private setZone(){
-  //   const zoneW = this.zoneWidth;
-  //   const { left:bcLeft, top:bcTop, right:bcRight, bottom:bcBottom, width:bcWidth, height:bcHeight } = this.bookContainerEl.getBoundingClientRect();
-  //   const zoneCenterH = bcHeight - zoneW * 2;
-  //   this.zone = { 
-  //     width: zoneW,
-  //     height: bcHeight,
-  //     lt: { x:0, y:0, width:zoneW, height:zoneW },
-  //     lc: { x:0, y:zoneW, width:zoneW, height:zoneCenterH },
-  //     lb: { x:0, y:zoneW+zoneCenterH, width:zoneW, height:zoneW },
-  
-  //     rt: { x:bcWidth-zoneW, y:0, width:zoneW, height:zoneW },
-  //     rc: { x:bcWidth-zoneW, y:zoneW, width:zoneW, height:zoneCenterH },
-  //     rb: { x:bcWidth-zoneW, y:zoneW+zoneCenterH, width:zoneW, height:zoneW },
-  //   };
-  // }
   private detachBook() {
     this.bookViewerEl.classList.add("hidden");  
     this.book?.clearPageEls();
@@ -471,47 +398,6 @@ export class BookViewer extends Flipping {
     }
   }
 
-  // zoneMouseUp(event:MouseEvent, param:ZoneEventParams){
-  //   const msEvent = event as MouseEvent;
-  //   const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-
-  //   switch(param.zone){
-  //     case Zone.LT: break;
-  //     case Zone.LC: break;
-  //     case Zone.LB: break;
-  //     case Zone.RT: break;
-  //     case Zone.RC: break;
-  //     case Zone.RB: 
-  //       // this.flipOut(viewport, this.pageContainerRect as Rect, this.backPage1El as HTMLElement);
-  //       // this.flipOutCorner(this.backPage1El as HTMLElement, this.maskShapeOnBackPage1 as SVGPolygonElement, this.maskShapeOnBackPage2 as SVGPolygonElement, () => {
-  //       //   if(this.backPage1El){
-  //       //     this.backPage1El.classList.remove("ready-to-flip");
-  //       //     this.backPage1El.style.top = "";
-  //       //     this.backPage1El.style.left = "";
-  //       //     this.backPage1El.style.transform = `rotate(0rad)`;
-  //       //   }
-  //       //   if(this.backPage2El){
-  //       //     this.backPage2El.classList.remove("back2");
-  //       //   }
-  //       // });
-  //       // this.eventStatus = EventStatus.AutoFlipOutCorner;
-  //       break;
-  //   }
-  // }
-
-  // zoneMouseMoved(event:MouseEvent, param:ZoneEventParams){
-  //   const msEvent = event as MouseEvent;
-  //   const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-  //   this.flip(
-  //     viewport, 
-  //     this.bottomCenter,
-  //     this.pageContainerRect as Rect,
-  //     this.backPage1El as HTMLElement,
-  //     this.maskShapeOnBackPage1,
-  //     this.maskShapeOnBackPage2
-  //   );
-  // }
-
   documentMouseUp(event:Event){
     if(this.eventStatus != EventStatus.Flipping){ return; }
 
@@ -581,101 +467,6 @@ export class BookViewer extends Flipping {
     this.zoneRB.addEventListener('mousedown', (event:Event) => { this.zoneMouseDowned(event as MouseEvent, { zone: Zone.RB }); })
 
     document.addEventListener('mouseup', this.documentMouseUp.bind(this));
-    document.addEventListener('mousemove', this.documentMouseMove.bind(this)); 
-    // document.addEventListener('mouseup', (event) => { 
-    //   if(this.eventStatus != EventStatus.Flipping){ return; }
-
-    //   this.eventStatus = EventStatus.FlippingOut;
-
-    //   const msEvent = event as MouseEvent;
-    //   const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-
-    //   this.flipOut(
-    //     viewport, 
-    //     this.bottomCenter,
-    //     this.pageContainerRect as Rect, 
-    //     this.backPage1El as HTMLElement, 
-    //     this.maskShapeOnBackPage1,
-    //     this.maskShapeOnBackPage2,
-    //     () => {
-    //       this.eventStatus = EventStatus.None;
-    //       this.bookViewerEl.classList.remove("noselect");
-    //       this.backPage2El?.classList.remove("flipping-back-page2");
-    //       if(this.backPage1El){
-    //         this.backPage1El.classList.remove("flipping-back-page1");
-    //         this.backPage1El.style.top = "";
-    //         this.backPage1El.style.left = "";
-    //         this.backPage1El.style.transform = `rotate(0rad)`;
-    //       }
-    //     }
-    //   );
-    // });
-
-    // document.addEventListener('mousemove', (event) => { 
-    //   if(this.eventStatus != EventStatus.Flipping){ return; }
-
-    //   const msEvent = event as MouseEvent;
-    //   const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-    //   this.flip(
-    //     viewport, 
-    //     this.bottomCenter,
-    //     this.pageContainerRect as Rect,
-    //     this.backPage1El as HTMLElement,
-    //     this.maskShapeOnBackPage1,
-    //     this.maskShapeOnBackPage2
-    //   );
-    //   // // The position of mouse pointer in the viewport.
-    //   // let viewportX = msEvent.clientX;
-    //   // let viewportY = msEvent.clientY;
-    //   // if(this.getLength(bottomCenter.x, bottomCenter.y, msEvent.clientX, msEvent.clientY) > 600){
-    //   //   ({ x:viewportX, y:viewportY } = this.findPointOnLine(bottomCenter, { x: viewportX, y: viewportY }, 600));
-    //   // }
-    //   // const radian = this.getRadian(containerRect.right, containerRect.bottom, viewportX, viewportY);
-    //   // if(backPage1El){
-    //   //   const b = containerRect.bottom - viewportY;
-    //   //   const c = containerRect.right - viewportX;
-    //   //   const d = c / Math.cos(Math.PI*3/2 + 2*radian);
-    //   //   const e = b / Math.cos(Math.PI*3/2 + 2*radian);
-
-    //   //   this.maskShapeOnBackPage1?.setAttribute('points', `0,900 0,${900-d} ${e},900`);
-    //   //   this.maskShapeOnBackPage2?.setAttribute('points', `600,900 ${600-e},900 600,${900-d}`);
-    //   //   backPage1El.style.top = `${viewportY - containerRect.top - containerRect.height}px`;
-    //   //   backPage1El.style.left = `${viewportX - containerRect.left}px`;
-    //   //   backPage1El.style.transform = `rotate(${2*radian}rad)`;
-    //   // }
-    // });
-
-    // this.bookContainerEl.addEventListener("mousemove", (event:Event) => {
-    //   const msEvent = event as MouseEvent;
-
-    //   const rect = this.bookContainerEl.getBoundingClientRect();
-
-    //   const x = msEvent.offsetX;
-    //   const y = msEvent.offsetY;
-      
-    //   if(this.zone){
-    //     const zoneW = this.zone.width;
-    //     // Left
-    //     if(x < zoneW){
-    //       // Top
-    //       if(y < this.zone.lc.y){ }
-    //       // Center
-    //       else if(y < this.zone.lb.y){}
-    //       // Bottom
-    //       else if(y > (this.zone.lb.y + zoneW)){ }
-    //     } 
-    //     else if(x > (this.zone.rt.x)){
-    //       // Top
-    //       if(y < this.zone.rc.y){ }
-    //       // Center
-    //       else if(y < this.zone.rb.y){}
-    //       // Bottom
-    //       else if(y < (this.zone.rb.y + zoneW)){ }
-    //     }
-    //   }
-    // })
+    document.addEventListener('mousemove', this.documentMouseMove.bind(this));
   }
-
-
-
 }
