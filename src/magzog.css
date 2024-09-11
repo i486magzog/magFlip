@@ -142,7 +142,7 @@ html, body {
   height: 100%; */
   box-sizing: border-box;
 }
-#bookViewer .book > .container > .page.flipping-back-page1 {
+#bookViewer .book > .container > .page.flipping-page2 {
   z-index: 10;
   /* mask: url(#mask);
   -webkit-mask: url(#mask); */
@@ -153,7 +153,7 @@ html, body {
   mask-image: url(#mask1);
   mask-mode: alpha;
 }
-#bookViewer .book > .container > .page.ready-to-flip {
+/* #bookViewer .book > .container > .page.ready-to-flip {
   z-index: 10;
   -webkit-mask-composite: intersect;
   -webkit-mask-image: url(#mask1);
@@ -161,8 +161,9 @@ html, body {
   mask-composite: intersect;
   mask-image: url(#mask1);
   mask-mode: alpha;
-}
-#bookViewer .book > .container > .page.flipping-back-page2 {
+} */
+#bookViewer .book > .container > .page.flipping-page3 {
+  z-index: 10;
   -webkit-mask-composite: intersect;
   -webkit-mask-image: url(#mask2);
   -webkit-mask-mode: alpha;
@@ -172,12 +173,17 @@ html, body {
 }
 #bookViewer .book > .container > .page:nth-child(-n+3) {
   left:0%;
-  transform-origin: bottom right;
 }
 #bookViewer .book > .container > .page:nth-child(n+4):nth-child(-n+6) {
   left:50%;
-  transform-origin: bottom left;
 }
+
+#bookViewer.zone-lt .book > .container > .page:nth-child(-n+3){ transform-origin: top right; }
+#bookViewer.zone-lc .book > .container > .page:nth-child(-n+3){ transform-origin: center right; }
+#bookViewer.zone-lb .book > .container > .page:nth-child(-n+3){ transform-origin: bottom right; }
+#bookViewer.zone-rt .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: top left; }
+#bookViewer.zone-rc .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: center left; }
+#bookViewer.zone-rb .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: bottom left; }
 
 #bookViewer .book.book.ready-to-open > .container > .page:nth-child(n+4):nth-child(-n+6) { left:0; }
 

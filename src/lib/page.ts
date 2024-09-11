@@ -1,4 +1,4 @@
-import { DefaultSize, IPageSize, IPageData, PageType, EventHandlers } from "./models.js";
+import { DefaultSize, Size, IPageData, PageType, EventHandlers } from "./models.js";
 /**
  * Page class
  */
@@ -8,7 +8,7 @@ export class Page implements IPageData {
      */
     id: string;
     type: PageType;
-    size: IPageSize;
+    size: Size;
     index: number;
     number: number | undefined;
     ignore: boolean;

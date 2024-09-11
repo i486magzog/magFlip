@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType } from "./models.js";
+import { IBookData, BookStatus, BookType, IPublication, BookSize, DefaultSize, IPageData, PageType } from "./models.js";
 import { Page } from "./page.js";
 
 /**
@@ -11,7 +11,7 @@ export class Book implements IBookData {
   title: string;
   author: string;
   publication: IPublication;
-  size: IBookSize;
+  size: BookSize;
   private pages: { [n:number|string]: Page };
   thumbnails: {
     spine: string;
@@ -126,8 +126,8 @@ export class Book implements IBookData {
 
   setReadyToOpen() { 
     const el = this.element as HTMLElement;
-    el.style.width = `${Math.round(this.size.width)}px`;
-    el.style.height = `${this.size.height}px`;
+    el.style.width = `${Math.round(this.size.closed.width)}px`;
+    el.style.height = `${this.size.closed.height}px`;
     el.classList.add("ready-to-open");
   }
   addPage(page: Page, index: number) { this.pages[index] = page; }
@@ -149,8 +149,8 @@ export class Book implements IBookData {
     const bookEl = document.createElement('div');
     const containerEl = document.createElement('div');
     bookEl.className = "book";
-    bookEl.style.width = `${this.size.width}px`;
-    bookEl.style.height = `${this.size.height}px`;
+    bookEl.style.width = `${this.size.closed.width}px`;
+    bookEl.style.height = `${this.size.closed.height}px`;
     containerEl.className = "container";
     bookEl.appendChild(containerEl);
 
