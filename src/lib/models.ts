@@ -1,4 +1,6 @@
-export interface Size {
+import { MZMath } from "./mzMath.js";
+
+export interface ISize {
   width: number;
   height: number;
 }
@@ -7,9 +9,9 @@ export interface Size {
 //   height: number;
 // }
 
-export interface BookSize {
-  closed: Size
-  opened: Size
+export interface IBookSize {
+  closed: ISize
+  opened: ISize
 }
 
 export interface IPublication {
@@ -60,61 +62,196 @@ export enum Zone {
   RB="rb"
 }
 
-export interface ZoneEventParams {
+export interface IZoneEventParams {
   zone: Zone,
   // backPage1El: HTMLElement,
   // backPage2El: HTMLElement 
 }
 
-export interface EventHandlers {
+export interface IEventHandlers {
   clicked: (event:Event, param:any)=>void
   mousemoved: (event:Event, param:any)=>void
 }
 
-export interface Gutter {
-  topPoint:Point;
-  bottomPoint:Point;
-  rect: Rect;
-}
-
-export class Gutter implements Gutter {
-  constructor(){
-    this.topPoint = new Point();
-    this.bottomPoint = new Point();
-    this.rect = new Rect();
-  }
-}
-
-export interface Point {
+export interface IPoint {
   x: number,
   y: number
 }
-export class Point implements Point{
-  constructor(){
-    this.x = 0;
-    this.y = 0;
+export class Point implements IPoint{
+  x:number;
+  y:number;
+  constructor(point?:IPoint){
+    this.x = point?.x || 0;
+    this.y = point?.y || 0;
   }
 }
-export interface TopBottom{
+export interface ITopBottom{
   top: number,
   bottom: number,
 }
-export interface LeftRight{
+export interface ILeftRight{
   left: number,
   right: number,
 }
-export interface Rect extends TopBottom, LeftRight {
+export interface IRect extends ITopBottom, ILeftRight {
   width: number,
   height: number,
 }
-export class Rect implements Rect {
+export class Rect implements IRect {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
   width:number;
   height:number;
-  constructor(){
-    this.width = 0;
-    this.height = 0;
+  private center: Point;
+
+  constructor(rect?:IRect){
+    this.left = rect?.left || 0;
+    this.right = rect?.right || 0;
+    this.top = rect?.top || 0;
+    this.bottom = rect?.bottom || 0;
+    this.width = rect?.width || 0;
+    this.height = rect?.height || 0;
+    this.center = new Point({x:(this.left + this.right)/2, y:(this.top+this.bottom)/2})
+  }
+  get leftTop(){ return { x: this.left, y:this.top } }
+  get leftCenter(){ return { x: this.left, y:this.center.y } }
+  get leftBottom() { return { x: this.left, y:this.bottom } }
+  get rightTop(){ return { x: this.right, y:this.top } }
+  get rightCenter() { return { x: this.right, y:this.center.y } }
+  get rightBottom() { return { x: this.right, y:this.bottom } }
+  get centerTop() { return { x: this.center.x, y: this.top } }
+  get centerCenter() { return this.center }
+  get centerBottom() { return { x: this.center.x, y: this.bottom } }
+}
+
+export class Gutter extends Rect{
+  constructor(gutter?:IRect){
+    super(gutter as IRect);
+  }
+  get topPoint() { return {x:this.left, y:this.top} }
+  get bottomPoint() { return {x:this.left, y:this.bottom} }
+}
+
+export class FlipActionLine {
+  private _leftP:Point;
+  private _rightP:Point;
+  private _centerP:Point;
+  leftX:number;
+  rightX:number;
+  y:number;
+
+  constructor(leftX:number = 0, rightX:number = 0, y:number = 0){
+    this.leftX = leftX;
+    this.rightX = rightX;
+    this.y = y;
+    this._leftP = { x: leftX, y: y };
+    this._rightP =  { x: rightX, y: y };
+    this._centerP = { x: (leftX + rightX)/2, y: y };
+  }
+  get leftP() { return this._leftP; }
+  get rightP() { return this._rightP; }
+  get centerP() { return this._centerP; }
+}
+
+
+export class FlipDiagonal {
+  private _length: number = 0;
+  private _radian: number = 0;
+  get length() { return this._length; }
+  get radian(){ return this._radian; }
+
+  constructor(startP:Point, endP:Point){
+    this._length = MZMath.getLength(startP, endP);
+    this._radian = MZMath.getRadianPositive(startP, endP);
   }
 }
+export class FlipDiagonals {
+  area1:{
+    length: number
+    radian: {
+      low: number
+      high: number
+    }
+  };
+  area2: {
+    length: number
+    radian: {
+      low: number
+      high: number
+    }
+  };
+
+  area3: {
+    length: number
+    radian: {
+      low: number
+      high: number
+    }
+  }
+
+  area4: {
+    length: number
+    radian: {
+      low: number
+      high: number
+    }
+  }
+
+  /**
+   * 
+   * @param rect The container that book is spread open.
+   * @param actionCenter The center of FlipActionLine.
+   */
+  constructor(rect?:Rect, actionCenter?:Point){
+    const zeroP = new Point();
+    const centerLeftP = { x: rect?.left || 0, y:actionCenter?.y || 0 }
+    const centerRightP = { x: rect?.right || 0, y:actionCenter?.y || 0 }
+    const centerTop = rect?.centerTop || zeroP;
+    const centerBottom = rect?.centerBottom || zeroP;
+    //
+    const diagonalLeftInArea1 = new FlipDiagonal(centerBottom, centerLeftP);
+    const diagonalRightInArea1 = new FlipDiagonal(centerBottom, centerRightP);
+    const diagonalLeftInArea2 = new FlipDiagonal(centerTop, centerLeftP);
+    const diagonalRightInArea2 = new FlipDiagonal(centerTop, centerRightP);
+    // Upper side
+    this.area1 = {
+      length: diagonalLeftInArea1.length,
+      radian: {
+        low: diagonalLeftInArea1.radian,
+        high: diagonalRightInArea1.radian || 2 * Math.PI,
+      }
+    };
+    // Lower side
+    this.area2 = {
+      length: diagonalLeftInArea2.length,
+      radian: {
+        low: diagonalRightInArea2.radian,
+        high: diagonalLeftInArea2.radian,
+      }
+    };
+    // Right side
+    this.area3 = {
+      length: 0,
+      radian: {
+        low: diagonalRightInArea1.radian,
+        high: diagonalRightInArea2.radian,
+      }
+    };
+    // Left side
+    this.area4 = {
+      length: 0,
+      radian: {
+        low: diagonalLeftInArea2.radian,
+        high: diagonalLeftInArea1.radian,
+      }
+    };
+  }
+
+}
+
+
 export interface Box {
   x: number,
   y: number,
@@ -132,7 +269,7 @@ export interface IBookData {
   /**
    * The book size when it is close.
    */
-  size:BookSize;
+  size:IBookSize;
   thumbnails: {
     spine: string;
     small: string;
@@ -147,7 +284,7 @@ export interface IBookData {
 export interface IPageData {
   id: string;
   type: PageType;
-  size: Size;
+  size: ISize;
   index: number;      // index of the page in the book
   number: number | undefined;  // displayed number of the page in the book
   ignore: boolean;    // ignore the page when displaying the book

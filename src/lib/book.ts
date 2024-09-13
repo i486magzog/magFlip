@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType, IPublication, BookSize, DefaultSize, IPageData, PageType } from "./models.js";
+import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType } from "./models.js";
 import { Page } from "./page.js";
 
 /**
@@ -11,7 +11,7 @@ export class Book implements IBookData {
   title: string;
   author: string;
   publication: IPublication;
-  size: BookSize;
+  size: IBookSize;
   private pages: { [n:number|string]: Page };
   thumbnails: {
     spine: string;

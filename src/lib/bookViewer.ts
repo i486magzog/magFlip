@@ -1,8 +1,9 @@
-import { Box, EventStatus, Gutter, IPageData, Point, Rect, Zone, ZoneEventParams } from './models.js';
+import { Box, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams } from './models.js';
 import { Book } from './book.js'
 import { Page } from './page.js'
 import { BookManager } from './bookManager.js'
 import { Flipping } from './flipping.js'
+import { MZMath } from './mzMath.js';
 
 type ViewerElements = {
   bookViewerEl: HTMLElement,
@@ -43,7 +44,7 @@ export class BookViewer extends Flipping {
   isLeftPageActive:boolean = false;
   curActiveOpenPageIndex: number = 0;
   isSpreadOpen:boolean = false;
-  gutter:Gutter = new Gutter();
+  // gutter:Gutter = new Gutter();
 
   pageContainerRect?:Rect;
   // bottomCenter:Point = {x:0, y:0}
@@ -263,33 +264,25 @@ export class BookViewer extends Flipping {
   private setViewer(){
     if(this.book){
       const { closed, opened } = this.book.size;
-      const pageContainerRect = this.pageContainerRect = this.getOffset4Fixed(this.book.pageContainerEl as HTMLDivElement);
+      const pageContainerRect = this.pageContainerRect = MZMath.getOffset4Fixed(this.book.pageContainerEl as HTMLDivElement);
 
       if(pageContainerRect.width > (closed.width+10)){ 
-        this.gutter = {
-          topPoint: { x:pageContainerRect.left + pageContainerRect.width/2, y: pageContainerRect.top },
-          bottomPoint: { x:pageContainerRect.left + pageContainerRect.width/2, y: pageContainerRect.bottom },
-          rect: {
-            width:0, height:0,
-            left: pageContainerRect.left + pageContainerRect.width/2, 
-            right: pageContainerRect.left + pageContainerRect.width/2,
-            top: pageContainerRect.top,
-            bottom: pageContainerRect.bottom
-          }
-        } 
+        this.gutter = new Gutter({
+          width:0, height:0,
+          left: pageContainerRect.left + pageContainerRect.width/2, 
+          right: pageContainerRect.left + pageContainerRect.width/2,
+          top: pageContainerRect.top,
+          bottom: pageContainerRect.bottom
+        })
       }
       else { 
-        this.gutter = {
-          topPoint: { x:pageContainerRect.left, y: pageContainerRect.top },
-          bottomPoint: { x:pageContainerRect.left, y: pageContainerRect.bottom },
-          rect: {
-            width:0, height:0,
-            left: pageContainerRect.left, 
-            right: pageContainerRect.left,
-            top: pageContainerRect.top,
-            bottom: pageContainerRect.bottom
-          }
-        } 
+        this.gutter = new Gutter({
+          width:0, height:0,
+          left: pageContainerRect.left, 
+          right: pageContainerRect.left,
+          top: pageContainerRect.top,
+          bottom: pageContainerRect.bottom
+        })
       }
     }
   }
@@ -339,7 +332,7 @@ export class BookViewer extends Flipping {
     }
   }
 
-  zoneMouseEntered(event:MouseEvent, param:ZoneEventParams) {
+  zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
     if(this.eventStatus == EventStatus.Flipping
       || this.eventStatus == EventStatus.FlippingOut){ return; }
 
@@ -378,7 +371,7 @@ export class BookViewer extends Flipping {
     });
   }
 
-  zoneMouseLeaved(event:MouseEvent, param:ZoneEventParams){
+  zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
     if(this.eventStatus == EventStatus.Flipping
       || this.eventStatus == EventStatus.FlippingOut){ return; }
 
@@ -413,7 +406,7 @@ export class BookViewer extends Flipping {
     // }
   }
 
-  zoneMouseDowned(event:MouseEvent, param:ZoneEventParams){
+  zoneMouseDowned(event:MouseEvent, param:IZoneEventParams){
     if(this.eventStatus == EventStatus.FlippingOut){ return; }
 
     const msEvent = event as MouseEvent;
@@ -427,59 +420,17 @@ export class BookViewer extends Flipping {
     this.bookViewerEl.classList.add("noselect");
     this.page3El && this.page3El.classList.add("flipping-page3");
     this.eventStatus = EventStatus.Flipping;
-    this.eventZone = param.zone;
+    // this.eventZone = param.zone;
     this.curAutoFlipWidth = 0;
 
     if(!this.pageContainerRect){ return; }
     // let gutterPoint:Point;
-    switch(param.zone){
-      case Zone.LT:
-        this.activeCenterGP = this.gutter.topPoint;
-        this.activeCenterOppositeGP = this.gutter.bottomPoint;
-        this.activeCornerGP = { x:this.pageContainerRect?.left, y: this.pageContainerRect?.top }
-        this.setDiagonalLength();
-        this.setInitFlipping();
-        break;
-      case Zone.RT:
-        this.activeCenterGP = this.gutter.topPoint;
-        this.activeCenterOppositeGP = this.gutter.bottomPoint;
-        this.activeCornerGP = { x:this.pageContainerRect?.right, y: this.pageContainerRect?.top }
-        this.setDiagonalLength();
-        this.setInitFlipping();
-        break;
-      case Zone.LC:
-        this.activeCenterGP = this.gutter.bottomPoint;
-        this.activeCenterOppositeGP = this.gutter.topPoint;
-        this.activeCornerGP = { x:this.pageContainerRect?.left, y: this.pageContainerRect?.top }
-        this.setDiagonalLength();
-        this.setInitFlipping();
-        break;
-      case Zone.RC:
-        {
-          this.activeCenterGP = this.gutter.bottomPoint;
-          this.activeCenterOppositeGP = this.gutter.topPoint;
-          this.activeCornerGP = { x:this.pageContainerRect?.right, y: viewport.y }
-          this.setDiagonalLength();
-          this.setInitFlipping();
-        }
-        break;
-      case Zone.LB:
-        this.activeCenterGP = this.gutter.bottomPoint;
-        this.activeCenterOppositeGP = this.gutter.topPoint;
-        this.activeCornerGP = { x:this.pageContainerRect?.left, y: this.pageContainerRect?.bottom }
-        this.setDiagonalLength();
-        this.setInitFlipping();
-        break;
-      case Zone.RB:
-        {
-          this.activeCenterGP = this.gutter.bottomPoint;
-          this.activeCenterOppositeGP = this.gutter.topPoint;
-          this.activeCornerGP = { x:this.pageContainerRect?.right, y: this.pageContainerRect?.bottom }
-          this.setDiagonalLength();
-          this.setInitFlipping();
-        }
-        break;
-    }
+    this.setInitFlipping(
+      param.zone, 
+      this.pageContainerRect as Rect,
+      viewport,
+      this.page2El as HTMLElement,
+    )
 
     this.flip(
       viewport, 

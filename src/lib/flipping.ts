@@ -248,8 +248,6 @@ export class Flipping extends PageWindow {
     if(page2El){
       const page2W = page2El.offsetWidth;
       const page2H = page2El.offsetHeight;
-      const containerGBottom = containerGRect.bottom;
-      let eventZoneCornerGP:Point;
       let page2ActiveCorner:Point;
       let page3ActiveCorner:Point;
       
@@ -294,190 +292,7 @@ export class Flipping extends PageWindow {
         case Zone.LB:
           break;
         case Zone.RT:
-          // Version 1
-          // {
-          //   page2ActiveCorner = { x: 0, y: 0 } // !!!
-          //   page3ActiveCorner = { x: page2W, y: 0 }  // !!!
-          //   const diffH = this.gutter.top - this.flipActionLine.y; // !!!
-
-          //   beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
-          //   page2Left = mouseGP.x - this.activeCenterGP.x;
-          //   page2Top = mouseGP.y - this.flipActionLine.y;
-
-          //   a = mouseGP.x - this.activeCornerGP.x;   // a < 0
-          //   // Method 1
-          //   // b = mouseGP.y - this.activeCornerGP.y;  // b > 0
-          //   // const cosTheta = Math.cos(-Math.PI/2 - 2*beta); // !!!
-          //   // const c = b == 0 ? -a/2 : (b / cosTheta);  // c > 0 // !!!
-          //   // const d = b == 0 ? page2H : (-a / cosTheta);  // d > 0
-          //   // Method 2
-          //   const cosTheta = Math.cos(-Math.PI/2 - 2*beta); // !!!
-          //   const tanAlpa = Math.tan(-Math.PI/2 + beta);  // !!!
-          //   const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
-          //   const c = b == 0 ? -a/2 : d / tanAlpa;
-          //   // const _d = -d;
-          //   // Page 2 좌표 기준
-          //   let f:Point = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
-          //   let g:Point = { x: page2ActiveCorner.x+c, y: page2ActiveCorner.y };
-          //   let h:Point = { x: 0, y: 0 }
-          //   let i:Point = { x: page2ActiveCorner.x, y: page2ActiveCorner.y+d }; // !!!  
-          //   // Update
-          //   if(b == 0){ h = { x:g.x, y:i.y } }
-          //   else if(c < 0){
-          //     h.x = -c * (page2H-d) / d;
-          //     h.y = i.y = page2H - page2ActiveCorner.y;
-          //     f.y = page2ActiveCorner.y-d;
-          //     g = f;
-          //   }
-          //   // Mask shape is parallelogram and the bottom side is longer than the top side.
-          //   // It is happend when the corner is dragging under book.
-          //   else if(d < 0){
-          //     h.x = c * (d-page2H) / d;
-          //     h.y = i.y = page2H - page2ActiveCorner.y;
-          //   }
-          //   // Mask shape is triangle.
-          //   else if(d < page2H){
-          //     h = i;
-          //   } 
-          //   // Mask shape is parallelogram.
-          //   else if(d > page2H){
-          //     h.x = c * (d-page2H) / d;
-          //     h.y = i.y = page2H - page2ActiveCorner.y;
-          //   }
-          //   // Page 3 좌표 기준
-          //   let j:Point = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
-          //   let k:Point = { x: page3ActiveCorner.x - g.x, y: g.y }
-          //   let l:Point = { x: page3ActiveCorner.x - h.x, y: h.y }
-          //   let m:Point = { x: page3ActiveCorner.x, y: i.y }
-          //   // Mask
-          //   maskShapeOnPage2?.setAttribute('points', `${f.x},${f.y} ${g.x},${g.y} ${h.x},${h.y} ${i.x},${i.y}`);
-          //   maskShapeOnPage3?.setAttribute('points', `${j.x},${j.y} ${k.x},${k.y} ${l.x},${l.y} ${m.x},${m.y}`);
-          //   // Page 2
-          //   page2El.style.top = `${page2Top}px`;
-          //   page2El.style.left = `${page2Left}px`;
-          //   page2El.style.transform = `rotate(${2*beta}rad)`;
-          // }
-          // Version 2
-          // {
-          //   page2ActiveCorner = { x: 0, y: page2H }
-          //   page3ActiveCorner = { x: page2W, y: page2H }
-          //   const diffH = this.gutter.bottom - this.flipActionLine.y;
-
-          //   beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
-          //   page2Left = mouseGP.x - this.activeCenterGP.x;
-          //   page2Top = mouseGP.y - this.flipActionLine.y;
-          //   a = mouseGP.x - this.activeCornerGP.x;   // a < 0
-          //   b = mouseGP.y - this.activeCornerGP.y;  // b < 0
-          //   // const theta = -Math.PI/2 + 2*radian;
-          //   const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
-          //   const tanAlpa = Math.tan(-Math.PI/2 - beta);
-          //   const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
-          //   const c = b == 0 ? -a/2 : d / tanAlpa;
-          //   // Page 2 좌표 기준
-          //   let f:Point = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
-          //   let g:Point = { x: page2ActiveCorner.x+c, y: page2ActiveCorner.y };
-          //   let h:Point = { x: 0, y: 0 }
-          //   let i:Point = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
-          //   // Update
-          //   if(b == 0){ h = { x:g.x, y:i.y } }
-          //   else if(c < 0){
-          //     h.x = -c * (page2H-d) / d;
-          //     h.y = i.y = page2H - page2ActiveCorner.y;
-          //     f.y = page2ActiveCorner.y-d;
-          //     g = f;
-          //   }
-          //   // Mask shape is parallelogram and the top side is longer than the bottom side.
-          //   // It is happend when the corner is dragging under book.
-          //   else if(d < 0){
-          //     h.x = c * (d-page2H) / d;
-          //     h.y = i.y = page2H - page2ActiveCorner.y;
-          //     console.log("a")
-          //   }
-          //   // Mask shape is triangle.
-          //   else if(d < page2H){
-          //     h = i;
-          //     console.log("b", d)
-          //   } 
-          //   // Mask shape is parallelogram.
-          //   else if(d > page2H){
-          //     h.x = c * (d-page2H) / d;
-          //     h.y = i.y = page2H - page2ActiveCorner.y;
-          //     console.log("c")
-          //   }
-          //   // Page 3 좌표 기준
-          //   let j:Point = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
-          //   let k:Point = { x: page3ActiveCorner.x - g.x, y: g.y }
-          //   let l:Point = { x: page3ActiveCorner.x - h.x, y: h.y }
-          //   let m:Point = { x: page3ActiveCorner.x, y: i.y }
-          //   // Mask
-          //   maskShapeOnPage2?.setAttribute('points', `${f.x},${f.y} ${g.x},${g.y} ${h.x},${h.y} ${i.x},${i.y}`);
-          //   maskShapeOnPage3?.setAttribute('points', `${j.x},${j.y} ${k.x},${k.y} ${l.x},${l.y} ${m.x},${m.y}`);
-          //   // Page 2
-          //   page2El.style.top = `${page2Top}px`;
-          //   page2El.style.left = `${page2Left}px`;
-          //   page2El.style.transform = `rotate(${2*beta}rad)`;
-          // }
-          // break;
         case Zone.RC:
-          {
-            page2ActiveCorner = { x: 0, y: page2H }
-            page3ActiveCorner = { x: page2W, y: page2H }
-            const diffH = this.gutter.bottom - this.flipActionLine.y;
-
-            beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
-            page2Left = mouseGP.x - this.activeCenterGP.x;
-            page2Top = mouseGP.y - this.flipActionLine.y;
-            a = mouseGP.x - this.activeCornerGP.x;   // a < 0
-            b = mouseGP.y - this.activeCornerGP.y;  // b < 0
-            const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
-            const tanAlpa = Math.tan(-Math.PI/2 - beta);
-            const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
-            const c = b == 0 ? -a/2 : d / tanAlpa;
-            // Page 2 좌표 기준
-            let f:Point = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
-            let g:Point = { x: page2ActiveCorner.x+c, y: page2ActiveCorner.y };
-            let h:Point = { x: 0, y: 0 }
-            let i:Point = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
-            // Update
-            if(b == 0){ h = { x:g.x, y:i.y } }
-            else if(c < 0){
-              h.x = -c * (page2H-d) / d;
-              h.y = i.y = page2H - page2ActiveCorner.y;
-              f.y = page2ActiveCorner.y-d;
-              g = f;
-            }
-            // Mask shape is parallelogram and the top side is longer than the bottom side.
-            // It is happend when the corner is dragging under book.
-            else if(d < 0){
-              h.x = c * (d-page2H) / d;
-              h.y = i.y = page2H - page2ActiveCorner.y;
-              console.log("a")
-            }
-            // Mask shape is triangle.
-            else if(d < page2H){
-              h = i;
-              console.log("b", d)
-            } 
-            // Mask shape is parallelogram.
-            else if(d > page2H){
-              h.x = c * (d-page2H) / d;
-              h.y = i.y = page2H - page2ActiveCorner.y;
-              console.log("c")
-            }
-            // Page 3 좌표 기준
-            let j:Point = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
-            let k:Point = { x: page3ActiveCorner.x - g.x, y: g.y }
-            let l:Point = { x: page3ActiveCorner.x - h.x, y: h.y }
-            let m:Point = { x: page3ActiveCorner.x, y: i.y }
-            // Mask
-            maskShapeOnPage2?.setAttribute('points', `${f.x},${f.y} ${g.x},${g.y} ${h.x},${h.y} ${i.x},${i.y}`);
-            maskShapeOnPage3?.setAttribute('points', `${j.x},${j.y} ${k.x},${k.y} ${l.x},${l.y} ${m.x},${m.y}`);
-            // Page 2
-            page2El.style.top = `${page2Top}px`;
-            page2El.style.left = `${page2Left}px`;
-            page2El.style.transform = `rotate(${2*beta}rad)`;
-          }
-          break;
         case Zone.RB:
           {
             page2ActiveCorner = { x: 0, y: page2H }
@@ -487,13 +302,8 @@ export class Flipping extends PageWindow {
             beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
             page2Left = mouseGP.x - this.activeCenterGP.x;
             page2Top = mouseGP.y - this.flipActionLine.y;
-            a = mouseGP.x - this.activeCornerGP.x;   // a < 0
-            b = mouseGP.y - this.activeCornerGP.y;  // b < 0
-            // Method 1
-            // const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
-            // const c = b == 0 ? -a/2 : (-b / cosTheta);  // c > 0
-            // const d = b == 0 ? page2H : (-a / cosTheta);  // d > 0
-            // Method 2
+            a = mouseGP.x - this.activeCornerGP.x;    // a < 0
+            b = mouseGP.y - this.activeCornerGP.y;    // b < 0
             const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
             const tanAlpa = Math.tan(-Math.PI/2 - beta);
             const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
