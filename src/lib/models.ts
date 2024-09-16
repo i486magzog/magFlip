@@ -46,11 +46,14 @@ export enum BookStatus {
 }
 
 export enum EventStatus {
-  None = "none",
-  AutoFlipInCorner = "autoFlipInCorner",
-  AutoFlipOutCorner = "autoFlipOutCorner",
-  Flipping = "flipping",
-  FlippingOut = "flippingOut"
+  None = 0b0000_0000,
+  AutoFlip = 0b0000_1000,
+  AutoFlipFromCorner = 0b0000_1100,
+  AutoFlipToCorner = 0b0000_1010,
+  Flipping = 0b1000_0000,
+  SnappingBack = 0b1001_0000,
+  FlippingForward = 0b1010_0000,
+  FlippingBackward = 0b1100_0000,
 }
 
 export enum Zone {
@@ -84,6 +87,7 @@ export class Point implements IPoint{
     this.x = point?.x || 0;
     this.y = point?.y || 0;
   }
+  toString(): string { return `${this.x},${this.y}`; }
 }
 export interface ITopBottom{
   top: number,
@@ -251,8 +255,65 @@ export class FlipDiagonals {
 
 }
 
+export interface IFlipData {
+  page2:{
+    top: number;
+    left: number;
+    rotate: number;
+  }
+  mask:{
+    page2:{
+      p1:Point;
+      p2:Point;
+      p3:Point;
+      p4:Point;
+    }
+    page3:{
+      p1:Point;
+      p2:Point;
+      p3:Point;
+      p4:Point;
+    }
+  }
+}
 
-export interface Box {
+export class FlipData implements IFlipData {
+  page2:{
+    top: number;
+    left: number;
+    rotate: number;
+  }
+  mask:{
+    page2:{
+      p1:Point;
+      p2:Point;
+      p3:Point;
+      p4:Point;
+    }
+    page3:{
+      p1:Point;
+      p2:Point;
+      p3:Point;
+      p4:Point;
+    }
+  }
+  constructor(flipData:IFlipData){
+    this.page2 = flipData.page2;
+    this.mask = flipData.mask;
+  }
+
+  printPage2MaskShape(){
+    const pg = this.mask.page2;
+    return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
+  }
+
+  printPage3MaskShape(){
+    const pg = this.mask.page3;
+    return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
+  }
+}
+
+export interface IBox {
   x: number,
   y: number,
   width: number,

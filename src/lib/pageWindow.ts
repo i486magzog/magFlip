@@ -64,4 +64,10 @@ export class PageWindow {
     this.windows.unshift({ page: page1 });
     this.windows.unshift({ page: page0 });
   }
+  /**
+   * 
+   * @param index Window index
+   * @returns 
+   */
+  getPageInWindow(index:number){ return this.windows[index].page; }
 }

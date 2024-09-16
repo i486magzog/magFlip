@@ -1,10 +1,11 @@
 import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType } from "./models.js";
+import { BookEl } from "./bookEl.js";
 import { Page } from "./page.js";
 
 /**
  * Book class
  */
-export class Book implements IBookData {
+export class Book extends BookEl implements IBookData {
   id: string;
   status: BookStatus;
   type: BookType;
@@ -23,12 +24,13 @@ export class Book implements IBookData {
     };
   };
   // 
-  elementOnShelf: HTMLElement;
-  element: HTMLElement;
-  pageContainerEl: HTMLElement;
-  flippingPageIndex: number = 0;
+  // elementOnShelf: HTMLElement;
+  // element: HTMLElement;
+  // pageContainerEl: HTMLElement;
+  // flippingPageIndex: number = 0;
 
   constructor(book:IBookData) {
+    super(book.size.closed, book.thumbnails);
     // TODO: id should be unique and exist.
     this.id = book.id;
     this.status = BookStatus.Close;
@@ -40,7 +42,10 @@ export class Book implements IBookData {
       location: "Location",
       publishedDate: "Published Date"
     };
-    this.size = book.size || { width: DefaultSize.bookWidth, height: DefaultSize.bookHeight };
+    this.size = book.size || {
+      closed: { width: DefaultSize.bookWidth, height: DefaultSize.bookHeight },
+      opened: { width: DefaultSize.bookWidth*2, height: DefaultSize.bookHeight }
+    };
     this.pages = {};
     this.thumbnails = book.thumbnails || {
       spine: "resources/default_spine.webp",
@@ -51,13 +56,6 @@ export class Book implements IBookData {
         back: "resources/default_back_cover.webp",
       }
     };
-    //
-    // Element creation
-    //
-    const elements = this.createBookElement();
-    this.elementOnShelf = elements.bookOnShelfEl;
-    this.element = elements.bookEl;
-    this.pageContainerEl = elements.containerEl;
     //
     // Create initial pages
     //
@@ -124,45 +122,19 @@ export class Book implements IBookData {
     })
   }
 
-  setReadyToOpen() { 
-    const el = this.element as HTMLElement;
-    el.style.width = `${Math.round(this.size.closed.width)}px`;
-    el.style.height = `${this.size.closed.height}px`;
-    el.classList.add("ready-to-open");
+  setReadyToOpen() { super.setReadyToOpen(this.size.closed); }
+  setSpreadOpen() { super.setSpreadOpen(this.size.opened); }
+  changeSize(){
+
   }
   addPage(page: Page, index: number) { this.pages[index] = page; }
   removePage(index: number) { delete this.pages[index]; }
   getPage(index: number){ return this.pages[index]; }
   getPageEl(index: number):HTMLElement { return this.pages[index].element; }
   clearPageEls() { this.pageContainerEl.innerHTML = ""; }
-  appendPageEl(pageIndex: number) { this.pageContainerEl.appendChild(this.getPageEl(pageIndex)); }
 
-  createBookElement(): { bookOnShelfEl: HTMLElement, bookEl: HTMLElement, containerEl: HTMLElement } {
-    const bookOnShelfEl = document.createElement('div');
-    bookOnShelfEl.className = "book-on-shelf";
-    const coverEl = document.createElement('img');
-    coverEl.src = this.thumbnails.medium;
-    bookOnShelfEl.appendChild(coverEl);
-    // <div class="book">
-    //   <div class="container">
-    // </div>
-    const bookEl = document.createElement('div');
-    const containerEl = document.createElement('div');
-    bookEl.className = "book";
-    bookEl.style.width = `${this.size.closed.width}px`;
-    bookEl.style.height = `${this.size.closed.height}px`;
-    containerEl.className = "container";
-    bookEl.appendChild(containerEl);
-
-    return { bookOnShelfEl: bookOnShelfEl, bookEl: bookEl, containerEl: containerEl };
+  pageClicked(event:Event, param:any){ 
+    // this.flippingPageIndex = (param as Page).index; 
   }
-
-  // addEventListener(page:Page){
-  //   page.element.addEventListener('click', (e:Event) => {
-  //     e.currentTarget
-  //   })
-  // }
-
-  pageClicked(event:Event, param:any){ this.flippingPageIndex = (param as Page).index; }
   pageActive(event:Event, param:any){ ; }
 }

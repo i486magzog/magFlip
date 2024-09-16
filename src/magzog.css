@@ -134,7 +134,7 @@ html, body {
   height: 100%;
   background-color: #fff;
 }
-#bookViewer .book.book.ready-to-open > .container > .page { width:100%; }
+#bookViewer .book.ready-to-open > .container > .page { width:100%; }
 #bookViewer .book > .container > .page.hidden { display: none; }
 #bookViewer .book > .container > .page {
   position:absolute;
@@ -178,14 +178,14 @@ html, body {
   left:50%;
 }
 
-#bookViewer.zone-lt .book > .container > .page:nth-child(-n+3){ transform-origin: top right; }
+/* #bookViewer.zone-lt .book > .container > .page:nth-child(-n+3){ transform-origin: top right; }
 #bookViewer.zone-lc .book > .container > .page:nth-child(-n+3){ transform-origin: center right; }
 #bookViewer.zone-lb .book > .container > .page:nth-child(-n+3){ transform-origin: bottom right; }
 #bookViewer.zone-rt .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: top left; }
 #bookViewer.zone-rc .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: center left; }
-#bookViewer.zone-rb .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: bottom left; }
+#bookViewer.zone-rb .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: bottom left; } */
 
-#bookViewer .book.book.ready-to-open > .container > .page:nth-child(n+4):nth-child(-n+6) { left:0; }
+#bookViewer .book.ready-to-open > .container > .page:nth-child(n+4):nth-child(-n+6) { left:0; }
 
 /* Temporary */
 .page:nth-child(1) { z-index: 1; background-color: lightblue; }

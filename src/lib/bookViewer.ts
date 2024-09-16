@@ -1,4 +1,4 @@
-import { Box, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams } from './models.js';
+import { IBox, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams, ISize, FlipData } from './models.js';
 import { Book } from './book.js'
 import { Page } from './page.js'
 import { BookManager } from './bookManager.js'
@@ -31,6 +31,7 @@ export class BookViewer extends Flipping {
 
   bookViewerEl: HTMLElement;
   bookContainerEl: HTMLElement;
+  pageContainerRect?:Rect;
   zoneLT: HTMLElement;
   zoneLC: HTMLElement;
   zoneLB: HTMLElement;
@@ -40,14 +41,9 @@ export class BookViewer extends Flipping {
   maskShapeOnPage2: SVGPolygonElement;
   maskShapeOnPage3: SVGPolygonElement;
   
-  // isFlipping: boolean = false;
+  curOpenLeftPageIndex: number = -1;
   isLeftPageActive:boolean = false;
-  curActiveOpenPageIndex: number = 0;
   isSpreadOpen:boolean = false;
-  // gutter:Gutter = new Gutter();
-
-  pageContainerRect?:Rect;
-  // bottomCenter:Point = {x:0, y:0}
 
   private get openPage():Page|undefined { return this.isLeftPageActive ? this.windows[2].page : this.windows[3].page; }
   private get page2():Page|undefined { return this.isLeftPageActive ? this.windows[1].page : this.windows[4].page; }
@@ -221,15 +217,15 @@ export class BookViewer extends Flipping {
   /**
    * Open the book on the viewer.
    * @param book 
-   * @param openPageIndex 
+   * @param openRightPageIndex 
    */
-  view(book: Book, openPageIndex: number = 0) {
+  view(book: Book, openRightPageIndex: number = 0) {
     this.bookViewerEl?.classList.remove("hidden");
     this.book = book;
-    const newIndexRange = this.getStartPageIndexToLoad(openPageIndex);
+    const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
     this.attachBook();
     this.setViewer();
-    if(openPageIndex == 0){ book.setReadyToOpen(); }
+    if(openRightPageIndex == 0){ book.setReadyToOpen(); }
     this.loadPages(newIndexRange);
     this.showPages(newIndexRange.start);
   }
@@ -239,18 +235,31 @@ export class BookViewer extends Flipping {
   closeBook() { this.detachBook(); }
   /**
    * 
-   * @param nextLeftPageIndex The index of the next left page.
-   * @param nextRightPageIndex 
+   * @param new1stPageIndex The index of the next left page.
    */
-  moveNextPage(nextLeftPageIndex: number, nextRightPageIndex: number) {
+  shiftPage(isFoward:boolean){
+    const { newPage1, newPage2, removedPage1, removedPage2 } = this.getNewPages(isFoward);
     const book = this.book;
-    if(!book){ throw new Error("Error the book opening"); }
 
-    const nextLeftPage = book.getPage(nextLeftPageIndex) || Page.emptyPage(nextLeftPageIndex);
-    const nextRightPage = book.getPage(nextRightPageIndex) || Page.emptyPage(nextRightPageIndex);
-    super.moveRight(nextLeftPage, nextRightPage);
-    book.appendPageEl(nextLeftPageIndex);
-    book.appendPageEl(nextRightPageIndex);
+    if(isFoward){
+      super.moveRight(newPage1, newPage2);
+      book?.appendPageEl(newPage1.element);
+      book?.appendPageEl(newPage2.element);
+    }
+    else {
+      super.moveLeft(newPage1, newPage2);
+      book?.prependPageEl(newPage2.element);
+      book?.prependPageEl(newPage1.element);
+    }
+
+    book?.removePageEl(removedPage1.element);
+    book?.removePageEl(removedPage2.element);
+    // Global Var
+    this.curOpenLeftPageIndex = isFoward ? this.curOpenLeftPageIndex + 2 : this.curOpenLeftPageIndex - 2;
+    if(this.curOpenLeftPageIndex > 0){
+      this.isSpreadOpen = true;
+      this.book?.setSpreadOpen();
+    }
   }
   /**
    * 
@@ -327,167 +336,221 @@ export class BookViewer extends Flipping {
       const page = book.getPage(i);
       if(page){
         this.loadPageToWindow(winIdx, page);
-        book.appendPageEl(page.index);
+        book.appendPageEl(page.element);
       }
     }
   }
 
+  private flipPage( page2El:HTMLElement, page2Mask:SVGPolygonElement, page3Mask:SVGPolygonElement, mouseGP:Point, pageWH:ISize){
+    const flipData = this.flip( mouseGP, pageWH);
+    // Mask
+    page2Mask.setAttribute('points', flipData.printPage2MaskShape() );
+    page3Mask.setAttribute('points', flipData.printPage3MaskShape() );
+    // Page 2
+    page2El.style.top = `${flipData?.page2.top}px`;
+    page2El.style.left = `${flipData?.page2.left}px`;
+    page2El.style.transform = `rotate(${flipData?.page2.rotate}rad)`;
+  }
+
+
+  onFlipStart(page2El:HTMLElement, page3El?:HTMLElement){
+    this.setViewerToFlip(page2El, page3El);
+  }
+
+  setViewerToAutoFlip(page2El:HTMLElement, page3El?:HTMLElement){
+    page2El.classList.add("flipping-page2");
+    page3El?.classList.add("flipping-page3");
+  }
+
+  unsetViewerToAutoFlip(page2El:HTMLElement, page3El?:HTMLElement){
+    page2El.classList.remove("flipping-page2");
+    page3El?.classList.remove("flipping-page3");
+  }
+
+  setViewerToFlip(page2El:HTMLElement, page3El?:HTMLElement){
+    page2El.classList.remove("flipping-page2");
+    page2El.classList.add("flipping-page2");
+    page3El?.classList.add("flipping-page3");
+    this.bookViewerEl.classList.add("noselect");
+    this.curAutoFlipWidth = 0;
+  }
+
+  unsetViewerToFlip(page2El:HTMLElement, page3El?:HTMLElement){
+    this.eventStatus = EventStatus.None;
+    this.bookViewerEl.classList.remove("noselect");
+    page3El?.classList.remove("flipping-page3");
+    page2El.classList.remove("flipping-page2");
+    page2El.style.top = "";
+    page2El.style.left = "";
+    page2El.style.transform = `rotate(0rad)`;
+  }
+
   zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
     if(this.eventStatus == EventStatus.Flipping
-      || this.eventStatus == EventStatus.FlippingOut){ return; }
+      || this.eventStatus == EventStatus.SnappingBack){ return; }
 
+    const page2El = this.page2El;
+    if(!page2El){ return }
+
+    let isCenter = false;
     switch(param.zone){
       case Zone.LT: 
+        this.isLeftPageActive = true;
+        break;
       case Zone.LC:
+        isCenter = true;
+        this.isLeftPageActive = true;
+        break;
       case Zone.LB: 
         this.isLeftPageActive = true;
         break;
       case Zone.RT: 
+        this.isLeftPageActive = false;
+        break;
       case Zone.RC: 
+      isCenter = true;
+        this.isLeftPageActive = false;
+        break;
       case Zone.RB: 
         this.isLeftPageActive = false;
         break;
     }
 
     const msEvent = event as MouseEvent;
-    this.setTransformOrigin(param.zone);
-    this.eventStatus = EventStatus.AutoFlipInCorner; 
-    this.eventZone = param.zone;
-    this.page2El?.classList.add("flipping-page2");
-    this.page3El?.classList.add("flipping-page3");
-    this.flipInCorner(this.page2El as HTMLElement, this.maskShapeOnPage2 as SVGPolygonElement, this.maskShapeOnPage3 as SVGPolygonElement, () =>{});
-  }
+    const viewport = { x:msEvent.clientX, y:isCenter ? this.gutter.centerCenter.y : msEvent.clientY }
+    this.eventStatus = EventStatus.AutoFlipFromCorner; 
 
-  setTransformOrigin(zone:Zone){
-    this.unsetTransformOrigin();
-    this.bookViewerEl?.classList.add(`zone-${zone}`)
+    this.setViewerToAutoFlip(page2El, this.page3El);
+    this.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect, page2El);
+    this.animateFlipInCorner(
+      { width: page2El.offsetWidth, height: page2El.offsetHeight },
+      (mouseGP:Point, pageWH:ISize) => {
+        this.flipPage(
+          page2El, 
+          this.maskShapeOnPage2, 
+          this.maskShapeOnPage3, 
+          mouseGP, 
+          pageWH
+        );
+      }, 
+      () =>{}
+    );
   }
-  unsetTransformOrigin(){
-    const classListArray = Array.from(this.bookViewerEl?.classList || []);
-    classListArray.forEach(className => {
-      if (className.startsWith('zone-')) {
-        this.bookViewerEl?.classList.remove(className);
-      }
-    });
-  }
-
+ 
   zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
     if(this.eventStatus == EventStatus.Flipping
-      || this.eventStatus == EventStatus.FlippingOut){ return; }
+      || this.eventStatus == EventStatus.SnappingBack){ return; }
 
-    this.eventStatus = EventStatus.AutoFlipOutCorner;
+    const page2El = this.page2El;
+    if(!page2El){ return }
+
+    this.eventStatus = EventStatus.AutoFlipToCorner;
     this.eventZone = param.zone;
 
-    this.flipOutCorner(
-      this.page2El as HTMLElement, 
-      this.maskShapeOnPage2 as SVGPolygonElement, 
-      this.maskShapeOnPage3 as SVGPolygonElement, 
-      () => {
-        if(this.page2El){
-          this.page2El.classList.remove("flipping-page2");
-          this.page2El.style.top = "";
-          this.page2El.style.left = "";
-          this.page2El.style.transform = `rotate(0rad)`;
-        }
-        if(this.page3El){
-          this.page3El.classList.remove("flipping-page3");
-        }
-        this.eventStatus = EventStatus.None;
-      }
+    this.animateFlipToCorner(
+      { width: page2El.offsetWidth, height: page2El.offsetHeight },
+      (mouseGP:Point, pageWH:ISize) => {
+        this.flipPage(
+          page2El,
+          this.maskShapeOnPage2, 
+          this.maskShapeOnPage3, 
+          mouseGP, 
+          pageWH
+        );
+      },
+      () => { this.unsetViewerToAutoFlip(page2El, this.page3El); }
     );
-
-    // switch(param.zone){
-    //   case Zone.LT: break;
-    //   case Zone.LC: break;
-    //   case Zone.LB: break;
-    //   case Zone.RT: break;
-    //   case Zone.RC: break;
-    //   case Zone.RB: break;
-    // }
   }
 
   zoneMouseDowned(event:MouseEvent, param:IZoneEventParams){
-    if(this.eventStatus == EventStatus.FlippingOut){ return; }
+    if(this.eventStatus == EventStatus.SnappingBack){ return; }
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+    const page2El = this.page2El;
 
-    if(this.page2El){ 
-      this.page2El.classList.remove("flipping-page2");
-      this.page2El.classList.add("flipping-page2");
-    }
-    this.setTransformOrigin(param.zone);
-    this.bookViewerEl.classList.add("noselect");
-    this.page3El && this.page3El.classList.add("flipping-page3");
-    this.eventStatus = EventStatus.Flipping;
-    // this.eventZone = param.zone;
-    this.curAutoFlipWidth = 0;
-
+    if(!page2El){ return }
     if(!this.pageContainerRect){ return; }
-    // let gutterPoint:Point;
+
+    this.eventStatus = EventStatus.Flipping;
+    this.setViewerToFlip(page2El, this.page3El);
     this.setInitFlipping(
       param.zone, 
-      this.pageContainerRect as Rect,
       viewport,
+      this.pageContainerRect as Rect,
       this.page2El as HTMLElement,
     )
 
-    this.flip(
+    this.flipPage(
+      page2El, 
+      this.maskShapeOnPage2, 
+      this.maskShapeOnPage3, 
       viewport, 
-      this.pageContainerRect as Rect,
-      this.page2El as HTMLElement,
-      this.maskShapeOnPage2,
-      this.maskShapeOnPage3
+      { width: page2El.offsetWidth, height: page2El.offsetHeight }
     );
   }
 
   documentMouseUp(event:Event){
     if(this.eventStatus != EventStatus.Flipping){ return; }
 
-    this.eventStatus = EventStatus.FlippingOut;
+    const page2El = this.page2El;
+    if(!page2El){ return }
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
 
-    this.flipOut(
+    const dataToFlip = this.getInfoToFlip(viewport);
+    if(dataToFlip.isSnappingBack){ this.eventStatus = EventStatus.SnappingBack; }
+    else { this.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
+    this.animateFlip(
       viewport, 
-      this.pageContainerRect as Rect, 
-      this.page2El as HTMLElement, 
-      this.maskShapeOnPage2,
-      this.maskShapeOnPage3,
+      dataToFlip.targetCornerGP,
+      { width: page2El.offsetWidth, height: page2El.offsetHeight },
+      (mouseGP:Point, pageWH:ISize) => {
+        this.flipPage(
+          page2El, 
+          this.maskShapeOnPage2, 
+          this.maskShapeOnPage3, 
+          mouseGP, 
+          pageWH
+        );
+      },
       () => {
-        this.eventStatus = EventStatus.None;
-        this.unsetTransformOrigin();
-        this.bookViewerEl.classList.remove("noselect");
-        this.page3El?.classList.remove("flipping-page3");
-        if(this.page2El){
-          this.page2El.classList.remove("flipping-page2");
-          this.page2El.style.top = "";
-          this.page2El.style.left = "";
-          this.page2El.style.transform = `rotate(0rad)`;
+        this.unsetViewerToFlip(page2El, this.page3El);
+        if(!dataToFlip.isSnappingBack){
+          this.shiftPage(dataToFlip.isFlippingForward)
         }
       }
     );
   }
 
-  documentMouseMove(event:Event){
-    if(this.eventStatus != EventStatus.Flipping){ return; }
-
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-    this.flip(
-      viewport, 
-      // this.bottomCenter,
-      this.pageContainerRect as Rect,
-      this.page2El as HTMLElement,
-      this.maskShapeOnPage2,
-      this.maskShapeOnPage3
-    );
+  getNewPages(isForward:boolean){
+    const newPage1Index = isForward ? this.curOpenLeftPageIndex + 4 : this.curOpenLeftPageIndex - 4;
+    const removedPage1Index = isForward ? this.curOpenLeftPageIndex -2: this.curOpenLeftPageIndex + 2;
+    return { 
+      newPage1: this.book?.getPage(newPage1Index) || Page.emptyPage(newPage1Index), 
+      newPage2: this.book?.getPage(newPage1Index+1) || Page.emptyPage(newPage1Index+1),
+      removedPage1: this.book?.getPage(removedPage1Index) || Page.emptyPage(removedPage1Index), 
+      removedPage2: this.book?.getPage(removedPage1Index+1) || Page.emptyPage(removedPage1Index+1),
+    }
   }
 
-  addEventListeners() {
-    // if(!this.book){ throw new Error("Error the book opening"); }
-    
+  documentMouseMove(event:Event){
+    if(this.eventStatus != EventStatus.Flipping){ return; }
+    const page2El = this.page2El;
+    if(!page2El){ return }
+    const msEvent = event as MouseEvent;
+    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+
+    this.flipPage(
+      page2El, 
+      this.maskShapeOnPage2, 
+      this.maskShapeOnPage3, 
+      viewport, 
+      { width: page2El.offsetWidth, height: page2El.offsetHeight });
+  }
+
+  addEventListeners() {    
     this.zoneLT.addEventListener('mouseenter', (event:Event) => { this.zoneMouseEntered(event as MouseEvent, { zone: Zone.LT }); })
     this.zoneLC.addEventListener('mouseenter', (event:Event) => { this.zoneMouseEntered(event as MouseEvent, { zone: Zone.LC }); })
     this.zoneLB.addEventListener('mouseenter', (event:Event) => { this.zoneMouseEntered(event as MouseEvent, { zone: Zone.LB }); })
