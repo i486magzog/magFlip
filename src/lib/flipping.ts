@@ -129,7 +129,7 @@ export class Flipping extends PageWindow {
     if(currentValue == targetValue){ return; }
 
     const startTime = performance.now();
-    const duration:number = 500; // 2000ms
+    const duration:number = 200; // 2000ms
     let startP:Point = new Point();
     let endP:Point = new Point();
     switch(this.eventZone){
@@ -138,8 +138,8 @@ export class Flipping extends PageWindow {
         endP = {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y + targetValue}; 
         break;
       case Zone.LC: 
-        startP = {x:this.activeCornerGP.x + currentValue, y:this.gutter.centerCenter.y}; 
-        endP = {x:this.activeCornerGP.x + targetValue, y:this.gutter.centerCenter.y};
+        startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y}; 
+        endP = {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y};
         break;
       case Zone.LB: 
         startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y - currentValue}; 
@@ -150,8 +150,8 @@ export class Flipping extends PageWindow {
         endP = {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y + targetValue}; 
         break;
       case Zone.RC:
-        startP = {x:this.activeCornerGP.x - currentValue, y:this.gutter.centerCenter.y}; 
-        endP = {x:this.activeCornerGP.x - targetValue, y:this.gutter.centerCenter.y}; 
+        startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y}; 
+        endP = {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y}; 
         break;
       case Zone.RB:
         startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y - currentValue}; 
@@ -212,7 +212,7 @@ export class Flipping extends PageWindow {
     onComplete:()=>void 
   ){
     const startTime = performance.now();
-    const duration:number = 1000; // 2000ms
+    const duration:number = 500; // 2000ms
 
     const animationFrame = (currentTime:number) => {
       if(this.eventStatus == EventStatus.Flipping){ return; }
@@ -238,7 +238,6 @@ export class Flipping extends PageWindow {
     pageWH:ISize,
     isSpreadOpen:boolean
   ){
-    console.log(mouseGP, pageWH, isSpreadOpen)
     const page2W = pageWH.width;
     const page2H = pageWH.height;
     let page2ActiveCorner:Point;

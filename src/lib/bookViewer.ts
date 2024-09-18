@@ -454,7 +454,7 @@ export class BookViewer extends Flipping {
 
     const msEvent = event as MouseEvent;
     const isCenter = this.eventZone & Zone.Center;
-    const viewport = { x:msEvent.clientX, y:isCenter ? this.gutter.centerCenter.y : msEvent.clientY }
+    const viewport = { x:msEvent.clientX, y:msEvent.clientY }
     this.eventStatus = EventStatus.AutoFlipFromCorner; 
 
     this.setViewerToAutoFlip();
@@ -514,12 +514,7 @@ export class BookViewer extends Flipping {
 
     this.eventStatus = EventStatus.Flipping;
     this.setViewerToFlip();
-    this.setInitFlipping(
-      param.zone, 
-      viewport,
-      this.pageContainerRect as Rect
-    )
-
+    this.setInitFlipping(param.zone, viewport, this.pageContainerRect)
     this.flipPage(
       page2El, 
       this.maskShapeOnPage1, 
