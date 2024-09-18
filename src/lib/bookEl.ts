@@ -42,13 +42,11 @@ export class BookEl {
     const el = this.element as HTMLElement;
     el.style.width = `${Math.round(size.width)}px`;
     el.style.height = `${size.height}px`;
-    el.classList.add("ready-to-open");
   }
   setSpreadOpen(size:ISize){
     const el = this.element as HTMLElement;
     el.style.width = `${Math.round(size.width)}px`;
     el.style.height = `${size.height}px`;
-    el.classList.remove("ready-to-open");
   }
   clearPageEls() { this.pageContainerEl.innerHTML = ""; }
   appendPageEl(pageEl:HTMLElement){ this.pageContainerEl.appendChild(pageEl); }

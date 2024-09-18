@@ -219,6 +219,12 @@ export class FlipDiagonals {
     const diagonalRightInArea1 = new FlipDiagonal(centerBottom, centerRightP);
     const diagonalLeftInArea2 = new FlipDiagonal(centerTop, centerLeftP);
     const diagonalRightInArea2 = new FlipDiagonal(centerTop, centerRightP);
+
+    const area3RadianLow = diagonalRightInArea1.radian;
+    const area3RadianHigh = diagonalRightInArea2.radian || 2 * Math.PI;
+    if(area3RadianHigh < area3RadianLow){
+
+    }
     // Upper side
     this.area1 = {
       length: diagonalLeftInArea1.length,
@@ -240,7 +246,7 @@ export class FlipDiagonals {
       length: 0,
       radian: {
         low: diagonalRightInArea1.radian,
-        high: diagonalRightInArea2.radian,
+        high: diagonalRightInArea2.radian || 2 * Math.PI,
       }
     };
     // Left side
@@ -307,7 +313,7 @@ export class FlipData implements IFlipData {
     return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
   }
 
-  printPage3MaskShape(){
+  printPage1MaskShape(){
     const pg = this.mask.page3;
     return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
   }

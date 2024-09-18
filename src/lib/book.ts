@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType } from "./models.js";
+import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType, ISize } from "./models.js";
 import { BookEl } from "./bookEl.js";
 import { Page } from "./page.js";
 
@@ -63,9 +63,12 @@ export class Book extends BookEl implements IBookData {
   }
 
   createInitialPages() {
-    this.addPage(Page.emptyPage(-3), -3);
-    this.addPage(Page.emptyPage(-2), -2);
-    this.addPage(Page.emptyPage(-1), -1);
+    this.createEmptyPage(-3);
+    this.createEmptyPage(-2);
+    this.createEmptyPage(-1);
+    // this.addPage(Page.emptyPage(-3), -3);
+    // this.addPage(Page.emptyPage(-2), -2);
+    // this.addPage(Page.emptyPage(-1), -1);
   }
 
   async fetchPage(index: number):Promise<IPageData>{
@@ -132,7 +135,11 @@ export class Book extends BookEl implements IBookData {
   getPage(index: number){ return this.pages[index]; }
   getPageEl(index: number):HTMLElement { return this.pages[index].element; }
   clearPageEls() { this.pageContainerEl.innerHTML = ""; }
-
+  createEmptyPage(index:number, size?:ISize){
+    const page = Page.emptyPage(index, size || this.size.closed)
+    this.addPage(page, index);
+    return page;
+  }
   pageClicked(event:Event, param:any){ 
     // this.flippingPageIndex = (param as Page).index; 
   }

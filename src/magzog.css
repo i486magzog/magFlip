@@ -3,6 +3,15 @@
   --viewer: 100px;
 } */
 
+:root {
+  --book-width: 0;
+  --book-height: 0;
+  --page-width: 0;
+  --page-height: 0;
+  --zone-width: 50px;
+  --flip-origin: '0px 0px';
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -102,8 +111,11 @@ html, body {
   
 }
 /* Book */
-#bookViewer #bookContainer .book.ready-to-open {
+#bookViewer.ready-to-open.front #bookContainer .book {
   border-radius: 0 20px 20px 0;
+}
+#bookViewer.ready-to-open.end #bookContainer .book {
+  border-radius: 20px 0 0 20px;
 }
 #bookViewer #bookContainer .book {
   display: flex;
@@ -117,13 +129,6 @@ html, body {
   box-shadow: 0px 0px 30px 1px #666;
 }
 
-/* #bookViewer #bookContainer .book:hover {
-  padding: 20px;
-  background: #eee;
-  border-radius: 20px;
-} */
-
-
 /* Pages */
 #bookViewer .book > .container {
   position: relative;
@@ -132,37 +137,18 @@ html, body {
   align-items: center;
   width: 100%;
   height: 100%;
-  background-color: #fff;
+  background: transparent;
 }
-#bookViewer .book.ready-to-open > .container > .page { width:100%; }
-#bookViewer .book > .container > .page.hidden { display: none; }
+#bookViewer.ready-to-open .book > .container > .page { width:100%; }
+#bookViewer .book > .container > .page.empty { opacity:0; }
 #bookViewer .book > .container > .page {
   position:absolute;
-  /* width: 50%;
-  height: 100%; */
   box-sizing: border-box;
+  width: var(--page-width);
+  height: var(--page-height);
 }
-#bookViewer .book > .container > .page.flipping-page2 {
-  z-index: 10;
-  /* mask: url(#mask);
-  -webkit-mask: url(#mask); */
-  -webkit-mask-composite: intersect;
-  -webkit-mask-image: url(#mask1);
-  -webkit-mask-mode: alpha;
-  mask-composite: intersect;
-  mask-image: url(#mask1);
-  mask-mode: alpha;
-}
-/* #bookViewer .book > .container > .page.ready-to-flip {
-  z-index: 10;
-  -webkit-mask-composite: intersect;
-  -webkit-mask-image: url(#mask1);
-  -webkit-mask-mode: alpha;
-  mask-composite: intersect;
-  mask-image: url(#mask1);
-  mask-mode: alpha;
-} */
-#bookViewer .book > .container > .page.flipping-page3 {
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) {
   z-index: 10;
   -webkit-mask-composite: intersect;
   -webkit-mask-image: url(#mask2);
@@ -170,87 +156,107 @@ html, body {
   mask-composite: intersect;
   mask-image: url(#mask2);
   mask-mode: alpha;
+
+  transform-origin: var(--flip-origin);
 }
-#bookViewer .book > .container > .page:nth-child(-n+3) {
-  left:0%;
-}
-#bookViewer .book > .container > .page:nth-child(n+4):nth-child(-n+6) {
-  left:50%;
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(3),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(4){
+  z-index: 9;
+  mask-size: cover;
+  mask-composite: exclude;
+  mask-image: url(#mask1);
+  -webkit-mask-composite: xor;
+  -webkit-mask-image: url(#mask1);
 }
 
-/* #bookViewer.zone-lt .book > .container > .page:nth-child(-n+3){ transform-origin: top right; }
+#bookViewer .book > .container > .page:nth-child(2),
+#bookViewer .book > .container > .page:nth-child(5) { display: none; }
+
+
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(5),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) { display: block; }
+
+
+#bookViewer .book > .container > .page:nth-child(-n+3) { left:0; }
+#bookViewer .book > .container > .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
+#bookViewer.ready-to-open .book > .container > .page:nth-child(-n+6) { left:0; }
+
+/* 
+#bookViewer.zone-lt .book > .container > .page:nth-child(-n+3){ transform-origin: top right; }
 #bookViewer.zone-lc .book > .container > .page:nth-child(-n+3){ transform-origin: center right; }
 #bookViewer.zone-lb .book > .container > .page:nth-child(-n+3){ transform-origin: bottom right; }
 #bookViewer.zone-rt .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: top left; }
 #bookViewer.zone-rc .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: center left; }
-#bookViewer.zone-rb .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: bottom left; } */
-
-#bookViewer .book.ready-to-open > .container > .page:nth-child(n+4):nth-child(-n+6) { left:0; }
+#bookViewer.zone-rb .book > .container > .page:nth-child(n+4):nth-child(-n+6){ transform-origin: bottom left; }
+*/
 
 /* Temporary */
-.page:nth-child(1) { z-index: 1; background-color: lightblue; }
-.page:nth-child(2) { z-index: 2; background-color: lightcoral; }
-.page:nth-child(3) { z-index: 3; background-color: lightgreen; }
-.page:nth-child(4) { z-index: 3; background-color: lightgray; }
-.page:nth-child(5) { z-index: 2; background-color: lightpink; }
-.page:nth-child(6) { z-index: 1; background-color: lightyellow; }
+.page:nth-child(1) { z-index: 1; }
+.page:nth-child(2) { z-index: 2; }
+.page:nth-child(3) { z-index: 3; }
+.page:nth-child(4) { z-index: 3; }
+.page:nth-child(5) { z-index: 2; }
+.page:nth-child(6) { z-index: 1; }
+.bg0 { background-color: lightblue; }
+.bg1 { background-color: lightcoral; }
+.bg2 { background-color: lightgreen; }
+.bg3 { background-color: lightpink; }
+.bg4 { background-color: lightyellow; }
+.content { height: 100%; }
 
 /* Event Zone */
-#mzZoneLT {
+#bookViewer.ready-to-open.front .event-zone.left,
+#bookViewer.ready-to-open.end .event-zone.right { display: none;}
+
+#bookViewer .event-zone {
   z-index: 20;
   position: absolute;
+}
+#mzZoneLT {
   top: 0px;
   left: 0px;
-  width: 25px;
-  height: 25px;
+  width: var(--zone-width);
+  height: var(--zone-width);
   background: rgba(63, 63, 63, 0.5)
 }
 #mzZoneLC {
-  z-index: 20;
-  position: absolute;
-  top: 25px;
+  top: var(--zone-width);
   left: 0px;
-  width: 25px;
-  height: 850px;
+  width: var(--zone-width);
+  height: calc(var(--page-height) - var(--zone-width)*2);
   background: rgba(63, 63, 63, 0.8)
 }
 
 #mzZoneLB {
-  z-index: 20;
-  position: absolute;
   bottom: 0px;
   left: 0px;
-  width: 25px;
-  height: 25px;
+  width: var(--zone-width);
+  height: var(--zone-width);
   background: rgba(63, 63, 63, 0.5)
 }
 
 #mzZoneRT {
-  z-index: 20;
-  position: absolute;
   top: 0px;
   right: 0px;
-  width: 25px;
-  height: 25px;
+  width: var(--zone-width);
+  height: var(--zone-width);
   background: rgba(63, 63, 63, 0.5)
 }
 
 #mzZoneRC {
-  z-index: 20;
-  position: absolute;
-  top: 25px;
+  top: var(--zone-width);
   right: 0px;
-  width: 25px;
-  height: 850px;
+  width: var(--zone-width);
+  height: calc(var(--page-height) - var(--zone-width)*2);
   background: rgba(63, 63, 63, 0.8)
 }
 
 #mzZoneRB {
-  z-index: 20;
-  position: absolute;
   bottom: 0px;
   right: 0px;
-  width: 25px;
-  height: 25px;
+  width: var(--zone-width);
+  height: var(--zone-width);
   background: rgba(63, 63, 63, 0.5)
 }

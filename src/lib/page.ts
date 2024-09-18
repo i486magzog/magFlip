@@ -30,13 +30,13 @@ export class Page implements IPageData {
       this.addEventListener(eventHandlers);
     }
   
-    static emptyPage(index:number):Page { return this.createEmptyOrBlankPage(index, PageType.Empty); }
-    static blankPage(index:number):Page { return this.createEmptyOrBlankPage(index, PageType.Blank); }  
-    private static createEmptyOrBlankPage(index:number, type:PageType):Page {
+    static emptyPage(index:number, size:ISize):Page { return this.createEmptyOrBlankPage(PageType.Empty, index, size); }
+    static blankPage(index:number, size:ISize):Page { return this.createEmptyOrBlankPage(PageType.Blank, index, size); }  
+    private static createEmptyOrBlankPage(type:PageType, index:number, size:ISize):Page {
       return new Page({
         id: `emptyPage${index}`,
         type: type,
-        size: { width: 0, height: 0 },
+        size: size,
         number: undefined,
         index: index,
         ignore: true,
@@ -56,15 +56,21 @@ export class Page implements IPageData {
       // <div class="page" pageIdx="${page.index}">
       //
       if(page.type == PageType.Empty){ 
-        pageEl.classList.add("hidden");
+        pageEl.classList.add("empty");
+        const contentEl = document.createElement('div');
+        contentEl.className = "content";
+        // contentEl.style.width = `${page.size.width}px`;
+        // contentEl.style.height = `${page.size.height}px`;
+        contentEl.innerHTML += `<span>${page.index}</span>`;
+        pageEl.appendChild(contentEl);
         return pageEl; 
       }
       else if(page.type == PageType.Blank){ 
         const contentEl = document.createElement('div');
         contentEl.className = "content";
-        contentEl.style.width = `${page.size.width}px`;
-        contentEl.style.height = `${page.size.height}px`;
-        contentEl.innerHTML += `<span>${page.number}</span>`;
+        // contentEl.style.width = `${page.size.width}px`;
+        // contentEl.style.height = `${page.size.height}px`;
+        contentEl.innerHTML += `<span>${page.index}</span>`;
         pageEl.appendChild(contentEl);
         return pageEl; 
       }
@@ -80,13 +86,13 @@ export class Page implements IPageData {
       //
       else {
         const contentEl = document.createElement('div');
-        contentEl.className = "content";
-        contentEl.style.width = `${page.size.width}px`;
-        contentEl.style.height = `${page.size.height}px`;
+        contentEl.className = `content bg${page.index}`;
+        // contentEl.style.width = `${page.size.width}px`;
+        // contentEl.style.height = `${page.size.height}px`;
         contentEl.innerHTML = page.content;
         contentEl.innerHTML += `<h1>Magzog</h1>`;
         contentEl.innerHTML += `<p>Magzog is a simple and easy to use magazine layout for web pages. It is a responsive layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page.</p>`;
-        contentEl.innerHTML += `<span>${page.number}</span>`;
+        contentEl.innerHTML += `<span>${page.index}</span>`;
         pageEl.appendChild(contentEl);
       }
       return pageEl;
