@@ -57,12 +57,17 @@ export enum EventStatus {
 }
 
 export enum Zone {
-  LT="lt",
-  LC="lc",
-  LB="lb",
-  RT="rt",
-  RC="rc",
-  RB="rb"
+  LT=0b0100_0010,
+  LC=0b0010_0010,
+  LB=0b0001_0010,
+  RT=0b0100_0001,
+  RC=0b0010_0001,
+  RB=0b0001_0001,
+  Left=0b0000_0010,
+  Right=0b0000_0001,
+  Top=0b0100_0000,
+  Center=0b0010_0000,
+  Bottom=0b0001_0000,
 }
 
 export interface IZoneEventParams {

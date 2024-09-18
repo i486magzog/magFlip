@@ -38,16 +38,16 @@ export class BookEl {
     this.pageContainerEl = elements.containerEl;
   }
 
-  setReadyToOpen(size:ISize) { 
-    const el = this.element as HTMLElement;
-    el.style.width = `${Math.round(size.width)}px`;
-    el.style.height = `${size.height}px`;
-  }
-  setSpreadOpen(size:ISize){
-    const el = this.element as HTMLElement;
-    el.style.width = `${Math.round(size.width)}px`;
-    el.style.height = `${size.height}px`;
-  }
+//   setReadyToOpen(size:ISize) { 
+//     const docStyle = document.documentElement.style;
+//     docStyle.setProperty('--book-width', `${size.width}px`)
+//     docStyle.setProperty('--book-height', `${size.height}px`)
+//   }
+//   setSpreadOpen(size:ISize){
+//     const docStyle = document.documentElement.style;
+//     docStyle.setProperty('--book-width', `${size.width}px`)
+//     docStyle.setProperty('--book-height', `${size.height}px`)
+//   }
   clearPageEls() { this.pageContainerEl.innerHTML = ""; }
   appendPageEl(pageEl:HTMLElement){ this.pageContainerEl.appendChild(pageEl); }
   prependPageEl(pageEl:HTMLElement){ this.pageContainerEl.prepend(pageEl); }
@@ -65,8 +65,8 @@ export class BookEl {
     const bookEl = document.createElement('div');
     const containerEl = document.createElement('div');
     bookEl.className = "book";
-    bookEl.style.width = `${size.width}px`;
-    bookEl.style.height = `${size.height}px`;
+    // bookEl.style.width = `${size.width}px`;
+    // bookEl.style.height = `${size.height}px`;
     containerEl.className = "container";
     bookEl.appendChild(containerEl);
 

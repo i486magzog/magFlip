@@ -11,6 +11,10 @@ export class Flipping extends PageWindow {
   get eventStatus(){ return this._eventStatus; }
 
   flipGRect:Rect = new Rect();
+  // private _gutter:Gutter = new Gutter();
+  // get gutter(){
+
+  // }
   gutter:Gutter = new Gutter();
   eventZone:Zone = Zone.RB;
   activeCenterGP:Point = new Point();
@@ -19,13 +23,13 @@ export class Flipping extends PageWindow {
   diagonals:FlipDiagonals = new FlipDiagonals();
   flipActionLine:FlipActionLine = new FlipActionLine();
   curAutoFlipWidth = 0;
-  autoCornerFlipWidth = 20;
+  autoFlipWidth = 20;
 
   constructor() { 
     super();
   }
   
-  setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect, page2El:HTMLElement){
+  setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect){
     this.eventZone = eventZone;
     let flipActionLineGY:number = mouseGP.y;
     // If dragging a corner, the flipActionLineGY will be the top or bottom of the container.
@@ -86,7 +90,7 @@ export class Flipping extends PageWindow {
     docEl.style.setProperty('--flip-origin', `${originX}px ${originY}px`)
     //
     const zoneWidthStr = getComputedStyle(docEl).getPropertyValue('--zone-width').trim();
-    this.autoCornerFlipWidth = parseFloat(zoneWidthStr) * 0.9;
+    this.autoFlipWidth = parseFloat(zoneWidthStr) * 0.9;
   }
 
   getTargetCorner(mouseGP:Point){
@@ -121,7 +125,7 @@ export class Flipping extends PageWindow {
   ) {
 
     let currentValue = this.curAutoFlipWidth;
-    const targetValue = isAutoFlippingFromCorner ? 20 : 0;
+    const targetValue = isAutoFlippingFromCorner ? this.autoFlipWidth : 0;
     if(currentValue == targetValue){ return; }
 
     const startTime = performance.now();
@@ -160,7 +164,7 @@ export class Flipping extends PageWindow {
             && eventStatus != EventStatus.AutoFlipFromCorner )
         || (isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipToCorner)
         || (!isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipFromCorner)){ return ; }
-console.log(currentValue)
+
       const elapsed = (currentTime - startTime) / duration; // 0 ~ 1 사이 값
       const progress = Math.min(elapsed, 1); // 진행률 계산 (최대 1)
       const easingProgress = this.easeInOutQuad(progress); // easing 함수 적용
@@ -234,6 +238,7 @@ console.log(currentValue)
     pageWH:ISize,
     isSpreadOpen:boolean
   ){
+    console.log(mouseGP, pageWH, isSpreadOpen)
     const page2W = pageWH.width;
     const page2H = pageWH.height;
     let page2ActiveCorner:Point;

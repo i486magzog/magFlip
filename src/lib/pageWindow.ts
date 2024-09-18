@@ -39,6 +39,15 @@ export class PageWindow {
     }
   }
   /**
+   * 
+   */
+  clearPageWindow(){
+    this.windows = [];
+    for(let i=0; i<this.windowSize; i++){
+      this.windows[i] = ({ page: undefined });
+    }
+  }
+  /**
    * Window moves to the right.
    * Before: ----[2][3][4][5][6][7]----------
    * After:  ----------[4][5][6][7][8][9]----

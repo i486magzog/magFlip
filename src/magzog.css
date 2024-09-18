@@ -4,10 +4,11 @@
 } */
 
 :root {
-  --book-width: 0;
-  --book-height: 0;
-  --page-width: 0;
-  --page-height: 0;
+  --closed-book-width: 0px;
+  --opened-book-width: 0px;
+  --book-height: 0px;
+  --page-width: 0px;
+  --page-height: 0px;
   --zone-width: 50px;
   --flip-origin: '0px 0px';
 }
@@ -111,22 +112,19 @@ html, body {
   
 }
 /* Book */
-#bookViewer.ready-to-open.front #bookContainer .book {
-  border-radius: 0 20px 20px 0;
-}
-#bookViewer.ready-to-open.end #bookContainer .book {
-  border-radius: 20px 0 0 20px;
-}
+#bookViewer.ready-to-open #bookContainer .book { width: var(--closed-book-width) }
+#bookViewer.ready-to-open.front #bookContainer .book { border-radius: 0 20px 20px 0; }
+#bookViewer.ready-to-open.end #bookContainer .book { border-radius: 20px 0 0 20px; }
 #bookViewer #bookContainer .book {
   display: flex;
   justify-content: center;
   align-items: center;
   
   box-sizing: content-box;
-  /* padding: 20px;
-  background: #eee;
-  border-radius: 20px; */
   box-shadow: 0px 0px 30px 1px #666;
+
+  width: var(--opened-book-width);
+  height: var(--book-height);
 }
 
 /* Pages */

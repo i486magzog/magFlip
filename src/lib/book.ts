@@ -125,11 +125,11 @@ export class Book extends BookEl implements IBookData {
     })
   }
 
-  setReadyToOpen() { super.setReadyToOpen(this.size.closed); }
-  setSpreadOpen() { super.setSpreadOpen(this.size.opened); }
-  changeSize(){
+  // setReadyToOpen() { super.setReadyToOpen(this.size.closed); }
+  // setSpreadOpen() { super.setSpreadOpen(this.size.opened); }
+  // changeSize(){
 
-  }
+  // }
   addPage(page: Page, index: number) { this.pages[index] = page; }
   removePage(index: number) { delete this.pages[index]; }
   getPage(index: number){ return this.pages[index]; }
