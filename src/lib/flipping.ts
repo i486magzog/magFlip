@@ -10,17 +10,19 @@ export class Flipping extends PageWindow {
   set eventStatus(status:EventStatus){ this._eventStatus = status; };
   get eventStatus(){ return this._eventStatus; }
 
+  /**
+   * The width is the same as the opened book width.
+   */
   flipGRect:Rect = new Rect();
-  // private _gutter:Gutter = new Gutter();
-  // get gutter(){
-
-  // }
   gutter:Gutter = new Gutter();
   eventZone:Zone = Zone.RB;
   activeCenterGP:Point = new Point();
   activeCornerGP:Point = new Point();
   activeCornerOppositeGP:Point = new Point();
   diagonals:FlipDiagonals = new FlipDiagonals();
+  /**
+   * The width is the same as the opened book width.
+   */
   flipActionLine:FlipActionLine = new FlipActionLine();
   curAutoFlipWidth = 0;
   autoFlipWidth = 20;
@@ -241,21 +243,9 @@ export class Flipping extends PageWindow {
     const page2W = pageWH.width;
     const page2H = pageWH.height;
     let page2ActiveCorner:Point;
-    let page3ActiveCorner:Point;
-    
-    let beta = 0;
-    let page2Top = 0;
-    let page2Left = 0;
-    let a = 0;
-    let b = 0;
-    let f = new Point();
-    let g = new Point();
-    let h = new Point();
-    let i = new Point();
-    let j = new Point();
-    let k = new Point();
-    let l = new Point();
-    let m = new Point();
+    let page3ActiveCorner:Point;    
+    let zeroX = 0;
+    let pivot = 1;
     //
     // Area
     //
@@ -293,112 +283,66 @@ export class Flipping extends PageWindow {
       case Zone.LT:
       case Zone.LC:
       case Zone.LB:
-        {
-          page2ActiveCorner = { x: page2W, y: page2H }
-          page3ActiveCorner = { x: 0, y: page2H }
-          const diffH = this.gutter.bottom - this.flipActionLine.y;
-
-          beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
-          // alpa = Math.PI*3
-          // page2Left = mouseGP.x - this.gutter.left;    // !!!
-          page2Left = mouseGP.x - this.gutter.left;
-          // page2Left = mouseGP.x - ( isSpreadOpen ? this.flipActionLine.leftX : this.gutter.left );
-          page2Top = mouseGP.y - this.flipActionLine.y;
-          a = mouseGP.x - this.activeCornerGP.x;    // a > 0
-          b = mouseGP.y - this.activeCornerGP.y;    // b < 0
-          const cosTheta = Math.cos(-Math.PI/2 + 2*beta); // cosThete < 0
-          const tanAlpa = Math.tan(-Math.PI/2 + beta);
-          const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
-          const c = b == 0 ? a/2 : d / tanAlpa; // !!!
-
-          // Page 2 좌표 기준
-          f = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
-          g = { x: page2ActiveCorner.x-c, y: page2ActiveCorner.y };
-          h = { x: 0, y: 0 }
-          i = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
-          // Update
-          if(b == 0){ h = { x:g.x, y:i.y } }
-          else if(c < 0){
-            h.x = page2ActiveCorner.x + c * (page2H-d) / d;
-            h.y = i.y = page2H - page2ActiveCorner.y;
-            f.y = page2ActiveCorner.y-d;
-            g = f;
-          }
-          // Mask shape is Trapezoid and the top side is longer than the bottom side.
-          // It is happend when the corner is dragging under book.
-          else if(d < 0){
-            h.x = page2ActiveCorner.x - c * (d-page2H) / d;
-            h.y = i.y = page2H - page2ActiveCorner.y;
-          }
-          // Mask shape is triangle.
-          else if(d < page2H){
-            h = i;
-          } 
-          // Mask shape is Trapezoid.
-          else if(d > page2H){
-            h.x = page2ActiveCorner.x - c * (d-page2H) / d;
-            h.y = i.y = page2H - page2ActiveCorner.y;
-          }
-          // Page 3 좌표 기준
-          j = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
-          k = { x: page3ActiveCorner.x + page2ActiveCorner.x - g.x, y: g.y }
-          l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
-          m = { x: page3ActiveCorner.x, y: i.y }
-        }
+        page2ActiveCorner = { x: page2W, y: page2H }
+        page3ActiveCorner = { x: 0, y: page2H }
+        zeroX = 0;
+        pivot = -1;
         break;
       case Zone.RT:
       case Zone.RC:
       case Zone.RB:
-        {
-          page2ActiveCorner = { x: 0, y: page2H }
-          page3ActiveCorner = { x: page2W, y: page2H }
-          const diffH = this.gutter.bottom - this.flipActionLine.y;
-
-          beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
-          page2Left = mouseGP.x - ( isSpreadOpen ? this.flipActionLine.leftX : this.gutter.left );
-          page2Top = mouseGP.y - this.flipActionLine.y;
-          a = mouseGP.x - this.activeCornerGP.x;    // a < 0
-          b = mouseGP.y - this.activeCornerGP.y;    // b < 0
-          const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
-          const tanAlpa = Math.tan(-Math.PI/2 - beta);
-          const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
-          const c = b == 0 ? -a/2 : d / tanAlpa;
-          // Page 2 좌표 기준
-          f = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
-          g = { x: page2ActiveCorner.x+c, y: page2ActiveCorner.y };
-          h = { x: 0, y: 0 }
-          i = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
-          // Update
-          if(b == 0){ h = { x:g.x, y:i.y } }
-          else if(c < 0){
-            h.x = -c * (page2H-d) / d;
-            h.y = i.y = page2H - page2ActiveCorner.y;
-            f.y = page2ActiveCorner.y-d;
-            g = f;
-          }
-          // Mask shape is parallelogram and the top side is longer than the bottom side.
-          // It is happend when the corner is dragging under book.
-          else if(d < 0){
-            h.x = c * (d-page2H) / d;
-            h.y = i.y = page2H - page2ActiveCorner.y;
-          }
-          // Mask shape is triangle.
-          else if(d < page2H){
-            h = i;
-          } 
-          // Mask shape is parallelogram.
-          else if(d > page2H){
-            h.x = c * (d-page2H) / d;
-            h.y = i.y = page2H - page2ActiveCorner.y;
-          }
-          // Page 3 좌표 기준
-          j = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
-          k = { x: page3ActiveCorner.x + page2ActiveCorner.x - g.x, y: g.y }
-          l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
-          m = { x: page3ActiveCorner.x, y: i.y }
-        }
+        page2ActiveCorner = { x: 0, y: page2H }
+        page3ActiveCorner = { x: page2W, y: page2H }
+        zeroX = isSpreadOpen ? page2W : 0;
+        pivot = 1;
         break;
+
+      default: throw new Error("Not found an event zone.")
     }
+
+    const diffH = this.gutter.bottom - this.flipActionLine.y;
+    const beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
+    const page2Left = zeroX + (mouseGP.x - this.gutter.left);
+    const page2Top = mouseGP.y - this.flipActionLine.y;
+    const a = mouseGP.x - this.activeCornerGP.x;    // a < 0
+    const b = mouseGP.y - this.activeCornerGP.y;    // b < 0
+    const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
+    const tanAlpa = Math.tan(-Math.PI/2 - pivot * beta);
+    const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
+    const c = b == 0 ? -a*pivot/2 : d / tanAlpa;
+    // Page 2 좌표 기준
+    const f = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
+    let g = { x: page2ActiveCorner.x+c*pivot, y: page2ActiveCorner.y };
+    let h = { x: 0, y: 0 }
+    const i = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
+    // Update
+    if(b == 0){ h = { x:g.x, y:i.y } }
+    else if(c < 0){
+      h.x = page2ActiveCorner.x -pivot * c * (page2H-d) / d;
+      h.y = i.y = page2H - page2ActiveCorner.y;
+      f.y = page2ActiveCorner.y-d;
+      g = f;
+    }
+    // Mask shape is parallelogram and the top side is longer than the bottom side.
+    // It is happend when the corner is dragging under book.
+    else if(d < 0){
+      h.x = page2ActiveCorner.x + pivot * c * (d-page2H) / d;
+      h.y = i.y = page2H - page2ActiveCorner.y;
+    }
+    // Mask shape is triangle.
+    else if(d < page2H){
+      h = i;
+    } 
+    // Mask shape is parallelogram.
+    else if(d > page2H){
+      h.x = page2ActiveCorner.x + pivot * c * (d-page2H) / d;
+      h.y = i.y = page2H - page2ActiveCorner.y;
+    }
+    // Page 3 좌표 기준
+    const j = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
+    const k = { x: page3ActiveCorner.x + page2ActiveCorner.x - g.x, y: g.y }
+    const l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
+    const m = { x: page3ActiveCorner.x, y: i.y }
     
 
     return new FlipData({
