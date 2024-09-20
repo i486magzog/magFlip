@@ -235,20 +235,7 @@ export class Flipping extends PageWindow {
     requestAnimationFrame(animationFrame);
   }
 
-  flip(
-    mouseGP:Point, 
-    pageWH:ISize,
-    isSpreadOpen:boolean
-  ){
-    const page2W = pageWH.width;
-    const page2H = pageWH.height;
-    let page2ActiveCorner:Point;
-    let page3ActiveCorner:Point;    
-    let zeroX = 0;
-    let pivot = 1;
-    //
-    // Area
-    //
+  updateMousePointOnArea(mouseGP:Point){
     const radian4Area1 = MZMath.getRadianPositive(this.gutter.centerBottom, mouseGP);
     const isArea1 = mouseGP.y < this.flipActionLine.y 
       && MZMath.getLength(this.gutter.centerBottom, mouseGP) > this.diagonals.area1.length
@@ -278,6 +265,25 @@ export class Flipping extends PageWindow {
     else if(isArea2){ mouseGP = MZMath.findPointOnLine(this.gutter.centerTop, mouseGP, this.diagonals.area2.length); }
     else if(isArea3){ mouseGP = this.flipActionLine.rightP; }
     else if(isArea4){ mouseGP = this.flipActionLine.leftP; }
+
+    return mouseGP;
+  }
+
+  flip(
+    mouseGP:Point, 
+    pageWH:ISize,
+    isSpreadOpen:boolean
+  ){
+    const page2W = pageWH.width;
+    const page2H = pageWH.height;
+    let page2ActiveCorner:Point;
+    let page3ActiveCorner:Point;    
+    let zeroX = 0;
+    let pivot = 1;
+    //
+    // Area
+    //
+    mouseGP = this.updateMousePointOnArea(mouseGP);
 
     switch(this.eventZone){
       case Zone.LT:
@@ -310,12 +316,14 @@ export class Flipping extends PageWindow {
     const tanAlpa = Math.tan(-Math.PI/2 - pivot * beta);
     const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
     const c = b == 0 ? -a*pivot/2 : d / tanAlpa;
-    // Page 2 좌표 기준
+    // Mask position on Page 2
     const f = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
     let g = { x: page2ActiveCorner.x+c*pivot, y: page2ActiveCorner.y };
     let h = { x: 0, y: 0 }
     const i = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
-    // Update
+    //
+    // Update positions
+    //
     if(b == 0){ h = { x:g.x, y:i.y } }
     else if(c < 0){
       h.x = page2ActiveCorner.x -pivot * c * (page2H-d) / d;
@@ -323,7 +331,7 @@ export class Flipping extends PageWindow {
       f.y = page2ActiveCorner.y-d;
       g = f;
     }
-    // Mask shape is parallelogram and the top side is longer than the bottom side.
+    // Mask shape is trapezoid and the top side is longer than the bottom side.
     // It is happend when the corner is dragging under book.
     else if(d < 0){
       h.x = page2ActiveCorner.x + pivot * c * (d-page2H) / d;
@@ -333,12 +341,12 @@ export class Flipping extends PageWindow {
     else if(d < page2H){
       h = i;
     } 
-    // Mask shape is parallelogram.
+    // Mask shape is trapezoid.
     else if(d > page2H){
       h.x = page2ActiveCorner.x + pivot * c * (d-page2H) / d;
       h.y = i.y = page2H - page2ActiveCorner.y;
     }
-    // Page 3 좌표 기준
+    // Mask position on Page 1
     const j = { x: page3ActiveCorner.x, y: page3ActiveCorner.y }
     const k = { x: page3ActiveCorner.x + page2ActiveCorner.x - g.x, y: g.y }
     const l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
