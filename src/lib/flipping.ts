@@ -299,14 +299,17 @@ export class Flipping extends PageWindow {
           const diffH = this.gutter.bottom - this.flipActionLine.y;
 
           beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
-          page2Left = mouseGP.x - this.gutter.left;    // !!!
+          // alpa = Math.PI*3
+          // page2Left = mouseGP.x - this.gutter.left;    // !!!
+          page2Left = mouseGP.x - this.gutter.left;
+          // page2Left = mouseGP.x - ( isSpreadOpen ? this.flipActionLine.leftX : this.gutter.left );
           page2Top = mouseGP.y - this.flipActionLine.y;
           a = mouseGP.x - this.activeCornerGP.x;    // a > 0
           b = mouseGP.y - this.activeCornerGP.y;    // b < 0
-          const cosTheta = Math.cos(-Math.PI/2 - 2*beta);
+          const cosTheta = Math.cos(-Math.PI/2 + 2*beta); // cosThete < 0
           const tanAlpa = Math.tan(-Math.PI/2 + beta);
-          const d = b == 0 ? page2H : (a / cosTheta) + diffH;  // d > 0
-          const c = b == 0 ? a/2 : d / tanAlpa;
+          const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
+          const c = b == 0 ? a/2 : d / tanAlpa; // !!!
 
           // Page 2 좌표 기준
           f = { x: page2ActiveCorner.x, y: page2ActiveCorner.y };
@@ -417,7 +420,10 @@ export class Flipping extends PageWindow {
           p3:l,
           p4:m,
         }
-      }
+      },
+      // shadow:{
+      //   rotate: 
+      // }
     })
   }
 }

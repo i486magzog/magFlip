@@ -1,4 +1,4 @@
-import { IBox, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams, ISize, FlipData, PageType } from './models.js';
+import { IBox, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams, ISize, FlipData, PageType, DefaultSize } from './models.js';
 import { Book } from './book.js'
 import { Page } from './page.js'
 import { BookManager } from './bookManager.js'
@@ -46,15 +46,17 @@ export class BookViewer extends Flipping {
   maskShapeOnPage2: SVGPolygonElement;
   
   curOpenLeftPageIndex: number = -1;
-  get isLeftPageActive(){ return this.eventZone & Zone.Left; };
   isSpreadOpen:boolean = false;
+  // Shadow  
 
+  get isLeftPageActive(){ return this.eventZone & Zone.Left; };
   private get openPage():Page|undefined { return this.eventZone ? this.windows[2].page : this.windows[3].page; }
   private get page2():Page|undefined { return this.isLeftPageActive ? this.windows[1].page : this.windows[4].page; }
   private get page3():Page|undefined { return this.isLeftPageActive ? this.windows[0].page : this.windows[5].page; }
   private get openPageEl():HTMLElement|undefined { return this.openPage?.element; }
   private get page2El():HTMLElement|undefined { return this.page2?.element; }
   private get page3El():HTMLElement|undefined { return this.page3?.element; }
+  private get page2ShadowRect():HTMLElement|null|undefined { return this.page2?.element.querySelector('.sh-rect'); }
 
   constructor(bookManager:BookManager, viewerId?:string) {
     super();
@@ -334,6 +336,8 @@ export class BookViewer extends Flipping {
     // Closed
     if(openRightPageIndex <= 0){ this.setReadyToOpen(); }
     else if(openRightPageIndex > 0) { this.setSpreadOpen(); }
+
+    document.documentElement.style.setProperty('--page-diagonal-length', (closed.diagonal || 0) + 'px');
   }
   private detachBook() {
     this.bookViewerEl.className = "";
@@ -385,17 +389,17 @@ export class BookViewer extends Flipping {
     }
   }
 
-  private flipPage(page2El:HTMLElement, page1Mask:SVGPolygonElement, page2Mask:SVGPolygonElement, mouseGP:Point, pageWH:ISize){
+  private flipPage(page2El:HTMLElement, page1Mask:SVGPolygonElement, page2Mask:SVGPolygonElement, shadow5:SVGPolygonElement|null, mouseGP:Point, pageWH:ISize){
     const flipData = this.flip(mouseGP, pageWH, this.isSpreadOpen);
     // Mask
     page1Mask.setAttribute('points', flipData.printPage1MaskShape() );
     page2Mask.setAttribute('points', flipData.printPage2MaskShape() );
+    shadow5?.setAttribute('points', flipData.printPage2MaskShape() );
     // Page 2
     page2El.style.top = `${flipData?.page2.top}px`;
     page2El.style.left = `${flipData?.page2.left}px`;
     page2El.style.transform = `rotate(${flipData?.page2.rotate}rad)`;
   }
-
 
   onFlipStart(){
     this.setViewerToFlip();
@@ -404,25 +408,6 @@ export class BookViewer extends Flipping {
   setViewerToAutoFlip(){
     const className = this.isLeftPageActive ? "left" : "right";
     this.bookViewerEl.classList.add(`${className}-page-flipping`);
-
-    // const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
-    // if(this.isSpreadOpen){
-    //   this.gutter = new Gutter({
-    //     width:0, height:0,
-    //     left: bookRect.left + bookRect.width/2, 
-    //     right: bookRect.left + bookRect.width/2,
-    //     top: bookRect.top,
-    //     bottom: bookRect.bottom
-    //   })
-    // } else {
-    //   this.gutter = new Gutter({
-    //     width:0, height:0,
-    //     left: bookRect.left, 
-    //     right: bookRect.left,
-    //     top: bookRect.top,
-    //     bottom: bookRect.bottom
-    //   })
-    // }
   }
 
   unsetViewerToAutoFlip(){
@@ -451,6 +436,7 @@ export class BookViewer extends Flipping {
     this.eventZone = param.zone;
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
+    const shadow5 = page2El.querySelector('polygon.shadow-shape') as SVGPolygonElement | null;
 
     const msEvent = event as MouseEvent;
     const isCenter = this.eventZone & Zone.Center;
@@ -465,7 +451,8 @@ export class BookViewer extends Flipping {
         this.flipPage(
           page2El, 
           this.maskShapeOnPage1, 
-          this.maskShapeOnPage2, 
+          this.maskShapeOnPage2,
+          shadow5,
           mouseGP, 
           pageWH
         );
@@ -479,6 +466,7 @@ export class BookViewer extends Flipping {
 
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
+    const shadow5 = page2El.querySelector('polygon.shadow-shape') as SVGPolygonElement | null;
 
     this.eventStatus = EventStatus.AutoFlipToCorner;
     this.eventZone = param.zone;
@@ -490,6 +478,7 @@ export class BookViewer extends Flipping {
           page2El,
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2, 
+          shadow5,
           mouseGP, 
           pageWH
         );
@@ -511,6 +500,7 @@ export class BookViewer extends Flipping {
 
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
     if(!this.pageContainerRect){ return; }
+    const shadow5 = page2El.querySelector('polygon.shadow-shape') as SVGPolygonElement | null;
 
     this.eventStatus = EventStatus.Flipping;
     this.setViewerToFlip();
@@ -519,6 +509,7 @@ export class BookViewer extends Flipping {
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
+      shadow5,
       viewport, 
       { width: page2El.offsetWidth, height: page2El.offsetHeight }
     );
@@ -529,7 +520,8 @@ export class BookViewer extends Flipping {
     
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    
+    const shadow5 = page2El.querySelector('polygon.shadow-shape') as SVGPolygonElement | null;
+
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
     const dataToFlip = this.getInfoToFlip(viewport);
@@ -546,6 +538,7 @@ export class BookViewer extends Flipping {
           page2El, 
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2, 
+          shadow5,
           mouseGP, 
           pageWH
         );
@@ -578,6 +571,7 @@ export class BookViewer extends Flipping {
     if(!(this.eventStatus & EventStatus.Flipping)){ return; }
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
+    const shadow5 = page2El.querySelector('polygon.shadow-shape') as SVGPolygonElement | null;
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
@@ -586,6 +580,7 @@ export class BookViewer extends Flipping {
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
+      shadow5,
       viewport, 
       { width: page2El.offsetWidth, height: page2El.offsetHeight });
   }

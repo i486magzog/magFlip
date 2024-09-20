@@ -85,16 +85,31 @@ export class Page implements IPageData {
       // </div>
       //
       else {
+        const shadowDiv = document.createElement('div');
+        shadowDiv.classList.add('shadow');
+        const shadowRect = document.createElement('div');
+        shadowRect.classList.add('sh-rect');
+        const svgNS = "http://www.w3.org/2000/svg";
+        const shadowSvg = document.createElementNS(svgNS, 'svg');
+        shadowSvg.classList.add('sh-svg');
+        const shadowShape = document.createElementNS(svgNS, 'polygon');
+        shadowShape.classList.add('shape');
+        shadowShape.setAttribute('points', '0,0');
+        shadowShape.setAttribute('fill', 'white');
+        shadowSvg.append(shadowShape);
+        shadowDiv.append(shadowSvg);
+        shadowDiv.append(shadowRect);
+        
         const contentEl = document.createElement('div');
         contentEl.className = `content bg${page.index}`;
-        // contentEl.style.width = `${page.size.width}px`;
-        // contentEl.style.height = `${page.size.height}px`;
         contentEl.innerHTML = page.content;
         contentEl.innerHTML += `<h1>Magzog</h1>`;
         contentEl.innerHTML += `<p>Magzog is a simple and easy to use magazine layout for web pages. It is a responsive layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page.</p>`;
         contentEl.innerHTML += `<span>${page.index}</span>`;
+        pageEl.appendChild(shadowDiv);
         pageEl.appendChild(contentEl);
       }
+
       return pageEl;
     }
 

@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType, ISize } from "./models.js";
+import { IBookData, BookStatus, BookType, IPublication, IBookSize, DefaultSize, IPageData, PageType, ISize, BookSize, SizeExt } from "./models.js";
 import { BookEl } from "./bookEl.js";
 import { Page } from "./page.js";
 
@@ -12,7 +12,7 @@ export class Book extends BookEl implements IBookData {
   title: string;
   author: string;
   publication: IPublication;
-  size: IBookSize;
+  size:BookSize;
   private pages: { [n:number|string]: Page };
   thumbnails: {
     spine: string;
@@ -23,11 +23,6 @@ export class Book extends BookEl implements IBookData {
       back: string;
     };
   };
-  // 
-  // elementOnShelf: HTMLElement;
-  // element: HTMLElement;
-  // pageContainerEl: HTMLElement;
-  // flippingPageIndex: number = 0;
 
   constructor(book:IBookData) {
     super(book.size.closed, book.thumbnails);
@@ -42,9 +37,9 @@ export class Book extends BookEl implements IBookData {
       location: "Location",
       publishedDate: "Published Date"
     };
-    this.size = book.size || {
-      closed: { width: DefaultSize.bookWidth, height: DefaultSize.bookHeight },
-      opened: { width: DefaultSize.bookWidth*2, height: DefaultSize.bookHeight }
+    this.size = new BookSize(book.size) || {
+      closed: new SizeExt(DefaultSize.bookWidth, DefaultSize.bookHeight),
+      opened: new SizeExt(DefaultSize.bookWidth*2, DefaultSize.bookHeight)
     };
     this.pages = {};
     this.thumbnails = book.thumbnails || {

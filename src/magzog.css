@@ -11,6 +11,8 @@
   --page-height: 0px;
   --zone-width: 50px;
   --flip-origin: '0px 0px';
+  --page-diagonal-length: 0px;
+  --shadow-flip-origin: '0px 0px';
 }
 
 html, body {
@@ -138,24 +140,35 @@ html, body {
   background: transparent;
 }
 #bookViewer.ready-to-open .book > .container > .page { width:100%; }
+#bookViewer .book > .container > .page > .shadow,
+#bookViewer .book > .container > .page > .content { 
+  position: absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height: 100%;;
+}
+#bookViewer .book > .container > .page > .shadow > .sh-rect {
+  position: absolute;
+  top:0;
+  left: calc(var(--page-diagonal-length) - var(--page-width));
+  width: var(--page-diagonal-length);
+  height: var(--page-diagonal-length);
+  transform-origin: var(--shadow-flip-origin);
+}
+#bookViewer .book > .container > .page > .shadow > .sh-svg { 
+  position: absolute;
+  top:0;
+  left:0;
+  width: 0;
+  height: 0;;
+}
 #bookViewer .book > .container > .page.empty { opacity:0; }
 #bookViewer .book > .container > .page {
   position:absolute;
   box-sizing: border-box;
   width: var(--page-width);
   height: var(--page-height);
-}
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) {
-  z-index: 10;
-  -webkit-mask-composite: intersect;
-  -webkit-mask-image: url(#mask2);
-  -webkit-mask-mode: alpha;
-  mask-composite: intersect;
-  mask-image: url(#mask2);
-  mask-mode: alpha;
-
-  transform-origin: var(--flip-origin);
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(3),
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(4){
@@ -165,6 +178,34 @@ html, body {
   mask-image: url(#mask1);
   -webkit-mask-composite: xor;
   -webkit-mask-image: url(#mask1);
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) {
+  z-index: 10;
+  transform-origin: var(--flip-origin);
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .content,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .content {
+  /* z-index: 10; */
+  -webkit-mask-composite: intersect;
+  -webkit-mask-image: url(#mask2);
+  -webkit-mask-mode: alpha;
+  mask-composite: intersect;
+  mask-image: url(#mask2);
+  mask-mode: alpha;
+
+  /* transform-origin: var(--flip-origin); */
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow {
+  width: 100%;
+  height: 100%;
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg > .shape,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg > .shape {
+  /* filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.306)); */
+  /* filter: drop-shadow(40px 1px 20px rgba(0, 0, 0, 0.6)); */
+  filter: drop-shadow(5px 1px 10px rgba(0, 0, 0, 0.3));
 }
 
 #bookViewer .book > .container > .page:nth-child(2),

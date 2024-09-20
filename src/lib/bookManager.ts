@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType } from './models.js';
+import { IBookData, BookStatus, BookType, BookSize } from './models.js';
 import { BookShelf } from './bookShelf.js';
 import { BookViewer } from './bookViewer.js';
 import { Book } from './book.js';
@@ -53,10 +53,10 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2022-09-01"
           },
-          size: {
-            closed: { width: 600, height: 900 },
-            opened: { width: 1200, height: 900 }
-          },
+          size: new BookSize({
+            closed: { width: 600, height: 900, diagonal:0 },
+            opened: { width: 1200, height: 900, diagonal:0 }
+          }),
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -78,10 +78,10 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2023-09-01"
           },
-          size: {
-            closed: { width: 600, height: 900 },
-            opened: { width: 1200, height: 900 }
-          },
+          size: new BookSize({
+            closed: { width: 600, height: 900, diagonal:0 },
+            opened: { width: 1200, height: 900, diagonal:0 }
+          }),
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -103,10 +103,10 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2024-09-01"
           },
-          size: {
-            closed: { width: 600, height: 900 },
-            opened: { width: 1200, height: 900 }
-          },
+          size: new BookSize({
+            closed: { width: 600, height: 900, diagonal:0 },
+            opened: { width: 1200, height: 900, diagonal:0 }
+          }),
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -128,10 +128,10 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2025-09-01"
           },
-          size: {
-            closed: { width: 600, height: 900 },
-            opened: { width: 1200, height: 900 }
-          },
+          size: new BookSize({
+            closed: { width: 600, height: 900, diagonal:0 },
+            opened: { width: 1200, height: 900, diagonal:0 }
+          }),
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -153,10 +153,10 @@ export class BookManager {
             location: "Auckland in New Zealand",
             publishedDate: "2026-09-01"
           },
-          size: {
-            closed: { width: 600, height: 900 },
-            opened: { width: 1200, height: 900 }
-          },
+          size: new BookSize({
+            closed: { width: 600, height: 900, diagonal:0 },
+            opened: { width: 1200, height: 900, diagonal:0 }
+          }),
           thumbnails: {
             spine: "resources/cover.webp",
             small: "resources/cover.webp",
@@ -190,10 +190,10 @@ export class BookManager {
           location: "Auckland in New Zealand",
           publishedDate: "2021-09-01"
         },
-        size: {
-          closed: { width: 600, height: 900 },
-          opened: { width: 1200, height: 900 }
-        },
+        size: new BookSize({
+          closed: { width: 600, height: 900, diagonal:0 },
+          opened: { width: 1200, height: 900, diagonal:0 }
+        }),
         thumbnails: {
           spine: "resources/cover.webp",
           small: "resources/cover.webp",
