@@ -427,46 +427,46 @@ export class BookViewer extends Flipping {
     const f = flipData.mask.page2.p1;
     const g = flipData.mask.page2.p2;
     const h = flipData.mask.page2.p3;
-    const i = flipData.mask.page2.p4;
-    const j = flipData.mask.page1.p1;
     const k = flipData.mask.page1.p2;
     const l = flipData.mask.page1.p3;
-    const m = flipData.mask.page1.p4;
     const c = flipData.c;
-    let x1, y1, x2, y2 = this.eventZone & Zone.Top ? 0 : 100;
+    let x1, y1, x2, y2 = 100;
+    const isTopZone = this.eventZone & Zone.Top;
     // Points are located on the gradient objectBoundingBox
-    let longLineLength = 0;
-    let p:Point;
-
-    console.log(f, g, h,i, j,k,l,m)
+    let longLineLength = 1;
+    let p:Point = new Point({x:.5,y:.5});
     if(this.isLeftPageActive){
-      if(c < 0){ p = new Point({x:.5,y:.5}); longLineLength = 1; y2 = 0; }
-      else if(f == g){ p = new Point({x:.5,y:.5}); longLineLength = 1; }
+      // Shape is triangle and dragging point is top corner.
+      if(c < 0){ y2 = 0; }
+      // Shape is triangle and dragging point is bottom corner.
+      else if(f == g){ }
       else if(l.x < k.x){
         longLineLength = k.x;
         p = MZMath.findPerpendicularFoot( new Line( { x:k.x-l.x, y:0}, { x:0, y:k.x} ), { x:k.x, y:k.x} );
       } else {
         longLineLength = l.x;
-        p = MZMath.findPerpendicularFoot( new Line( { x:0, y:0}, { x:l.x-k.x, y:l.x} ), { x:l.x, y:l.x} );
+        p = MZMath.findPerpendicularFoot( new Line( { x:0, y:0}, { x:l.x-k.x, y:l.x} ), { x:l.x, y:isTopZone ? 0 : l.x} );
+        if(isTopZone){ y2 = 0 }
       }
       x2 = 100;
     }
     else {
-      if(c < 0){ p = new Point({x:.5,y:.5}); longLineLength = 1; y2 = 0; }
-      else if(f == g){ p = new Point({x:.5,y:.5}); longLineLength = 1; }
+      // Shape is triangle and dragging point is top corner.
+      if(c < 0){ y2 = 0; }
+      // Shape is triangle and dragging point is bottom corner.
+      else if(f == g){  }
       else if(h.x < g.x){
         longLineLength = g.x;
         p = MZMath.findPerpendicularFoot( new Line( { x:h.x, y:0}, { x:g.x, y:g.x} ), { x:0, y:g.x} );
       } else {
         longLineLength = h.x;
-        p = MZMath.findPerpendicularFoot( new Line( { x:h.x, y:0}, { x:g.x, y:h.x} ), { x:0, y:h.x} );
+        p = MZMath.findPerpendicularFoot( new Line( { x:h.x, y:0}, { x:g.x, y:h.x} ), { x:0, y: isTopZone ? 0 : h.x} );
+        if(isTopZone){ y2 = 0 }
       }
       x2 = 0;
     }
-
     x1 = (p.x/longLineLength)*100;
     y1 = (p.y/longLineLength)*100;
-    
 
     shadow3El?.setAttribute('x1', `${x1}%`);
     shadow3El?.setAttribute('y1', `${y1}%`);
@@ -475,7 +475,7 @@ export class BookViewer extends Flipping {
     const stops = shadow3El?.querySelectorAll('stop');
     if(stops){
       stops[0].setAttribute('offset', '0%');
-      stops[0].setAttribute('stop-color', 'rgba(25, 235, 255, 0.2)');
+      stops[0].setAttribute('stop-color', 'rgba(255, 255, 255, 0.2)');
       stops[1].setAttribute('offset', '12%');
       stops[1].setAttribute('stop-color', 'rgba(0, 0, 0, 0.15)');
       stops[2].setAttribute('offset', '50%');
@@ -485,9 +485,6 @@ export class BookViewer extends Flipping {
     cssVar.setProperty('--page2-top', `${flipData.page2.top}px`)
     cssVar.setProperty('--page2-left', `${flipData.page2.left}px`)
     cssVar.setProperty('--page2-rotate', `${flipData.page2.rotate}rad`)
-    // page2El.style.top = `${flipData?.page2.top}px`;
-    // page2El.style.left = `${flipData?.page2.left}px`;
-    // page2El.style.transform = `rotate(${flipData?.page2.rotate}rad)`;
   }
 
   getShadow3GradientVetors(){
