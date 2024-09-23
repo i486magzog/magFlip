@@ -406,6 +406,8 @@ export class BookViewer extends Flipping {
     page1Mask.setAttribute('points', flipData.printPage1MaskShape() );
     page2Mask.setAttribute('points', flipData.printPage2MaskShape() );
     shadowShape?.setAttribute('points', flipData.printPage2MaskShape() );
+    // Shadow
+    const isLeftPageActive = this.isLeftPageActive;
     // Shadow Rect
     const shadowOrigin = flipData.shadowRect.origin;
     const cssVar = document.documentElement.style;
@@ -413,13 +415,17 @@ export class BookViewer extends Flipping {
     cssVar.setProperty('--shadow-origin-x', `${shadowOrigin.x}px`)
     cssVar.setProperty('--shadow-origin-y', `${shadowOrigin.y}px`)
     cssVar.setProperty('--shadow-rotate', `${alpa}rad`)
+    //
     // Shadow5
+    //
     const p2Rotate = flipData.page2.rotate;
-    const tempValue = 0.5/Math.PI;
+    const defaultOpacity = isLeftPageActive ? 0.15: 0.3;
+    const tempValue = defaultOpacity/Math.PI;
     const opacity = p2Rotate <= Math.PI 
-      ? 0.5 - tempValue*p2Rotate 
-      : 0.5 + tempValue*(2*Math.PI - p2Rotate);
+      ? defaultOpacity - tempValue*p2Rotate 
+      : defaultOpacity + tempValue*(2*Math.PI - p2Rotate);
     cssVar.setProperty('--shadow5-opacity', `${opacity}`)
+    // console.log("op:", opacity, "ro: ", p2Rotate, "tv: ", tempValue, )
     //
     // Shadow3
     //
@@ -435,7 +441,7 @@ export class BookViewer extends Flipping {
     // Points are located on the gradient objectBoundingBox
     let longLineLength = 1;
     let p:Point = new Point({x:.5,y:.5});
-    if(this.isLeftPageActive){
+    if(isLeftPageActive){
       // Shape is triangle and dragging point is top corner.
       if(c < 0){ y2 = 0; }
       // Shape is triangle and dragging point is bottom corner.

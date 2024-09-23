@@ -132,7 +132,7 @@ html, body {
   align-items: center;
   
   box-sizing: content-box;
-  box-shadow: 0px 0px 30px 1px #666;
+  /* box-shadow: 0px 0px 30px 1px #666; */
 
   width: var(--opened-book-width);
   height: var(--book-height);
@@ -163,6 +163,8 @@ html, body {
   box-sizing: border-box;
   width: var(--page-width);
   height: var(--page-height);
+  /* shadow 1 */
+  filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, .1));
 }
 #bookViewer .book .page:nth-child(-n+3) { left:0; }
 #bookViewer .book .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
@@ -173,6 +175,9 @@ html, body {
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(3),
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(4){
   z-index: 9;
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(3)  > .content,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(4) > .content{
   mask-size: cover;
   mask-composite: exclude;
   mask-image: url(#mask1);
@@ -186,7 +191,7 @@ html, body {
   top: var(--page2-top);
   left: var(--page2-left);
   transform: rotate(var(--page2-rotate));
-
+  /* Shadow 5 */
   filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, var(--shadow5-opacity)));
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .content,
@@ -245,9 +250,8 @@ html, body {
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg > .shape,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg > .shape {
-  /* filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.306)); */
-  /* filter: drop-shadow(40px 1px 20px rgba(0, 0, 0, 0.6)); */
-  filter: drop-shadow(5px 1px 10px rgba(0, 0, 0, 0.3));
+
+  /* filter: drop-shadow(5px 1px 10px rgba(0, 0, 0, 0.3)); */
 }
 
 /* #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg > .shadow3,
@@ -285,20 +289,19 @@ html, body {
 #bookViewer .event-zone {
   z-index: 20;
   position: absolute;
+  background: transparent; 
 }
 #mzZoneLT {
   top: 0px;
   left: 0px;
   width: var(--zone-width);
   height: var(--zone-width);
-  background: rgba(63, 63, 63, 0.5)
 }
 #mzZoneLC {
   top: var(--zone-width);
   left: 0px;
   width: var(--zone-width);
   height: calc(var(--page-height) - var(--zone-width)*2);
-  background: rgba(63, 63, 63, 0.8)
 }
 
 #mzZoneLB {
@@ -306,7 +309,6 @@ html, body {
   left: 0px;
   width: var(--zone-width);
   height: var(--zone-width);
-  background: rgba(63, 63, 63, 0.5)
 }
 
 #mzZoneRT {
@@ -314,7 +316,6 @@ html, body {
   right: 0px;
   width: var(--zone-width);
   height: var(--zone-width);
-  background: rgba(63, 63, 63, 0.5)
 }
 
 #mzZoneRC {
@@ -322,7 +323,6 @@ html, body {
   right: 0px;
   width: var(--zone-width);
   height: calc(var(--page-height) - var(--zone-width)*2);
-  background: rgba(63, 63, 63, 0.8)
 }
 
 #mzZoneRB {
@@ -330,5 +330,4 @@ html, body {
   right: 0px;
   width: var(--zone-width);
   height: var(--zone-width);
-  background: rgba(63, 63, 63, 0.5)
 }
