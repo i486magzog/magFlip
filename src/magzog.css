@@ -10,9 +10,18 @@
   --page-width: 0px;
   --page-height: 0px;
   --zone-width: 50px;
-  --flip-origin: '0px 0px';
+  /* Page 2 */
+  --page2-top: 0px;
+  --page2-left: 0px;
+  --page2-rotate: 0rad;
+  --page2-origin: '0px 0px';
+  /* Shadow */
   --page-diagonal-length: 0px;
-  --shadow-flip-origin: '0px 0px';
+  --shadow-origin-x: 0px;
+  --shadow-origin-y: 0px;
+  --shadow-left: calc(var(--page-width) - var(--page-diagonal-length));
+  --shadow-rotate: 0rad;
+  --shadow5-opacity: 0;
 }
 
 html, body {
@@ -75,7 +84,7 @@ html, body {
   padding: 50px;
   width: 100vw;
   height: 100vh;
-  background: rgba(63, 63, 63, 0.5);
+  background: rgba(255, 255, 255, 0.9);
 
   display: flex;
   justify-content: center;
@@ -148,21 +157,6 @@ html, body {
   width: 100%;
   height: 100%;;
 }
-#bookViewer .book > .container > .page > .shadow > .sh-rect {
-  position: absolute;
-  top:0;
-  left: calc(var(--page-diagonal-length) - var(--page-width));
-  width: var(--page-diagonal-length);
-  height: var(--page-diagonal-length);
-  transform-origin: var(--shadow-flip-origin);
-}
-#bookViewer .book > .container > .page > .shadow > .sh-svg { 
-  position: absolute;
-  top:0;
-  left:0;
-  width: 0;
-  height: 0;;
-}
 #bookViewer .book > .container > .page.empty { opacity:0; }
 #bookViewer .book > .container > .page {
   position:absolute;
@@ -170,6 +164,12 @@ html, body {
   width: var(--page-width);
   height: var(--page-height);
 }
+#bookViewer .book .page:nth-child(-n+3) { left:0; }
+#bookViewer .book .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
+#bookViewer .book .page:nth-child(2),
+#bookViewer .book .page:nth-child(5) { display: none; }
+#bookViewer.ready-to-open .book .page:nth-child(-n+6) { left:0; }
+
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(3),
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(4){
   z-index: 9;
@@ -182,7 +182,12 @@ html, body {
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) {
   z-index: 10;
-  transform-origin: var(--flip-origin);
+  transform-origin: var(--page2-origin);
+  top: var(--page2-top);
+  left: var(--page2-left);
+  transform: rotate(var(--page2-rotate));
+
+  filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, var(--shadow5-opacity)));
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .content,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .content {
@@ -193,13 +198,50 @@ html, body {
   mask-composite: intersect;
   mask-image: url(#mask2);
   mask-mode: alpha;
+}
 
-  /* transform-origin: var(--flip-origin); */
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(5),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) { display: block; }
+
+/* Shadow */
+#bookViewer .book > .container > .page > .shadow > .sh-rect {
+  position: absolute;
+  top:0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+#bookViewer .book > .container > .page > .shadow > .sh-svg { 
+  position: absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height: 100%;
+}
+#bookViewer .book > .container > .page > .shadow {
+  display: none;
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow {
+  display: block;
   width: 100%;
   height: 100%;
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-rect,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-rect {
+  top: var(--page-height);
+  left: var(--shadow-left);
+  width: var(--page-diagonal-length);
+  height: var(--page-diagonal-length);
+  transform-origin: calc(var(--shadow-origin-x) - var(--shadow-left)) 0px;
+  transform: rotate(var(--shadow-rotate));
+  /* overflow: hidden; */
+}
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg {
+  /* filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, var(--shadow5-opacity))); */
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg > .shape,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg > .shape {
@@ -208,19 +250,10 @@ html, body {
   filter: drop-shadow(5px 1px 10px rgba(0, 0, 0, 0.3));
 }
 
-#bookViewer .book > .container > .page:nth-child(2),
-#bookViewer .book > .container > .page:nth-child(5) { display: none; }
-
-
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(5),
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(2),
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) { display: block; }
-
-
-#bookViewer .book > .container > .page:nth-child(-n+3) { left:0; }
-#bookViewer .book > .container > .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
-#bookViewer.ready-to-open .book > .container > .page:nth-child(-n+6) { left:0; }
+/* #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg > .shadow3,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg > .shadow3 {
+  x1: 
+} */
 
 /* 
 #bookViewer.zone-lt .book > .container > .page:nth-child(-n+3){ transform-origin: top right; }
@@ -238,11 +271,11 @@ html, body {
 .page:nth-child(4) { z-index: 3; }
 .page:nth-child(5) { z-index: 2; }
 .page:nth-child(6) { z-index: 1; }
-.bg0 { background-color: lightblue; }
-.bg1 { background-color: lightcoral; }
-.bg2 { background-color: lightgreen; }
-.bg3 { background-color: lightpink; }
-.bg4 { background-color: lightyellow; }
+.bg0 { background-color: white; }
+.bg1 { background-color: white; }
+.bg2 { background-color: white; }
+.bg3 { background-color: white; }
+.bg4 { background-color: white; }
 .content { height: 100%; }
 
 /* Event Zone */

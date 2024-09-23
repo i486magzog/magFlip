@@ -119,6 +119,18 @@ export class Point implements IPoint{
   }
   toString(): string { return `${this.x},${this.y}`; }
 }
+export interface ILine {
+  p1:Point
+  p2:Point
+}
+export class Line {
+  p1:Point
+  p2:Point
+  constructor(p1:Point, p2:Point){
+    this.p1 = p1;
+    this.p2 = p2;
+  }
+}
 export interface ITopBottom{
   top: number,
   bottom: number,
@@ -292,6 +304,11 @@ export class FlipDiagonals {
 }
 
 export interface IFlipData {
+  alpa: number;
+  a:number;
+  b:number;
+  c:number;
+  d:number;
   page2:{
     top: number;
     left: number;
@@ -304,21 +321,30 @@ export interface IFlipData {
       p3:Point;
       p4:Point;
     }
-    page3:{
+    page1:{
       p1:Point;
       p2:Point;
       p3:Point;
       p4:Point;
     }
   }
+  shadowRect: {
+    rotate: number;
+    origin: Point;
+  };
 }
 
 export class FlipData implements IFlipData {
+  alpa: number = 0;
+  a:number = 0;
+  b:number = 0;
+  c:number = 0;
+  d:number = 0;
   page2:{
     top: number;
     left: number;
     rotate: number;
-  }
+  };
   mask:{
     page2:{
       p1:Point;
@@ -326,16 +352,27 @@ export class FlipData implements IFlipData {
       p3:Point;
       p4:Point;
     }
-    page3:{
+    page1:{
       p1:Point;
       p2:Point;
       p3:Point;
       p4:Point;
-    }
-  }
+    },
+  };
+  shadowRect: {
+    rotate: number,
+    origin: Point
+  };
+
   constructor(flipData:IFlipData){
+    this.alpa = flipData.alpa;
+    this.a = flipData.a;
+    this.b = flipData.b;
+    this.c = flipData.c;
+    this.d = flipData.d;
     this.page2 = flipData.page2;
     this.mask = flipData.mask;
+    this.shadowRect = flipData.shadowRect;
   }
 
   printPage2MaskShape(){
@@ -344,7 +381,7 @@ export class FlipData implements IFlipData {
   }
 
   printPage1MaskShape(){
-    const pg = this.mask.page3;
+    const pg = this.mask.page1;
     return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
   }
 }

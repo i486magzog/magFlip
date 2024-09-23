@@ -1,5 +1,5 @@
 import { MZMath } from './mzMath.js';
-import { EventStatus, FlipActionLine, FlipData, FlipDiagonals, Gutter, IRect, ISize, Point, Rect, Zone } from './models.js';
+import { EventStatus, FlipActionLine, FlipData, FlipDiagonals, Gutter, IRect, ISize, Line, Point, Rect, Zone } from './models.js';
 import { PageWindow } from './pageWindow.js';
 import { Page } from './page.js';
 /**
@@ -89,7 +89,7 @@ export class Flipping extends PageWindow {
     const originY = this.flipActionLine.y - containerRect.top;
     // page2El.style.transformOrigin = `${originX}px ${originY}px`;
     const docEl = document.documentElement;
-    docEl.style.setProperty('--flip-origin', `${originX}px ${originY}px`)
+    docEl.style.setProperty('--page2-origin', `${originX}px ${originY}px`)
     //
     const zoneWidthStr = getComputedStyle(docEl).getPropertyValue('--zone-width').trim();
     this.autoFlipWidth = parseFloat(zoneWidthStr) * 0.9;
@@ -306,14 +306,16 @@ export class Flipping extends PageWindow {
       default: throw new Error("Not found an event zone.")
     }
 
+    const halfPI = Math.PI/2;
     const diffH = this.gutter.bottom - this.flipActionLine.y;
     const beta = MZMath.getRadianPositive(this.activeCornerGP, mouseGP);
+    const alpha = pivot*(halfPI*3 - beta);
     const page2Left = zeroX + (mouseGP.x - this.gutter.left);
     const page2Top = mouseGP.y - this.flipActionLine.y;
     const a = mouseGP.x - this.activeCornerGP.x;    // a < 0
     const b = mouseGP.y - this.activeCornerGP.y;    // b < 0
-    const cosTheta = Math.cos(-Math.PI/2 + 2*beta);
-    const tanAlpa = Math.tan(-Math.PI/2 - pivot * beta);
+    const cosTheta = Math.cos(-halfPI + 2*beta);
+    const tanAlpa = Math.tan(-halfPI - pivot * beta);
     const d = b == 0 ? page2H : (-a / cosTheta) + diffH;  // d > 0
     const c = b == 0 ? -a*pivot/2 : d / tanAlpa;
     // Mask position on Page 2
@@ -325,6 +327,7 @@ export class Flipping extends PageWindow {
     // Update positions
     //
     if(b == 0){ h = { x:g.x, y:i.y } }
+    // Mask shape is triangle when top corner is one of the vertices.
     else if(c < 0){
       h.x = page2ActiveCorner.x -pivot * c * (page2H-d) / d;
       h.y = i.y = page2H - page2ActiveCorner.y;
@@ -337,7 +340,7 @@ export class Flipping extends PageWindow {
       h.x = page2ActiveCorner.x + pivot * c * (d-page2H) / d;
       h.y = i.y = page2H - page2ActiveCorner.y;
     }
-    // Mask shape is triangle.
+    // Mask shape is triangle when bottom corner is one of the vertices.
     else if(d < page2H){
       h = i;
     } 
@@ -352,12 +355,15 @@ export class Flipping extends PageWindow {
     const l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
     const m = { x: page3ActiveCorner.x, y: i.y }
     
+    
+
+
 
     return new FlipData({
       page2:{
         top: page2Top,
         left: page2Left,
-        rotate: 2*beta
+        rotate: (2*beta)%(2*Math.PI)
       },
       mask:{
         page2:{
@@ -366,16 +372,25 @@ export class Flipping extends PageWindow {
           p3:h,
           p4:i,
         },
-        page3:{
+        page1:{
           p1:j,
           p2:k,
           p3:l,
           p4:m,
         }
       },
-      // shadow:{
-      //   rotate: 
-      // }
+      alpa: alpha,
+      a:a,
+      b:b,
+      c:c,
+      d:d,
+      shadowRect:{
+        rotate: alpha,
+        origin: {
+          x: g.x,
+          y: 0
+        }
+      },
     })
   }
 }

@@ -1,4 +1,4 @@
-import { Point, Rect } from './models.js';
+import { Line, Point, Rect } from './models.js';
 
 export class MZMath {
     /**
@@ -131,6 +131,13 @@ export class MZMath {
   static getLength(point1:Point, point2:Point):number {
     return Math.sqrt(Math.pow(point1.x-point2.x, 2) + Math.pow(point1.y-point2.y, 2));
   }
+  /**
+   * Find a point on line AB that is a fixed distance from point A toward point B.
+   * @param a 
+   * @param b 
+   * @param distance 
+   * @returns 
+   */
   static findPointOnLine(a:Point, b:Point, distance:number):Point{
     // AB 벡터 계산
     const ab = { x: b.x - a.x, y: b.y - a.y };
@@ -146,4 +153,36 @@ export class MZMath {
 
     return point;
   }
+
+  /**
+ * 두 점 A와 B를 지나는 선분 AB에 대해, 점 C에서 AB에 내린 수선의 발 D의 좌표를 계산합니다.
+ *
+ * @param line - line
+ * @param c - 수선을 내릴 점
+ * @returns 점 D의 좌표
+ */
+static findPerpendicularFoot(line:Line, c: Point): Point {
+  const vectorX = line.p2.x - line.p1.x;
+  const vectorY = line.p2.y - line.p1.y;
+  const vector_squared = vectorX * vectorX + vectorY * vectorY;
+
+  if (vector_squared === 0) {
+    return line.p1;
+  }
+
+  // Vector p1,c
+  const vector_p1_c_x = c.x - line.p1.x;
+  const vector_p1_c_y = c.y - line.p1.y;
+
+  // 내적을 사용하여 t 계산
+  const dotProduct = vector_p1_c_x * vectorX + vector_p1_c_y * vectorY;
+  const t = dotProduct / vector_squared;
+
+  // 수선의 발 D의 좌표 계산
+  const dx = line.p1.x + vectorX * t;
+  const dy = line.p1.y + vectorY * t;
+
+  return { x: dx, y: dy };
+}
+
 }
