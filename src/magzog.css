@@ -206,8 +206,8 @@ html, body {
 }
 
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(5),
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5),
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2),
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) { display: block; }
 
 /* Shadow */
@@ -280,6 +280,7 @@ html, body {
 .bg2 { background-color: white; }
 .bg3 { background-color: white; }
 .bg4 { background-color: white; }
+.bg5 { background-color: white; }
 .content { height: 100%; }
 
 /* Event Zone */
