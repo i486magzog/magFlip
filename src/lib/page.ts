@@ -104,13 +104,20 @@ export class Page implements IPageData {
         shadowDiv.append(shadowSvg);
         shadowDiv.append(shadowRect);
         
+        const gutterShadow = document.createElement('div');
+        gutterShadow.className = "shadow2";
+        const contentContainerEl = document.createElement('div');
+        contentContainerEl.className = `content-container`;
         const contentEl = document.createElement('div');
         contentEl.className = `content bg${page.index}`;
         contentEl.innerHTML = page.content;
-        contentEl.innerHTML += `<h1>Magzog</h1>`;
-        contentEl.innerHTML += `<p>Magzog is a simple and easy to use magazine layout for web pages. It is a responsive layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page.</p>`;
-        contentEl.innerHTML += `<span>${page.index}</span>`;
-        pageEl.appendChild(contentEl);
+        contentEl.innerHTML += `<img src="./resources/page${page.index+1}.jpg"/>`;
+        // contentEl.innerHTML += `<h1>Magzog</h1>`;
+        // contentEl.innerHTML += `<p>Magzog is a simple and easy to use magazine layout for web pages. It is a responsive layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page. It is a simple and easy to use layout that can be used for any kind of web page.</p>`;
+        // contentEl.innerHTML += `<span>${page.index}</span>`;
+        contentContainerEl.appendChild(contentEl)
+        contentContainerEl.appendChild(gutterShadow)
+        pageEl.appendChild(contentContainerEl);
         pageEl.appendChild(shadowDiv);
       }
 

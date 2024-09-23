@@ -79,6 +79,7 @@ export enum EventStatus {
   SnappingBack = 0b1001_0000,
   FlippingForward = 0b1010_0000,
   FlippingBackward = 0b1100_0000,
+  Dragging = 0b1000_0000_0000,
 }
 
 export enum Zone {
@@ -328,9 +329,12 @@ export interface IFlipData {
       p4:Point;
     }
   }
-  shadowRect: {
-    rotate: number;
-    origin: Point;
+  shadow: {
+    closingDistance: number,
+    rect:{
+      rotate: number,
+      origin: Point
+    }
   };
 }
 
@@ -359,9 +363,12 @@ export class FlipData implements IFlipData {
       p4:Point;
     },
   };
-  shadowRect: {
-    rotate: number,
-    origin: Point
+  shadow: {
+    closingDistance: number,
+    rect:{
+      rotate: number,
+      origin: Point
+    }
   };
 
   constructor(flipData:IFlipData){
@@ -372,7 +379,7 @@ export class FlipData implements IFlipData {
     this.d = flipData.d;
     this.page2 = flipData.page2;
     this.mask = flipData.mask;
-    this.shadowRect = flipData.shadowRect;
+    this.shadow = flipData.shadow;
   }
 
   printPage2MaskShape(){

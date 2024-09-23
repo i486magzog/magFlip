@@ -16,6 +16,7 @@ export class Flipping extends PageWindow {
   flipGRect:Rect = new Rect();
   gutter:Gutter = new Gutter();
   eventZone:Zone = Zone.RB;
+  oldEventZone:Zone = Zone.RT;
   activeCenterGP:Point = new Point();
   activeCornerGP:Point = new Point();
   activeCornerOppositeGP:Point = new Point();
@@ -128,7 +129,7 @@ export class Flipping extends PageWindow {
 
     let currentValue = this.curAutoFlipWidth;
     const targetValue = isAutoFlippingFromCorner ? this.autoFlipWidth : 0;
-    if(currentValue == targetValue){ return; }
+    if(currentValue == targetValue){ return onComplete(); }
 
     const startTime = performance.now();
     const duration:number = 200; // 2000ms
@@ -162,10 +163,12 @@ export class Flipping extends PageWindow {
     }
     const animationFrame = (currentTime:number) => {
       const eventStatus = this.eventStatus;
-      if( ( eventStatus != EventStatus.AutoFlipToCorner 
-            && eventStatus != EventStatus.AutoFlipFromCorner )
+      if( ( eventStatus != EventStatus.AutoFlipToCorner && eventStatus != EventStatus.AutoFlipFromCorner )
         || (isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipToCorner)
-        || (!isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipFromCorner)){ return ; }
+        || (!isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipFromCorner))
+      { 
+          return onComplete(); 
+      }
 
       const elapsed = (currentTime - startTime) / duration; // 0 ~ 1 사이 값
       const progress = Math.min(elapsed, 1); // 진행률 계산 (최대 1)
@@ -192,6 +195,8 @@ export class Flipping extends PageWindow {
    * @param onComplete 
    */
   animateFlipFromCorner(pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
+    if(this.oldEventZone != this.eventZone){ this.curAutoFlipWidth = 0; }
+    this.oldEventZone = this.eventZone;
     this.animateReadyToFlip(true, pageWH, onFlip, onComplete);
   }
   /**
@@ -201,6 +206,7 @@ export class Flipping extends PageWindow {
    * @param onComplete 
    */
   animateFlipToCorner(pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
+    this.oldEventZone = this.eventZone;
     this.animateReadyToFlip(false, pageWH, onFlip, onComplete);
   }
 
@@ -284,7 +290,6 @@ export class Flipping extends PageWindow {
     // Area
     //
     mouseGP = this.updateMousePointOnArea(mouseGP);
-
     switch(this.eventZone){
       case Zone.LT:
       case Zone.LC:
@@ -323,6 +328,8 @@ export class Flipping extends PageWindow {
     let g = { x: page2ActiveCorner.x+c*pivot, y: page2ActiveCorner.y };
     let h = { x: 0, y: 0 }
     const i = { x: page2ActiveCorner.x, y: page2ActiveCorner.y-d }
+    // Shadow
+    const closingDistance = MZMath.getLength(mouseGP, this.activeCornerOppositeGP);
     //
     // Update positions
     //
@@ -384,12 +391,15 @@ export class Flipping extends PageWindow {
       b:b,
       c:c,
       d:d,
-      shadowRect:{
-        rotate: alpha,
-        origin: {
-          x: g.x,
-          y: 0
-        }
+      shadow:{
+        closingDistance: closingDistance,
+        rect: {
+          rotate: alpha,
+          origin: {
+            x: g.x,
+            y: 0
+          }
+        },
       },
     })
   }
