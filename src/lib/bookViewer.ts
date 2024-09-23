@@ -419,7 +419,7 @@ export class BookViewer extends Flipping {
     // Shadow5
     //
     const p2Rotate = flipData.page2.rotate;
-    const defaultOpacity = isLeftPageActive ? 0.15: 0.3;
+    const defaultOpacity = isLeftPageActive ? 0.1: 0.15;
     const tempValue = defaultOpacity/Math.PI;
     const opacity = p2Rotate <= Math.PI 
       ? defaultOpacity - tempValue*p2Rotate 
