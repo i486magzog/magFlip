@@ -1,5 +1,5 @@
 import { MZMath } from './mzMath.js';
-import { EventStatus, FlipActionLine, FlipData, FlipDiagonals, Gutter, IRect, ISize, Line, Point, Rect, Zone } from './models.js';
+import { AutoFlipType, EventStatus, FlipActionLine, FlipData, FlipDiagonals, Gutter, IRect, ISize, Line, Point, Rect, Zone } from './models.js';
 import { PageWindow } from './pageWindow.js';
 import { Page } from './page.js';
 /**
@@ -9,7 +9,6 @@ export class Flipping extends PageWindow {
   private _eventStatus:EventStatus = EventStatus.None;
   set eventStatus(status:EventStatus){ this._eventStatus = status; };
   get eventStatus(){ return this._eventStatus; }
-
   /**
    * The width is the same as the opened book width.
    */
@@ -27,6 +26,12 @@ export class Flipping extends PageWindow {
   flipActionLine:FlipActionLine = new FlipActionLine();
   curAutoFlipWidth = 0;
   autoFlipWidth = 20;
+
+  setting: {
+    autoFlip: {
+      type: AutoFlipType
+    }
+  } = { autoFlip: { type: AutoFlipType.MouseCursor }}
 
   constructor() { 
     super();
@@ -122,14 +127,22 @@ export class Flipping extends PageWindow {
    */
   private animateReadyToFlip(
     isAutoFlippingFromCorner:boolean,
+    mouseGP:Point,
     pageWH:ISize,
     onFlip:(mouseGP:Point, pageWH:ISize)=>void,
     onComplete:()=>void
   ) {
 
     let currentValue = this.curAutoFlipWidth;
+    let targetGP:Point = new Point();
+    const isFlipToMouse = (this.setting.autoFlip.type == AutoFlipType.MouseCursor) && !(this.eventZone & Zone.Center);
     const targetValue = isAutoFlippingFromCorner ? this.autoFlipWidth : 0;
-    if(currentValue == targetValue){ return onComplete(); }
+    if(isFlipToMouse){
+      if(!isAutoFlippingFromCorner){ mouseGP = this.activeCornerGP }
+    }
+    else {
+      if(currentValue == targetValue){ return onComplete(); }  
+    }
 
     const startTime = performance.now();
     const duration:number = 200; // 2000ms
@@ -138,27 +151,27 @@ export class Flipping extends PageWindow {
     switch(this.eventZone){
       case Zone.LT: 
         startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y + currentValue}; 
-        endP = {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y + targetValue}; 
+        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y + targetValue}; 
         break;
       case Zone.LC: 
         startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y}; 
-        endP = {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y};
+        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y};
         break;
       case Zone.LB: 
         startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y - currentValue}; 
-        endP = {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y - targetValue}; 
+        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y - targetValue}; 
         break;
       case Zone.RT:
         startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y + currentValue}; 
-        endP = {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y + targetValue}; 
+        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y + targetValue}; 
         break;
       case Zone.RC:
         startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y}; 
-        endP = {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y}; 
+        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y}; 
         break;
       case Zone.RB:
         startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y - currentValue}; 
-        endP = {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y - targetValue}; 
+        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y - targetValue}; 
         break;
     }
     const animationFrame = (currentTime:number) => {
@@ -189,25 +202,25 @@ export class Flipping extends PageWindow {
     requestAnimationFrame(animationFrame); // 애니메이션 시작
   }
   /**
-   * 
+   * @param mouseGP 
    * @param pageWH 
    * @param onFlip 
    * @param onComplete 
    */
-  animateFlipFromCorner(pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
+  animateFlipFromCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
     if(this.oldEventZone != this.eventZone){ this.curAutoFlipWidth = 0; }
     this.oldEventZone = this.eventZone;
-    this.animateReadyToFlip(true, pageWH, onFlip, onComplete);
+    this.animateReadyToFlip(true, mouseGP, pageWH, onFlip, onComplete);
   }
   /**
-   * 
+   * @param mouseGP 
    * @param pageWH 
    * @param onFlip 
    * @param onComplete 
    */
-  animateFlipToCorner(pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
+  animateFlipToCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
     this.oldEventZone = this.eventZone;
-    this.animateReadyToFlip(false, pageWH, onFlip, onComplete);
+    this.animateReadyToFlip(false, mouseGP, pageWH, onFlip, onComplete);
   }
 
   easeInOutQuad(t:number):number { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }

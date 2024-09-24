@@ -311,28 +311,28 @@ html, body {
 #mzZoneLT {
   top: 0px;
   left: 0px;
-  width: var(--zone-width);
-  height: var(--zone-width);
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
 }
 #mzZoneLC {
   top: var(--zone-width);
   left: 0px;
   width: var(--zone-width);
-  height: calc(var(--page-height) - var(--zone-width)*2);
+  height: calc(var(--page-height) - var(--zone-width)*4);
 }
 
 #mzZoneLB {
   bottom: 0px;
   left: 0px;
-  width: var(--zone-width);
-  height: var(--zone-width);
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
 }
 
 #mzZoneRT {
   top: 0px;
   right: 0px;
-  width: var(--zone-width);
-  height: var(--zone-width);
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
 }
 
 #mzZoneRC {
@@ -345,6 +345,6 @@ html, body {
 #mzZoneRB {
   bottom: 0px;
   right: 0px;
-  width: var(--zone-width);
-  height: var(--zone-width);
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
 }

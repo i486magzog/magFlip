@@ -1,4 +1,4 @@
-import { IBox, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams, ISize, FlipData, PageType, DefaultSize, Line } from './models.js';
+import { IBox, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams, ISize, FlipData, PageType, DefaultSize, Line, AutoFlipType } from './models.js';
 import { Book } from './book.js'
 import { Page } from './page.js'
 import { BookManager } from './bookManager.js'
@@ -546,6 +546,7 @@ export class BookViewer extends Flipping {
     this.setViewerToAutoFlip();
     this.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect);
     this.animateFlipFromCorner(
+      viewport,
       { width: page2El.offsetWidth, height: page2El.offsetHeight },
       (mouseGP:Point, pageWH:ISize) => {
         this.flipPage(
@@ -561,6 +562,29 @@ export class BookViewer extends Flipping {
       () =>{}
     );
   }
+
+  zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
+    if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
+    if(this.eventZone & Zone.Center){ return; }
+    this.eventZone = param.zone;
+
+    const page2El = this.page2El;
+    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
+    const shadowRect = page2El.querySelector('div.shadow > div.sh-rect') as HTMLElement | null;
+    const shadowShape = page2El.querySelector('div.shadow > .sh-svg > polygon.shape') as SVGPolygonElement | null;
+
+    const msEvent = event as MouseEvent;
+    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+
+    this.flipPage(
+      page2El, 
+      this.maskShapeOnPage1, 
+      this.maskShapeOnPage2, 
+      shadowRect,
+      shadowShape,
+      viewport, 
+      { width: page2El.offsetWidth, height: page2El.offsetHeight });
+  }
  
   zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
     if(!(this.eventStatus == EventStatus.AutoFlipFromCorner)){ return; }
@@ -570,9 +594,12 @@ export class BookViewer extends Flipping {
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
     const shadowRect = page2El.querySelector('div.shadow > div.sh-rect') as HTMLElement | null;
     const shadowShape = page2El.querySelector('div.shadow > .sh-svg > polygon.shape') as SVGPolygonElement | null;
+    const msEvent = event as MouseEvent;
+    const viewport = { x:msEvent.clientX, y:msEvent.clientY }
 
     this.eventZone = param.zone;
     this.animateFlipToCorner(
+      viewport,
       { width: page2El.offsetWidth, height: page2El.offsetHeight },
       (mouseGP:Point, pageWH:ISize) => {
         this.flipPage(
@@ -720,6 +747,13 @@ export class BookViewer extends Flipping {
     this.zoneRT.addEventListener('mousedown', (event:Event) => { this.zoneMouseDowned(event as MouseEvent, { zone: Zone.RT }); })
     this.zoneRC.addEventListener('mousedown', (event:Event) => { this.zoneMouseDowned(event as MouseEvent, { zone: Zone.RC }); })
     this.zoneRB.addEventListener('mousedown', (event:Event) => { this.zoneMouseDowned(event as MouseEvent, { zone: Zone.RB }); })
+
+    this.zoneLT.addEventListener('mousemove', (event:Event) => { this.zoneMouseMoved(event as MouseEvent, { zone: Zone.LT }); })
+    this.zoneLC.addEventListener('mousemove', (event:Event) => { this.zoneMouseMoved(event as MouseEvent, { zone: Zone.LC }); })
+    this.zoneLB.addEventListener('mousemove', (event:Event) => { this.zoneMouseMoved(event as MouseEvent, { zone: Zone.LB }); })
+    this.zoneRT.addEventListener('mousemove', (event:Event) => { this.zoneMouseMoved(event as MouseEvent, { zone: Zone.RT }); })
+    this.zoneRC.addEventListener('mousemove', (event:Event) => { this.zoneMouseMoved(event as MouseEvent, { zone: Zone.RC }); })
+    this.zoneRB.addEventListener('mousemove', (event:Event) => { this.zoneMouseMoved(event as MouseEvent, { zone: Zone.RB }); })
 
     document.addEventListener('mouseup', this.documentMouseUp.bind(this));
     document.addEventListener('mousemove', this.documentMouseMove.bind(this));

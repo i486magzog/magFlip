@@ -96,6 +96,11 @@ export enum Zone {
   Bottom=0b0001_0000,
 }
 
+export enum AutoFlipType {
+  FixedWidth=0,
+  MouseCursor=1,
+}
+
 export interface IZoneEventParams {
   zone: Zone,
   // backPage1El: HTMLElement,
