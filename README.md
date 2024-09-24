@@ -1,4 +1,7 @@
-# Start
+# MagFlip
+In relation to this project 'MagFlip', back when Flash was popular, I first created a similar app using Flash ActionScript, based on a simple concept provided by MIT, when the Flash version app called Flipbook was first released. I revisited the basic concepts and mathematical aspects I had noted in my notebook, and now, as I prepare for a job transition and have some free time, I have made it open source. I'll update it occasionally whenever I have time.
+
+# How to Start
 ```bash
 npm start
 ```
