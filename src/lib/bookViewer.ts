@@ -530,7 +530,8 @@ export class BookViewer extends Flipping {
   }
 
   zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
-    if(this.eventStatus & EventStatus.Flipping){ return; }
+    if(this.eventStatus & EventStatus.Flipping
+      || this.eventStatus & EventStatus.Dragging){ return; }
     this.eventStatus = EventStatus.AutoFlipFromCorner;
 
     this.eventZone = param.zone;
@@ -587,7 +588,7 @@ export class BookViewer extends Flipping {
   }
  
   zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
-    if(!(this.eventStatus == EventStatus.AutoFlipFromCorner)){ return; }
+    if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
     this.eventStatus = EventStatus.AutoFlipToCorner;
 
     const page2El = this.page2El;
