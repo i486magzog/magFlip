@@ -210,6 +210,8 @@ export class BookViewer extends Flipping {
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3Svg.appendChild(shadow3);
 
 
@@ -489,12 +491,23 @@ export class BookViewer extends Flipping {
       let opacityScale = flipData.shadow.closingDistance/(pageWH.width/3);
       opacityScale = opacityScale > 1 ? 1 : opacityScale;
       //
-      stops[0].setAttribute('offset', '0%');
-      stops[0].setAttribute('stop-color', `rgba(255, 255, 255, ${0.2*opacityScale})`);
-      stops[1].setAttribute('offset', '12%');
-      stops[1].setAttribute('stop-color', `rgba(0, 0, 0, ${0.15*opacityScale})`);
-      stops[2].setAttribute('offset', '50%');
-      stops[2].setAttribute('stop-color', 'rgba(0, 0, 0, 0)');
+      stops[0].setAttribute('offset', '0.5%');
+      stops[0].setAttribute('stop-color', `rgba(255, 255, 255, ${0.7*opacityScale})`);
+      stops[1].setAttribute('offset', '5%');
+      stops[1].setAttribute('stop-color', `rgba(255, 255, 255, ${0.5*opacityScale})`);
+      stops[2].setAttribute('offset', '12%');
+      stops[2].setAttribute('stop-color', `rgba(255, 255, 255, ${0.7*opacityScale})`);
+      stops[3].setAttribute('offset', '50%');
+      stops[3].setAttribute('stop-color', 'rgba(0, 0, 0, 0.208)');
+      stops[4].setAttribute('offset', '100%');
+      stops[4].setAttribute('stop-color', 'rgba(255, 255, 255, 0)');
+
+
+      // rgba(255, 255, 255, 0.45), 
+      // rgba(255, 255, 255, 0.15) 0.015px, 
+      // rgba(255, 255, 255, 0.45) 0.0825px, 
+      // rgba(0, 0, 0, 0.208) 0.2775px, 
+      // transparent 1.5px);
     }
     // Page 2
     cssVar.setProperty('--page2-top', `${flipData.page2.top}px`)

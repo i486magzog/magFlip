@@ -226,9 +226,14 @@ html, body {
 
   display: none;
 }
-/* #bookViewer .book > .container > .page > .shadow > .shadow3-svg { } */
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .shadow3-svg,
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .shadow3-svg { display: block; }
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .shadow3-svg {
+  display: block;
+  border-radius: 50% 0 0 50% / .7% 0 0 .7%;
+}
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .shadow3-svg { 
+  display: block; 
+  border-radius: 0 50% 50% 0 / 0 .7% .7% 0;
+}
 
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow {
@@ -253,7 +258,7 @@ html, body {
   width: 7%;
   background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 210%);
   border-right: 1px solid rgba(71, 71, 71, 0.1);
-  border-radius: 0 50% 50% 0 / 0 0.7% .7% 0;
+  border-radius: 0 100% 100% 0 / 0 1% 1% 0;
 }
 #bookViewer .book > .container > .page:nth-child(even) .shadow2{ 
   position: absolute;
@@ -263,7 +268,7 @@ html, body {
   width: 7%;
   background-image: -webkit-linear-gradient(right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 210%);
   border-left: 1px solid rgba(71, 71, 71, 0.1);
-  border-radius: 50% 0 0 50% / 0.7% 0 0 .7%;
+  border-radius: 100% 0 0 50% / 1% 0 0 .7%;
 }
 #bookViewer .book > .container > .page:nth-child(odd) .content { border-radius: 20px 10% 10% 20px / 20px 0.7% .7% 20px; }
 #bookViewer .book > .container > .page:nth-child(even) .content { border-radius: 10% 20px 20px 10% / 0.7% 20px 20px .7%; }
@@ -290,6 +295,7 @@ html, body {
 .bg4 { background-color: white; }
 .bg5 { background-color: white; }
 .content-container, .content { height: 100%; }
+img { width: 100%; height:100%; }
 
 /* Event Zone */
 #bookViewer.ready-to-open.front .event-zone.left,
@@ -307,7 +313,7 @@ html, body {
   height: calc(2*var(--zone-width));
 }
 #mzZoneLC {
-  top: var(--zone-width);
+  top: calc(2*var(--zone-width));
   left: 0px;
   width: var(--zone-width);
   height: calc(var(--page-height) - var(--zone-width)*4);
@@ -328,7 +334,7 @@ html, body {
 }
 
 #mzZoneRC {
-  top: var(--zone-width);
+  top: calc(2*var(--zone-width));
   right: 0px;
   width: var(--zone-width);
   height: calc(var(--page-height) - var(--zone-width)*2);
