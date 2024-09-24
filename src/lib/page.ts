@@ -88,21 +88,19 @@ export class Page implements IPageData {
         // Shadow
         const shadowDiv = document.createElement('div');
         shadowDiv.classList.add('shadow');
-        const shadowRect = document.createElement('div');
-        shadowRect.classList.add('sh-rect');
+        const shadow6 = document.createElement('div');
+        shadow6.classList.add('shadow6');
         const svgNS = "http://www.w3.org/2000/svg";
-        const shadowSvg = document.createElementNS(svgNS, 'svg');
-        shadowSvg.classList.add('sh-svg');
-                
-        const shadowShape = document.createElementNS(svgNS, 'polygon');
-        shadowShape.classList.add('shape');
-        shadowShape.setAttribute('points', '0,0');
-        shadowShape.setAttribute('fill', 'url(#shadow3)');
+        const shadow3Svg = document.createElementNS(svgNS, 'svg');
+        shadow3Svg.classList.add('shadow3-svg');
+        const shadow3Shape = document.createElementNS(svgNS, 'polygon');
+        shadow3Shape.classList.add('shape');
+        shadow3Shape.setAttribute('points', '0,0');
+        shadow3Shape.setAttribute('fill', 'url(#shadow3)');
         
         // shadowSvg.append(shadow3);
-        shadowSvg.append(shadowShape);
-        shadowDiv.append(shadowSvg);
-        shadowDiv.append(shadowRect);
+        shadow3Svg.appendChild(shadow3Shape);
+        shadowDiv.appendChild(shadow3Svg);
         
         const gutterShadow = document.createElement('div');
         gutterShadow.className = "shadow2";
@@ -118,6 +116,7 @@ export class Page implements IPageData {
         contentContainerEl.appendChild(contentEl)
         contentContainerEl.appendChild(gutterShadow)
         pageEl.appendChild(contentContainerEl);
+        pageEl.appendChild(shadow6);
         pageEl.appendChild(shadowDiv);
       }
 

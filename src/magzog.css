@@ -191,7 +191,7 @@ html, body {
   left: var(--page2-left);
   transform: rotate(var(--page2-rotate));
   /* Shadow 5 */
-  filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, var(--shadow5-opacity)));
+  filter: drop-shadow(0px 0px 80px rgba(0, 0, 0, var(--shadow5-opacity)));
 }
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .content-container,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .content-container {
@@ -210,31 +210,33 @@ html, body {
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) { display: block; }
 
 /* Shadow */
-#bookViewer .book > .container > .page > .shadow > .sh-rect {
+#bookViewer .book > .container > .page > .shadow6 {
   position: absolute;
   top:0;
   left: 0;
   width: 0;
   height: 0;
 }
-#bookViewer .book > .container > .page > .shadow > .sh-svg { 
+#bookViewer .book > .container > .page > .shadow > .shadow3-svg { 
   position: absolute;
   top:0;
   left:0;
   width: 100%;
   height: 100%;
+
+  display: none;
 }
-#bookViewer .book > .container > .page > .shadow > .sh-svg { display: none; }
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg,
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg { display: block; }
+/* #bookViewer .book > .container > .page > .shadow > .shadow3-svg { } */
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .shadow3-svg,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .shadow3-svg { display: block; }
 
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow {
   width: 100%;
   height: 100%;
 }
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-rect,
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-rect {
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow6,
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow6 {
   top: var(--page-height);
   left: var(--shadow-left);
   width: var(--page-diagonal-length);
@@ -243,16 +245,6 @@ html, body {
   transform: rotate(var(--shadow-rotate));
   /* overflow: hidden; */
 }
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg,
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg {
-  /* filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, var(--shadow5-opacity))); */
-}
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .sh-svg > .shape,
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .sh-svg > .shape {
-
-  /* filter: drop-shadow(5px 1px 10px rgba(0, 0, 0, 0.3)); */
-}
-
 #bookViewer .book > .container > .page:nth-child(odd) .shadow2{ 
   position: absolute;
   top: 0;
