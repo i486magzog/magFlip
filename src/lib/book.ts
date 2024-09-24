@@ -75,7 +75,7 @@ export class Book extends BookEl implements IBookData {
       index: index,
       number: undefined,
       ignore: false,
-      content: "This is a page content",
+      content: "",
     };
     const page = new Page(pageSample);
     this.addPage(page, index);
@@ -103,7 +103,7 @@ export class Book extends BookEl implements IBookData {
         index: i,
         number: undefined,
         ignore: false,
-        content: "This is a page content",
+        content: "",
       },);
     }
 
