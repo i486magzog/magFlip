@@ -7,11 +7,11 @@ import { Book } from './book.js';
  */
 export class BookManager {
     /**
-     * 
+     * Returns the BookShelf instance.
      */
-    bookShelf: BookShelf;
+    readonly bookShelf: BookShelf;
     /**
-     * 
+     * Returns the BookViewer instance.
      */
     bookViewer: BookViewer;
     /**
@@ -24,13 +24,13 @@ export class BookManager {
       this.bookViewer = new BookViewer(this, bookViewerId);
     }
     /**
-     * 
+     * Gets a book holder's element with the book's id.
      * @param id 
      * @returns 
      */
     getBookHolder(id:string):Element { return this.bookShelf.getBookHolder(id); }
     /**
-     * 
+     * Gets a book object with the book's id.
      * @param id 
      * @returns 
      */

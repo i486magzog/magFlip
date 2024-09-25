@@ -8,16 +8,26 @@ interface IBookOnShelf {
   // TODO: Change the meaning of the position.
   position: number;  
 }
-  
-  
 /**
  * BookShelf class
  */
 export class BookShelf {
-  bookManager: BookManager;
-  bookShelfDocId: string;
+  /**
+   * Returns the BookManager's instance.
+   */
+  readonly bookManager: BookManager;
+  /**
+   * Returns the book shelf's document id.
+   */
+  readonly bookShelfDocId: string;
+  /**
+   * Returns and sets the books on the book shelf.
+   */
   booksOnShelf: { [id:string]: IBookOnShelf };
-  element: Element;
+  /**
+   * Returns this book shelf's element.
+   */
+  readonly element: Element;
 
   constructor(bookManager:BookManager, bookShelfDocId?:string) {
     this.booksOnShelf = {};
@@ -25,7 +35,10 @@ export class BookShelf {
     this.bookShelfDocId = bookShelfDocId || "bookShelf";
     this.element = this.createElement();
   }
-
+  /**
+   * Creates all book shelf elements.
+   * @returns 
+   */
   createElement():Element {
     let bookShelfEl = document.getElementById(this.bookShelfDocId);
     if(!bookShelfEl){
@@ -37,19 +50,19 @@ export class BookShelf {
     return bookShelfEl;
   }
   /**
-   * 
+   * Gets the book holder's element with the book id.
    * @param id 
    * @returns 
    */
   getBookHolder(id:string):Element { return this.booksOnShelf[id].bookHolderEl; }
   /**
-   * 
+   * Gets the book object with the book id.
    * @param id 
    * @returns 
    */
   getBook(id:string):Book { return this.booksOnShelf[id].book; }
   /**
-   * 
+   * Adds a book to this book shelf.
    * @param book 
    */
   addBook(book: Book, event: { [key:string]: (event:Event)=>void } ) {
@@ -69,7 +82,6 @@ export class BookShelf {
     for(const key in event){
         bookOnShelfEl.addEventListener(key, event[key]);
     }
-    
   }
   /**
    * Put back the book from the viewer to the shelf.

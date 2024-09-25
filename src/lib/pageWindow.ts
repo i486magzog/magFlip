@@ -1,18 +1,21 @@
 import { Page } from './page.js';
-
 /**
  * Page Window Interface
  */
 interface IPageWindow {
   page: Page | undefined;
 }
-  
-  
 /**
  * PageWindow class
  */
 export class PageWindow {
+  /**
+   * Window array that contains active pages regarding flipping.
+   */
   windows: IPageWindow[];
+  /**
+   * Window array size. The default value is 6.
+   */
   readonly windowSize: number = 6;
 
   constructor(){
@@ -22,7 +25,7 @@ export class PageWindow {
     }
   }
   /**
-   * 
+   * Loads and adds a page to the window.
    * @param index Window index
    * @param page 
    */
@@ -30,7 +33,7 @@ export class PageWindow {
     this.windows[index].page = page;
   }
   /**
-   * 
+   * Loads and adds pages to the window.
    * @param pages The length of the pages should be 6.
    */
   loadPagesToWindow(pages: Page[]) {
@@ -39,7 +42,7 @@ export class PageWindow {
     }
   }
   /**
-   * 
+   * Clears all pages on the window.
    */
   clearPageWindow(){
     this.windows = [];
@@ -74,7 +77,7 @@ export class PageWindow {
     this.windows.unshift({ page: page0 });
   }
   /**
-   * 
+   * Get a page with window index.
    * @param index Window index
    * @returns 
    */

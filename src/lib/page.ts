@@ -4,17 +4,38 @@ import { DefaultSize, ISize, IPageData, PageType, IEventHandlers } from "./model
  */
 export class Page implements IPageData {
     /**
-     * id
+     * Returns the page's id.
      */
-    id: string;
-    type: PageType;
-    size: ISize;
-    index: number;
-    number: number | undefined;
+    readonly id: string;
+    /**
+     * Returns the page's type.
+     */
+    readonly type: PageType;
+    /**
+     * Returns the page's size.
+     */
+    readonly size: ISize;
+    /**
+     * Returns the page's index which is the sequence number.
+     * This number is unique in a book.
+     */
+    readonly index: number;
+    /**
+     * Returns the page's number which is set by editors.
+     */
+    readonly number: number | undefined;
+    /**
+     * Returns the ignore value whether this page is ignored or not.
+     */
     ignore: boolean;
+    /**
+     * Returns the content of this page.
+     */
     content: any;
-    
-    element: HTMLElement;
+    /**
+     * Returns the element of this page.
+     */
+    readonly element: HTMLElement;
     
     constructor(page:IPageData, eventHandlers:IEventHandlers|null = null) {
       // TODO: id should be unique and exist.
@@ -29,9 +50,26 @@ export class Page implements IPageData {
       this.element = this.createPageElement(page);
       this.addEventListener(eventHandlers);
     }
-  
+    /**
+     * Creates and return an empty page.
+     * @param index 
+     * @param size 
+     * @returns 
+     */
     static emptyPage(index:number, size:ISize):Page { return this.createEmptyOrBlankPage(PageType.Empty, index, size); }
+    /**
+     * Creates and return an blank page.
+     * @param index 
+     * @param size 
+     * @returns 
+     */
     static blankPage(index:number, size:ISize):Page { return this.createEmptyOrBlankPage(PageType.Blank, index, size); }  
+    /**
+     * Creates and return an empty or blank page.
+     * @param index 
+     * @param size 
+     * @returns 
+     */
     private static createEmptyOrBlankPage(type:PageType, index:number, size:ISize):Page {
       return new Page({
         id: `emptyPage${index}`,
@@ -44,7 +82,7 @@ export class Page implements IPageData {
       });
     }
     /**
-     * 
+     * Creates the elements of this page.
      * @param page 
      * @returns 
      */
@@ -122,7 +160,10 @@ export class Page implements IPageData {
 
       return pageEl;
     }
-
+    /**
+     * Adds all events related to this page.
+     * @param handlers 
+     */
     addEventListener(handlers:IEventHandlers|null){
       this.element.addEventListener('click', (event:Event) => { handlers?.clicked(event, this) })
       this.element.addEventListener('mousemove', (event:Event) => { handlers?.mousemoved(event, this) })

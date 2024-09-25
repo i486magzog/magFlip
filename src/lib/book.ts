@@ -6,13 +6,37 @@ import { Page } from "./page.js";
  * Book class
  */
 export class Book extends BookEl implements IBookData {
-  id: string;
+  /**
+   * Returns the book id.
+   */
+  readonly id: string;
+  /**
+   * Returns and sets the book status such as close, open and so on.
+   */
   status: BookStatus;
+  /**
+   * Returns and sets the book type.
+   */
   type: BookType;
-  title: string;
-  author: string;
-  publication: IPublication;
-  size:BookSize;
+  /**
+   * Returns the book's title.
+   */
+  readonly title: string;
+  /**
+   * Returns the book's author.
+   */
+  readonly author: string;
+  /**
+   * Returns the book's publication.
+   */
+  readonly publication: IPublication;
+  /**
+   * Returns the book's size.
+   */
+  readonly size:BookSize;
+  /**
+   * Returns and sets pages that the book contains
+   */
   private pages: { [n:number|string]: Page };
   thumbnails: {
     spine: string;
@@ -56,16 +80,19 @@ export class Book extends BookEl implements IBookData {
     //
     this.createInitialPages();
   }
-
+  /**
+   * Creats empty pages to fill the book viewer for flipping effect.
+   */
   createInitialPages() {
     this.createEmptyPage(-3);
     this.createEmptyPage(-2);
     this.createEmptyPage(-1);
-    // this.addPage(Page.emptyPage(-3), -3);
-    // this.addPage(Page.emptyPage(-2), -2);
-    // this.addPage(Page.emptyPage(-1), -1);
   }
-
+  /**
+   * Fetches and adds a page from server.
+   * @param index 
+   * @returns 
+   */
   async fetchPage(index: number):Promise<IPageData>{
     // TODO: fecth page from the server
     const pageSample:IPageData = {
@@ -84,7 +111,11 @@ export class Book extends BookEl implements IBookData {
       resolve(pageSample);
     })
   }
-
+  /**
+   * Fetches and adds pages from server.
+   * @param indexRange the indice of the pages to fetches
+   * @returns 
+   */
   async fetchPages(indexRange: {start:number, cnt:number}):Promise<IPageData[]>{
     let startIndex = indexRange.start;
     // if start index is negative set it as zero.
@@ -119,24 +150,40 @@ export class Book extends BookEl implements IBookData {
       resolve(pageSamples);
     })
   }
-
-  // setReadyToOpen() { super.setReadyToOpen(this.size.closed); }
-  // setSpreadOpen() { super.setSpreadOpen(this.size.opened); }
-  // changeSize(){
-
-  // }
+  /**
+   * Adds a page object to the book.
+   * @param page 
+   * @param index 
+   */
   addPage(page: Page, index: number) { this.pages[index] = page; }
+  /**
+   * Remove a page object from the book.
+   * @param index 
+   */
   removePage(index: number) { delete this.pages[index]; }
+  /**
+   * Returns the page object with the page index.
+   * @param index 
+   * @returns 
+   */
   getPage(index: number){ return this.pages[index]; }
+  /**
+   * Returns the page element with the page index.
+   * @param index 
+   * @returns 
+   */
   getPageEl(index: number):HTMLElement { return this.pages[index].element; }
-  clearPageEls() { this.pageContainerEl.innerHTML = ""; }
+  /**
+   * Creates and adds an empty page object.
+   * @param index 
+   * @param size 
+   * @returns 
+   */
   createEmptyPage(index:number, size?:ISize){
     const page = Page.emptyPage(index, size || this.size.closed)
     this.addPage(page, index);
     return page;
   }
-  pageClicked(event:Event, param:any){ 
-    // this.flippingPageIndex = (param as Page).index; 
-  }
-  pageActive(event:Event, param:any){ ; }
+  pageClicked = (event:Event, param:any) => { }
+  pageActive = (event:Event, param:any) => { }
 }

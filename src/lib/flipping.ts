@@ -6,37 +6,83 @@ import { Page } from './page.js';
  * Flipping class
  */
 export class Flipping extends PageWindow {
+  /**
+   * Current status of the event, initialized to 'None'.
+   */
   private _eventStatus:EventStatus = EventStatus.None;
+  /**
+   * Setter for eventStatus to update the current status of the event.
+   */
   set eventStatus(status:EventStatus){ this._eventStatus = status; };
+  /**
+   * Getter for eventStatus to retrieve the current event status.
+   */
   get eventStatus(){ return this._eventStatus; }
   /**
+   * The area representing the flipping region. 
    * The width is the same as the opened book width.
    */
   flipGRect:Rect = new Rect();
+  /**
+   * The gutter of the book, representing the central area between the pages.
+   * The position 
+   */
   gutter:Gutter = new Gutter();
+  /**
+   * The current zone where the event is occurring, initialized to the right-bottom (RB) zone.
+   */
   eventZone:Zone = Zone.RB;
+  /**
+   * The previous zone where the event occurred, initialized to the right-top (RT) zone.
+   */
   oldEventZone:Zone = Zone.RT;
+  /**
+   * The center point of the active flipping process.
+   */
   activeCenterGP:Point = new Point();
+  /**
+   * The point representing the active corner during the flip.
+   */
   activeCornerGP:Point = new Point();
+  /**
+   * The opposite corner to the active corner during the flip.
+   */
   activeCornerOppositeGP:Point = new Point();
+  /**
+   * Diagonal values used to calculate flipping geometry.
+   * The diagonals are depends on the dragging corner point.
+   */
   diagonals:FlipDiagonals = new FlipDiagonals();
   /**
+   * A line that represents the action of flipping a page.
    * The width is the same as the opened book width.
    */
   flipActionLine:FlipActionLine = new FlipActionLine();
+  /**
+   * The current width being used for automatic flipping when the AutoFlipType is FixedWidth.
+   */
   curAutoFlipWidth = 0;
+  /**
+   * The width for automatic flipping, initialized to 20.
+   */
   autoFlipWidth = 20;
-
+  /** 
+   * Settings related to the flipping behavior.
+   */
   setting: {
     autoFlip: {
       type: AutoFlipType
     }
   } = { autoFlip: { type: AutoFlipType.MouseCursor }}
 
-  constructor() { 
-    super();
-  }
-  
+  constructor() {  super(); }
+  /**
+   * Initializes the flipping process, setting the event zone and configuring the flip action line, 
+   * diagonal properties, and active corner points.
+   * @param eventZone The zone where the event is happening (e.g., LT, RT).
+   * @param mouseGP The current position of the mouse pointer.
+   * @param containerRect The rectangle defining the boundaries of the container element.
+   */
   setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect){
     this.eventZone = eventZone;
     let flipActionLineGY:number = mouseGP.y;
@@ -100,13 +146,22 @@ export class Flipping extends PageWindow {
     const zoneWidthStr = getComputedStyle(docEl).getPropertyValue('--zone-width').trim();
     this.autoFlipWidth = parseFloat(zoneWidthStr) * 0.9;
   }
-
+  /**
+   * Returns the point of the corner that flipping page has to go back.
+   * @param mouseGP The current position of the mouse pointer.
+   * @returns The corner point closest to the mouse pointer.
+   */
   getTargetCorner(mouseGP:Point){
     const activeLength = MZMath.getLength(mouseGP, this.activeCornerGP);
     const inactiveLength = MZMath.getLength(mouseGP, this.activeCornerOppositeGP);
     return inactiveLength < activeLength ? this.activeCornerOppositeGP : this.activeCornerGP;
   }
-
+  /**
+   * Retrieves information needed to execute the flip, such as the target corner, 
+   * whether the flip is snapping back, and whether the flip is forward.
+   * @param mouseGP The current position of the mouse pointer.
+   * @returns An object containing the target corner, snap-back status, and flip direction.
+   */
   getInfoToFlip(mouseGP:Point){
     const targetCornerGP = this.getTargetCorner(mouseGP);
     const isSnappingBack = targetCornerGP == this.activeCornerGP;
@@ -118,12 +173,13 @@ export class Flipping extends PageWindow {
     }
   }
   /**
-   * 
-   * @param isAutoFlippingFromCorner 
-   * @param pageWH 
-   * @param onFlip 
-   * @param onComplete 
-   * @returns 
+   * Animates the page flip action, gradually moving from the start point to the target point,
+   * while applying easing to make the motion smooth. It supports auto-flip from or to the corner.
+   * @param isAutoFlippingFromCorner Whether the flip is an automatic flip from the corner.
+   * @param mouseGP The current position of the mouse pointer.
+   * @param pageWH The width and height of the page.
+   * @param onFlip A callback executed during the flip, receiving the mouse position and page size.
+   * @param onComplete A callback executed when the flip is complete.
    */
   private animateReadyToFlip(
     isAutoFlippingFromCorner:boolean,
@@ -202,10 +258,11 @@ export class Flipping extends PageWindow {
     requestAnimationFrame(animationFrame); // 애니메이션 시작
   }
   /**
-   * @param mouseGP 
-   * @param pageWH 
-   * @param onFlip 
-   * @param onComplete 
+   * Starts the animation for flipping the page from the corner.
+   * @param mouseGP The current position of the mouse pointer.
+   * @param pageWH The width and height of the page.
+   * @param onFlip A callback executed during the flip, receiving the mouse position and page size.
+   * @param onComplete A callback executed when the flip is complete.
    */
   animateFlipFromCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
     if(this.oldEventZone != this.eventZone){ this.curAutoFlipWidth = 0; }
@@ -213,18 +270,30 @@ export class Flipping extends PageWindow {
     this.animateReadyToFlip(true, mouseGP, pageWH, onFlip, onComplete);
   }
   /**
-   * @param mouseGP 
-   * @param pageWH 
-   * @param onFlip 
-   * @param onComplete 
+   * Starts the animation for flipping the page to the corner.
+   * @param mouseGP The current position of the mouse pointer.
+   * @param pageWH The width and height of the page.
+   * @param onFlip A callback executed during the flip, receiving the mouse position and page size.
+   * @param onComplete A callback executed when the flip is complete.
    */
   animateFlipToCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
     this.oldEventZone = this.eventZone;
     this.animateReadyToFlip(false, mouseGP, pageWH, onFlip, onComplete);
   }
-
+  /**
+   * Easing function for smooth transition during the flip animation.
+   * @param t A number between 0 and 1 representing the current progress of the animation.
+   * @returns A number representing the eased progress value.
+   */
   easeInOutQuad(t:number):number { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
-
+  /**
+   * Animates the page flip, interpolating between the start and end points with easing.
+   * @param startP The starting point of the flip.
+   * @param endP The ending point of the flip.
+   * @param pageWH The width and height of the page.
+   * @param onFlip A callback executed during the flip, receiving the mouse position and page size.
+   * @param onComplete A callback executed when the flip is complete.
+   */
   animateFlip(
     startP:Point, 
     endP:Point,
@@ -253,7 +322,11 @@ export class Flipping extends PageWindow {
 
     requestAnimationFrame(animationFrame);
   }
-
+  /**
+   * Updates and returns the mouse pointer position depends on the area that the mouse pointer position is located in.
+   * @param mouseGP The current position of the mouse pointer.
+   * @returns The updated mouse pointer position.
+   */
   updateMousePointOnArea(mouseGP:Point){
     const radian4Area1 = MZMath.getRadianPositive(this.gutter.centerBottom, mouseGP);
     const isArea1 = mouseGP.y < this.flipActionLine.y 
@@ -287,7 +360,14 @@ export class Flipping extends PageWindow {
 
     return mouseGP;
   }
-
+  /**
+   * Calculates and returns the data needed to flip the page, including the active corner,
+   * mask shape, shadow, and rotation angles.
+   * @param mouseGP The current position of the mouse pointer.
+   * @param pageWH The width and height of the page.
+   * @param isSpreadOpen Whether the page is spread open or not.
+   * @returns An object containing all the necessary data for rendering the flip.
+   */
   flip(
     mouseGP:Point, 
     pageWH:ISize,
@@ -374,10 +454,6 @@ export class Flipping extends PageWindow {
     const k = { x: page3ActiveCorner.x + page2ActiveCorner.x - g.x, y: g.y }
     const l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
     const m = { x: page3ActiveCorner.x, y: i.y }
-    
-    
-
-
 
     return new FlipData({
       page2:{

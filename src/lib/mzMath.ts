@@ -1,7 +1,9 @@
 import { Line, Point, Rect } from './models.js';
-
+/**
+ * This is Magzog Math object that contains math util-methods.
+ */
 export class MZMath {
-    /**
+  /**
    * Finds the symmetric point of a given target point with respect to a reference origin point.
    *
    * This function calculates the point that is symmetric to the target point,
@@ -71,7 +73,11 @@ export class MZMath {
     }
     return radian;
   }
-
+  /**
+   * Returns the global location and size of the input element.
+   * @param el 
+   * @returns 
+   */
   static getOffset(el:HTMLDivElement) {
     var  top = 0, left = 0, width = 0, height = 0;
     let  bound = el.getBoundingClientRect();
@@ -127,7 +133,12 @@ export class MZMath {
       right: left + width,
     });
   }
-  // getLength(x1:number, y1:number, x2:number, y2:number):number {
+  /**
+   * Returns the length between two points.
+   * @param point1 
+   * @param point2 
+   * @returns 
+   */
   static getLength(point1:Point, point2:Point):number {
     return Math.sqrt(Math.pow(point1.x-point2.x, 2) + Math.pow(point1.y-point2.y, 2));
   }
@@ -139,13 +150,13 @@ export class MZMath {
    * @returns 
    */
   static findPointOnLine(a:Point, b:Point, distance:number):Point{
-    // AB 벡터 계산
+    // AB Vector calculation.
     const ab = { x: b.x - a.x, y: b.y - a.y };
-    // 벡터 AB의 길이 계산
+    // The length of vector AB
     const abLength = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
-    // AB 벡터의 단위 벡터 계산 (방향 벡터)
+    // Calculates the vector AB's unit.
     const unitVector = { x: ab.x / abLength, y: ab.y / abLength };
-    // A에서 B 방향으로 distance만큼 떨어진 점 계산
+    // Find the point.
     const point = {
         x: a.x + unitVector.x * distance,
         y: a.y + unitVector.y * distance
@@ -153,36 +164,31 @@ export class MZMath {
 
     return point;
   }
-
   /**
- * 두 점 A와 B를 지나는 선분 AB에 대해, 점 C에서 AB에 내린 수선의 발 D의 좌표를 계산합니다.
- *
- * @param line - line
- * @param c - 수선을 내릴 점
- * @returns 점 D의 좌표
- */
-static findPerpendicularFoot(line:Line, c: Point): Point {
-  const vectorX = line.p2.x - line.p1.x;
-  const vectorY = line.p2.y - line.p1.y;
-  const vector_squared = vectorX * vectorX + vectorY * vectorY;
+   * Calculates and returns the coordinates of point D, where the perpendicular from point C meets the line segment AB.
+   * @param line line
+   * @param c 
+   * @returns 
+   */
+  static findPerpendicularFoot(line:Line, c: Point): Point {
+    const vectorX = line.p2.x - line.p1.x;
+    const vectorY = line.p2.y - line.p1.y;
+    const vector_squared = vectorX * vectorX + vectorY * vectorY;
 
-  if (vector_squared === 0) {
-    return line.p1;
+    if (vector_squared === 0) { return line.p1; }
+
+    // Vector p1,c
+    const vector_p1_c_x = c.x - line.p1.x;
+    const vector_p1_c_y = c.y - line.p1.y;
+
+    // Vector production.
+    const dotProduct = vector_p1_c_x * vectorX + vector_p1_c_y * vectorY;
+    const t = dotProduct / vector_squared;
+
+    // Point D
+    const dx = line.p1.x + vectorX * t;
+    const dy = line.p1.y + vectorY * t;
+
+    return { x: dx, y: dy };
   }
-
-  // Vector p1,c
-  const vector_p1_c_x = c.x - line.p1.x;
-  const vector_p1_c_y = c.y - line.p1.y;
-
-  // 내적을 사용하여 t 계산
-  const dotProduct = vector_p1_c_x * vectorX + vector_p1_c_y * vectorY;
-  const t = dotProduct / vector_squared;
-
-  // 수선의 발 D의 좌표 계산
-  const dx = line.p1.x + vectorX * t;
-  const dy = line.p1.y + vectorY * t;
-
-  return { x: dx, y: dy };
-}
-
 }

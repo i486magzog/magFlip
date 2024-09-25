@@ -1,9 +1,12 @@
 import { ISize } from "./models.js";
 
 /**
- * Book class
+ * Book element management class
  */
 export class BookEl {
+  /**
+   * Returns and sets the info of thumbnails for the book.
+   */
   thumbnails: {
     spine: string;
     small: string;
@@ -13,10 +16,18 @@ export class BookEl {
       back: string;
     };
   };
-  // 
-  elementOnShelf: HTMLElement;
-  element: HTMLElement;
-  pageContainerEl: HTMLElement;
+  /**
+   * Returns the the book element shown on the book shelf.
+   */
+  readonly elementOnShelf: HTMLElement;
+  /**
+   * Returns the book element shown on the book viewer.
+   */
+  readonly element: HTMLElement;
+  /**
+   * Returns the page container element.
+   */
+  readonly pageContainerEl: HTMLElement;
 
   constructor(size:ISize, thumbnails:any) {
     // TODO: id should be unique and exist.
@@ -37,12 +48,30 @@ export class BookEl {
     this.element = elements.bookEl;
     this.pageContainerEl = elements.containerEl;
   }
-
+  /**
+   * Clears the children elements of the page container's element.
+   */
   clearPageEls() { this.pageContainerEl.innerHTML = ""; }
+  /**
+   * Appends a page element into the page container element.
+   * @param pageEl the page element to append.
+   */
   appendPageEl(pageEl:HTMLElement){ this.pageContainerEl.appendChild(pageEl); }
+  /**
+   * Prepends a page element into the page container element.
+   * @param pageEl the page element to prepend.
+   */
   prependPageEl(pageEl:HTMLElement){ this.pageContainerEl.prepend(pageEl); }
+  /**
+   * Remove a page element from the page container element.
+   * @param pageEl the page element to remove.
+   */
   removePageEl(pageEl:HTMLElement){ this.pageContainerEl.removeChild(pageEl); }
-
+  /**
+   * Creates the book element and child elements
+   * @param size 
+   * @returns 
+   */
   createBookElement(size:ISize): { bookOnShelfEl: HTMLElement, bookEl: HTMLElement, containerEl: HTMLElement } {
     const bookOnShelfEl = document.createElement('div');
     bookOnShelfEl.className = "book-on-shelf";
