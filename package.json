@@ -4,9 +4,6 @@
   "description": "",
   "main": "default.js",
   "scripts": {
-    "mkdir": "mkdir -p ./dist/css && mkdir -p ./dist/lib && mkdir -p ./dist/resources",
-    "cp": "cp ./src/*.html ./dist && cp ./src/css/* ./dist/css && cp ./src/resources/* ./dist/resources",
-    "build:tsc": "tsc && npm run mkdir && npm run cp",
     "build": "webpack",
     "start": "webpack serve"
   },
