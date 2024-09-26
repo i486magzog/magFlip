@@ -262,6 +262,8 @@ export class BookViewer extends Flipping {
 
       // Shadow3
       const shadow3Svg = document.createElementNS(svgNS, 'svg');
+      shadow3Svg.setAttribute('width', '0');
+      shadow3Svg.setAttribute('height', '0');
       const shadow3 = document.createElementNS(svgNS, 'linearGradient');
       shadow3.id ='shadow3';
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
@@ -506,6 +508,9 @@ export class BookViewer extends Flipping {
     //
     // Shadow
     //
+    // The stop shadow becomes increasingly transparent 
+    // from one-third of the way toward the closing corner as it gets closer to the corner.
+    let opacityScale = flipData.shadow.closingDistance/(pageWH.width/3);
     // Shadow Rect
     const shadowOrigin = flipData.shadow.rect.origin;
     const cssVar = document.documentElement.style;
@@ -522,7 +527,7 @@ export class BookViewer extends Flipping {
     const opacity = p2Rotate <= Math.PI 
       ? defaultOpacity - tempValue*p2Rotate 
       : defaultOpacity + tempValue*(2*Math.PI - p2Rotate);
-    cssVar.setProperty('--shadow5-opacity', `${opacity}`)
+    cssVar.setProperty('--shadow5-opacity', `${opacity*opacityScale}`)
     // console.log("op:", opacity, "ro: ", p2Rotate, "tv: ", tempValue, )
     //
     // Shadow3
@@ -569,8 +574,8 @@ export class BookViewer extends Flipping {
       }
       x2 = 0;
     }
-    x1 = ((p.x/longLineLength) || 1)*100;
-    y1 = ((p.y/longLineLength) || 1)*100;
+    x1 = ((p.x/longLineLength) || 0)*100;
+    y1 = ((p.y/longLineLength) || 0)*100;
 
     if(shadow3El){
       shadow3El.setAttribute('x1', `${x1}%`);
@@ -581,8 +586,6 @@ export class BookViewer extends Flipping {
 
     const stops = shadow3El?.querySelectorAll('stop');
     if(stops){
-      // The stop shadow becomes increasingly transparent from one-third of the way toward the closing corner as it gets closer to the corner.
-      let opacityScale = flipData.shadow.closingDistance/(pageWH.width/3);
       opacityScale = opacityScale > 1 ? 1 : opacityScale;
       //
       stops[0].setAttribute('offset', '0.5%');
@@ -592,7 +595,7 @@ export class BookViewer extends Flipping {
       stops[2].setAttribute('offset', '12%');
       stops[2].setAttribute('stop-color', `rgba(255, 255, 255, ${0.7*opacityScale})`);
       stops[3].setAttribute('offset', '50%');
-      stops[3].setAttribute('stop-color', 'rgba(0, 0, 0, 0.208)');
+      stops[3].setAttribute('stop-color', `rgba(0, 0, 0, ${0.208*opacityScale})`);
       stops[4].setAttribute('offset', '100%');
       stops[4].setAttribute('stop-color', 'rgba(255, 255, 255, 0)');
 

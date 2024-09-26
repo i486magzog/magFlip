@@ -80,7 +80,7 @@ export class BookShelf {
     // Add event listeners to the book element.
     //
     for(const key in event){
-        bookOnShelfEl.addEventListener(key, event[key]);
+      bookOnShelfEl.addEventListener(key, event[key]);
     }
   }
   /**

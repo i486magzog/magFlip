@@ -58,115 +58,15 @@ export class BookManager {
             opened: { width: 1200, height: 900, diagonal:0 }
           }),
           thumbnails: {
-            spine: "resources/cover.webp",
-            small: "resources/cover.webp",
-            medium: "resources/cover.webp",
+            spine: "resources/cover.jpg",
+            small: "resources/cover.jpg",
+            medium: "resources/cover.jpg",
             cover: {
-              front: "resources/cover.webp",
-              back: "resources/cover.webp",
+              front: "resources/cover.jpg",
+              back: "resources/cover.jpg",
             }
           },
-        },
-        {
-          id: "book2",
-          status: BookStatus.Close,
-          title: "Book 2",
-          type: BookType.Magazine,
-          author: "Shinkee",
-          publication: {
-            name: "Magzog",
-            location: "Auckland in New Zealand",
-            publishedDate: "2023-09-01"
-          },
-          size: new BookSize({
-            closed: { width: 600, height: 900, diagonal:0 },
-            opened: { width: 1200, height: 900, diagonal:0 }
-          }),
-          thumbnails: {
-            spine: "resources/cover.webp",
-            small: "resources/cover.webp",
-            medium: "resources/cover.webp",
-            cover: {
-              front: "resources/cover.webp",
-              back: "resources/cover.webp",
-            }
-          },
-        },
-        {
-          id: "book3",
-          status: BookStatus.Close,
-          title: "Book 3",
-          type: BookType.Magazine,
-          author: "Shinkee",
-          publication: {
-            name: "Magzog",
-            location: "Auckland in New Zealand",
-            publishedDate: "2024-09-01"
-          },
-          size: new BookSize({
-            closed: { width: 600, height: 900, diagonal:0 },
-            opened: { width: 1200, height: 900, diagonal:0 }
-          }),
-          thumbnails: {
-            spine: "resources/cover.webp",
-            small: "resources/cover.webp",
-            medium: "resources/cover.webp",
-            cover: {
-              front: "resources/cover.webp",
-              back: "resources/cover.webp",
-            }
-          },
-        },
-        {
-          id: "book4",
-          status: BookStatus.Close,
-          title: "Book 4",
-          type: BookType.Magazine,
-          author: "Shinkee",
-          publication: {
-            name: "Magzog",
-            location: "Auckland in New Zealand",
-            publishedDate: "2025-09-01"
-          },
-          size: new BookSize({
-            closed: { width: 600, height: 900, diagonal:0 },
-            opened: { width: 1200, height: 900, diagonal:0 }
-          }),
-          thumbnails: {
-            spine: "resources/cover.webp",
-            small: "resources/cover.webp",
-            medium: "resources/cover.webp",
-            cover: {
-              front: "resources/cover.webp",
-              back: "resources/cover.webp",
-            }
-          },
-        },
-        {
-          id: "book5",
-          status: BookStatus.Close,
-          title: "Book 5",
-          type: BookType.Magazine,
-          author: "Shinkee",
-          publication: {
-            name: "Magzog",
-            location: "Auckland in New Zealand",
-            publishedDate: "2026-09-01"
-          },
-          size: new BookSize({
-            closed: { width: 600, height: 900, diagonal:0 },
-            opened: { width: 1200, height: 900, diagonal:0 }
-          }),
-          thumbnails: {
-            spine: "resources/cover.webp",
-            small: "resources/cover.webp",
-            medium: "resources/cover.webp",
-            cover: {
-              front: "resources/cover.webp",
-              back: "resources/cover.webp",
-            }
-          },
-        },
+        }
       ];
   
       bookSamplesLoaded.forEach((bookSample) => {
