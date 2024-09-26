@@ -124,19 +124,26 @@ export class Page implements IPageData {
       //
       else {
         // Shadow
-        const shadowDiv = document.createElement('div');
-        shadowDiv.classList.add('shadow');
+        const svgNS = "http://www.w3.org/2000/svg";
         const shadow6 = document.createElement('div');
         shadow6.classList.add('shadow6');
-        const svgNS = "http://www.w3.org/2000/svg";
+        const shadow6Svg = document.createElementNS(svgNS, 'svg');
+        shadow6Svg.classList.add('shadow6-svg');
+        const shadow6Shape = document.createElementNS(svgNS, 'polygon');
+        shadow6Shape.classList.add('shape');
+        shadow6Shape.setAttribute('points', '0,0');
+        shadow6Shape.setAttribute('fill', 'white');
+        shadow6Svg.appendChild(shadow6Shape);
+        shadow6.appendChild(shadow6Svg);
+
+        const shadowDiv = document.createElement('div');
+        shadowDiv.classList.add('shadow');
         const shadow3Svg = document.createElementNS(svgNS, 'svg');
         shadow3Svg.classList.add('shadow3-svg');
         const shadow3Shape = document.createElementNS(svgNS, 'polygon');
         shadow3Shape.classList.add('shape');
         shadow3Shape.setAttribute('points', '0,0');
         shadow3Shape.setAttribute('fill', 'url(#shadow3)');
-        
-        // shadowSvg.append(shadow3);
         shadow3Svg.appendChild(shadow3Shape);
         shadowDiv.appendChild(shadow3Svg);
         

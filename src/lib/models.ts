@@ -387,14 +387,19 @@ export class FlipData implements IFlipData {
     this.shadow = flipData.shadow;
   }
 
+  printPage1MaskShape(){
+    const pg = this.mask.page1;
+    return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
+  }
+
   printPage2MaskShape(){
     const pg = this.mask.page2;
     return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
   }
 
-  printPage1MaskShape(){
+  printShadow6(bookSize:ISize){
     const pg = this.mask.page1;
-    return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
+    return `0,0 ${bookSize.width},0 ${bookSize.width},${bookSize.height} 0,${bookSize.height}`;
   }
 }
 

@@ -194,7 +194,6 @@ export class Flipping extends PageWindow {
   ) {
 
     let currentValue = this.curAutoFlipWidth;
-    let targetGP:Point = new Point();
     const isFlipToMouse = (this.setting.autoFlip.type == AutoFlipType.MouseCursor) && !(this.eventZone & Zone.Center);
     const targetValue = isAutoFlippingFromCorner ? this.autoFlipWidth : 0;
     if(isFlipToMouse && !isAutoFlippingFromCorner){ mouseGP = this.activeCornerGP }

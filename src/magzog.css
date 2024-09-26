@@ -154,7 +154,7 @@ html, body {
   border:0px;
   width: var(--page-width);
   height: var(--page-height);
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 #bookViewer .book .page:nth-child(-n+3) { left:0; }
 #bookViewer .book .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
@@ -184,7 +184,8 @@ html, body {
   top:0;
   left:0;
   width: 100%;
-  height: 100%;;
+  height: 100%;
+  overflow: hidden;
 }
 
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(3)  > .content-container,
@@ -217,29 +218,46 @@ html, body {
 }
 
 /* Shadow */
-#bookViewer .book > .container > .page > .shadow6 {
+.shadow6 polygon { fill:url(#shadow6); }
+#bookViewer .book .page .shadow6 { display: none; }
+
+#bookViewer .book .page .shadow6 > .shadow6-svg { width:100%; height:100%; }
+#bookViewer.left-page-flipping .book > .container > .page:nth-child(3) > .shadow6 {
+  display: block;
   position: absolute;
   top:0;
   left: 0;
-  width: 0;
-  height: 0;
+  width: calc(2*var(--page-width));
+  height: 100%;
 }
+#bookViewer.right-page-flipping .book > .container > .page:nth-child(4) > .shadow6 {
+  display: block;
+  position: absolute;
+  top:0;
+  left: calc((-1)*var(--page-width));
+  width: calc(2*var(--page-width));
+  height: 100%;
+}
+#bookViewer.ready-to-open.left-page-flipping .book > .container > .page:nth-child(3) > .shadow6,
+#bookViewer.ready-to-open.right-page-flipping .book > .container > .page:nth-child(4) > .shadow6 { display: none; }
+
 
 #bookViewer .book > .container > .page > .content-container > .content,
 #bookViewer .book > .container > .page > .shadow {
   overflow: hidden;
-  border: 1px solid transparent;  
   box-sizing: border-box;
 }
+#bookViewer .book > .container > .page:nth-child(odd) > .content-container,
 #bookViewer .book > .container > .page:nth-child(odd) > .content-container > .content,
 #bookViewer .book > .container > .page:nth-child(odd) > .shadow { 
-  border-right-width: 0; 
-  border-radius: 20px 10% 10% 20px / 20px 0.7% .7% 20px; 
+  border-right-width: 0 !important; 
+  border-radius: 20px 0 0 20px; 
 }
+#bookViewer .book > .container > .page:nth-child(even) > .content-container,
 #bookViewer .book > .container > .page:nth-child(even) > .content-container > .content,
 #bookViewer .book > .container > .page:nth-child(even) > .shadow {
-  border-left-width: 0; 
-  border-radius: 10% 20px 20px 10% / 0.7% 20px 20px .7%; 
+  border-left-width: 0 !important; 
+  border-radius: 0 20px 20px 0; 
 }
 
 #bookViewer .book > .container > .page > .shadow > .shadow3-svg { 
@@ -251,23 +269,10 @@ html, body {
 
   display: none;
 }
-#bookViewer .book > .container > .page > .shadow > .shadow3-svg > .shape { 
-  stroke: white;
-  stroke-width: 1px;
-}
+
 #bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow > .shadow3-svg,
 #bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow > .shadow3-svg {  display: block; }
 
-#bookViewer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow6,
-#bookViewer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow6 {
-  top: var(--page-height);
-  left: var(--shadow-left);
-  width: var(--page-diagonal-length);
-  height: var(--page-diagonal-length);
-  transform-origin: calc(var(--shadow-origin-x) - var(--shadow-left)) 0px;
-  transform: rotate(var(--shadow-rotate));
-  /* overflow: hidden; */
-}
 #bookViewer .book > .container > .page:nth-child(odd) .shadow2{ 
   position: absolute;
   top: 0;
@@ -276,7 +281,6 @@ html, body {
   width: 7%;
   background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 210%);
   border-right: 1px solid rgba(71, 71, 71, 0.1);
-  border-radius: 0 100% 100% 0 / 0 1% 1% 0;
 }
 #bookViewer .book > .container > .page:nth-child(even) .shadow2{ 
   position: absolute;
@@ -286,8 +290,26 @@ html, body {
   width: 7%;
   background-image: -webkit-linear-gradient(right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 210%);
   border-left: 1px solid rgba(71, 71, 71, 0.1);
-  border-radius: 100% 0 0 100% / 1% 0 0 1%;
 }
+
+
+/****************
+  Setting
+ ****************/
+
+/* Page Border */
+#bookViewer .page.border > .content-container > .content {
+  border: 1px solid white;
+}
+#bookViewer .page.border > .shadow {
+  /* Must be transparent */
+  border: 1px solid transparent;
+}
+#bookViewer .page.border .shadow > .shadow3-svg > .shape { 
+  stroke: white;
+  stroke-width: 1px;
+}
+
 
 .page:nth-child(1) { z-index: 1; }
 .page:nth-child(2) { z-index: 2; }

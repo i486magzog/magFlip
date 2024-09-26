@@ -102,13 +102,22 @@ export class BookViewer extends Flipping {
    */
   get isLeftPageFlipping(){ return this.eventZone & Zone.Left; };
   /**
+   * Returns the instance of Page with sequence of active page.
+   * @param seq 
+   */
+  private getActivePage(seq:number):Page|undefined { return this.isLeftPageFlipping ? this.windows[3-seq].page : this.windows[2+seq].page; }
+  /**
    * Returns the instance of Page for page 2.
    */
-  private get page2():Page|undefined { return this.isLeftPageFlipping ? this.windows[1].page : this.windows[4].page; }
+  private get page2():Page|undefined { return this.getActivePage(2); }
+  /**
+   * Returns the element of the page 1.
+   */
+  private get page1El():HTMLElement|undefined { return this.getActivePage(1)?.element; }
   /**
    * Returns the element of the page 2.
    */
-  private get page2El():HTMLElement|undefined { return this.page2?.element; }
+  private get page2El():HTMLElement|undefined { return this.getActivePage(2)?.element; }
 
   constructor(bookManager:BookManager, viewerId?:string) {
     super();
@@ -212,10 +221,12 @@ export class BookViewer extends Flipping {
       // SVG 네임스페이스
       const svgNS = "http://www.w3.org/2000/svg";
 
-      const mask1Svg = document.createElementNS(svgNS, 'svg');
-      mask1Svg.setAttribute('width', '0');
-      mask1Svg.setAttribute('height', '0');
-      const mask1SvgDefs = document.createElementNS(svgNS, 'defs');
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('width', '0');
+      svg.setAttribute('height', '0');
+      const defs = document.createElementNS(svgNS, 'defs');
+      svg.appendChild(defs);
+      
       const mask1 = document.createElementNS(svgNS, 'mask');
       mask1.setAttribute('id', 'mask1');
       const mask1Rect = document.createElementNS(svgNS, 'rect');
@@ -231,11 +242,9 @@ export class BookViewer extends Flipping {
       mask1Polygon.setAttribute('fill', 'black');
       mask1Polygon.setAttribute('stroke', 'black');
       mask1Polygon.setAttribute('stroke-width', '1');
+      mask1.appendChild(mask1Rect);
+      mask1.appendChild(mask1Polygon);
 
-      const mask2Svg = document.createElementNS(svgNS, 'svg');
-      mask2Svg.setAttribute('width', '0');
-      mask2Svg.setAttribute('height', '0');
-      const mask2SvgDefs = document.createElementNS(svgNS, 'defs');
       const mask2 = document.createElementNS(svgNS, 'mask');
       mask2.setAttribute('id', 'mask2');
       const mask2Rect = document.createElementNS(svgNS, 'rect');
@@ -248,35 +257,35 @@ export class BookViewer extends Flipping {
       mask2Polygon.setAttribute('id', 'mask2-shape');
       mask2Polygon.setAttribute('points', '0,0');
       mask2Polygon.setAttribute('fill', 'white');
-
-      // 요소들을 트리 구조로 연결
-      mask1.appendChild(mask1Rect);
-      mask1.appendChild(mask1Polygon);
-      mask1SvgDefs.appendChild(mask1);
-      mask1Svg.appendChild(mask1SvgDefs);
-
       mask2.appendChild(mask2Rect);
       mask2.appendChild(mask2Polygon);
-      mask2SvgDefs.appendChild(mask2);
-      mask2Svg.appendChild(mask2SvgDefs);
 
       // Shadow3
-      const shadow3Svg = document.createElementNS(svgNS, 'svg');
-      shadow3Svg.setAttribute('width', '0');
-      shadow3Svg.setAttribute('height', '0');
       const shadow3 = document.createElementNS(svgNS, 'linearGradient');
       shadow3.id ='shadow3';
+      // shadow3.setAttribute('gradientUnits','userSpaceOnUse');
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow3Svg.appendChild(shadow3);
 
+      // Shadow6
+      const shadow6 = document.createElementNS(svgNS, 'linearGradient');
+      shadow6.id ='shadow6';
+      shadow6.setAttribute('gradientUnits','userSpaceOnUse');
+      shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+      shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+      shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+      // shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+      // shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
 
-      viewerEl.appendChild(mask1Svg);
-      viewerEl.appendChild(mask2Svg);
-      viewerEl.appendChild(shadow3Svg);
+      //      
+      defs.appendChild(mask1);
+      defs.appendChild(mask2);
+      defs.appendChild(shadow3);
+      defs.appendChild(shadow6);
+      viewerEl.appendChild(svg);
       document.body.appendChild(viewerEl);
       return { 
         bookContainerEl: bookContainer, 
@@ -504,26 +513,33 @@ export class BookViewer extends Flipping {
     }
   }
 
-  private flipPage(page2El:HTMLElement, page1Mask:SVGPolygonElement, page2Mask:SVGPolygonElement, shadowRect:HTMLElement|null, shadowShape:SVGPolygonElement|null, mouseGP:Point, pageWH:ISize){
+  private flipPage(page2El:HTMLElement, page1Mask:SVGPolygonElement, page2Mask:SVGPolygonElement, shadow3Shape:SVGPolygonElement|null, shadow6Shape:SVGPolygonElement|null, mouseGP:Point, pageWH:ISize){
     const flipData = this.flip(mouseGP, pageWH, this.isSpreadOpen);
     const isLeftPageActive = this.isLeftPageFlipping;
     // Mask
     page1Mask.setAttribute('points', flipData.printPage1MaskShape() );
     page2Mask.setAttribute('points', flipData.printPage2MaskShape() );
-    shadowShape?.setAttribute('points', flipData.printPage2MaskShape() );
+    shadow3Shape?.setAttribute('points', flipData.printPage2MaskShape() );
+    shadow6Shape?.setAttribute('points', flipData.printShadow6(this.book!.size.opened) );
     //
     // Shadow
     //
     // The stop shadow becomes increasingly transparent 
     // from one-third of the way toward the closing corner as it gets closer to the corner.
     let opacityScale = flipData.shadow.closingDistance/(pageWH.width/3);
-    // Shadow Rect
-    const shadowOrigin = flipData.shadow.rect.origin;
     const cssVar = document.documentElement.style;
-    const alpa = flipData.shadow.rect.rotate;
-    cssVar.setProperty('--shadow-origin-x', `${shadowOrigin.x}px`)
-    cssVar.setProperty('--shadow-origin-y', `${shadowOrigin.y}px`)
-    cssVar.setProperty('--shadow-rotate', `${alpa}rad`)
+    const f = flipData.mask.page2.p1;
+    const g = flipData.mask.page2.p2;
+    const h = flipData.mask.page2.p3;
+    const k = flipData.mask.page1.p2;
+    const l = flipData.mask.page1.p3;
+    const c = flipData.c;
+    // Shadow6
+    // const shadowOrigin = flipData.shadow.rect.origin;
+    // const alpa = flipData.shadow.rect.rotate;
+    // cssVar.setProperty('--shadow-origin-x', `${shadowOrigin.x}px`)
+    // cssVar.setProperty('--shadow-origin-y', `${shadowOrigin.y}px`)
+    // cssVar.setProperty('--shadow-rotate', `${alpa}rad`)
     //
     // Shadow5
     //
@@ -534,17 +550,10 @@ export class BookViewer extends Flipping {
       ? defaultOpacity - tempValue*p2Rotate 
       : defaultOpacity + tempValue*(2*Math.PI - p2Rotate);
     cssVar.setProperty('--shadow5-opacity', `${opacity*opacityScale}`)
-    // console.log("op:", opacity, "ro: ", p2Rotate, "tv: ", tempValue, )
     //
     // Shadow3
     //
     const shadow3El = document.getElementById('shadow3') as SVGLinearGradientElement|null;
-    const f = flipData.mask.page2.p1;
-    const g = flipData.mask.page2.p2;
-    const h = flipData.mask.page2.p3;
-    const k = flipData.mask.page1.p2;
-    const l = flipData.mask.page1.p3;
-    const c = flipData.c;
     let x1, y1, x2, y2 = 100;
     const isTopOrCenterZone = (this.eventZone & Zone.Top) || (this.eventZone & Zone.Center);
     // Points are located on the gradient objectBoundingBox
@@ -604,14 +613,62 @@ export class BookViewer extends Flipping {
       stops[3].setAttribute('stop-color', `rgba(0, 0, 0, ${0.208*opacityScale})`);
       stops[4].setAttribute('offset', '100%');
       stops[4].setAttribute('stop-color', 'rgba(255, 255, 255, 0)');
-
-
-      // rgba(255, 255, 255, 0.45), 
-      // rgba(255, 255, 255, 0.15) 0.015px, 
-      // rgba(255, 255, 255, 0.45) 0.0825px, 
-      // rgba(0, 0, 0, 0.208) 0.2775px, 
-      // transparent 1.5px);
     }
+    //
+    // Shadow 6
+    //
+    const originP = new Point();
+    const endCorner = new Point();
+    const line = new Line(new Point(), new Point());
+
+    if(isLeftPageActive){
+      originP.x = pageWH.width*2;
+      endCorner.x = 0;
+      line.p1.x = k.x;
+      line.p1.y = k.y;
+      line.p2.x = l.x;
+      line.p2.y = l.y;
+    } else {
+      originP.x = 0;
+      endCorner.x = pageWH.width*2;
+      line.p1.x = pageWH.width+k.x;
+      line.p1.y = k.y;
+      line.p2.x = pageWH.width+l.x;
+      line.p2.y = l.y;
+    }
+
+    if(this.eventZone & Zone.Top){
+      originP.y = pageWH.height;
+      endCorner.y = 0;
+    } else {
+      originP.y = 0;
+      endCorner.y = pageWH.height;
+    }
+
+    p = MZMath.findPerpendicularFoot( line, originP );
+    const p2 = MZMath.findPerpendicularFoot( line, endCorner);
+    const diagonalL = MZMath.getLength(originP, endCorner);
+    const pLength = MZMath.getLength(p2, endCorner);
+    const offset2 = (1-flipData.shadow.closingDistance/diagonalL)*(pLength/diagonalL)*100;
+
+    const shadow6El = document.getElementById('shadow6') as SVGLinearGradientElement|null;
+    if(shadow6El){
+      shadow6El.setAttribute('x1', `${p.x}`);
+      shadow6El.setAttribute('y1', `${p.y}`);
+      shadow6El.setAttribute('x2', `${originP.x}`);
+      shadow6El.setAttribute('y2', `${originP.y}`);
+    }
+
+    const sh6stops = shadow6El?.querySelectorAll('stop');
+    if(sh6stops){
+      sh6stops[0].setAttribute('offset', '0%');
+      sh6stops[0].setAttribute('stop-color', `rgba(255, 255, 255, 0)`);
+      sh6stops[1].setAttribute('offset', '0%');
+      sh6stops[1].setAttribute('stop-color', `rgba(0, 0, 0, ${offset2/100})`);
+      sh6stops[2].setAttribute('offset', `${offset2}%`);
+      sh6stops[2].setAttribute('stop-color', `rgba(0, 0, 0, 0`);
+    }
+
     // Page 2
     cssVar.setProperty('--page2-top', `${flipData.page2.top}px`)
     cssVar.setProperty('--page2-left', `${flipData.page2.left}px`)
@@ -658,8 +715,8 @@ export class BookViewer extends Flipping {
     this.eventZone = param.zone;
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
-    const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
     const isCenter = this.eventZone & Zone.Center;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
@@ -674,8 +731,8 @@ export class BookViewer extends Flipping {
           page2El, 
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2,
-          shadowRect,
-          shadowShape,
+          shadow3Shape,
+          shadow6Shape,
           mouseGP, 
           pageWH
         );
@@ -701,8 +758,8 @@ export class BookViewer extends Flipping {
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
     if(!this.pageContainerRect){ return; }
 
-    const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
-    const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
 
     this.setViewerToFlip();
     this.setInitFlipping(param.zone, viewport, this.pageContainerRect)
@@ -710,8 +767,8 @@ export class BookViewer extends Flipping {
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
-      shadowRect,
-      shadowShape,
+      shadow3Shape,
+      shadow6Shape,
       viewport, 
       { width: page2El.offsetWidth, height: page2El.offsetHeight }
     );
@@ -730,8 +787,8 @@ export class BookViewer extends Flipping {
 
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
-    const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
 
@@ -739,8 +796,8 @@ export class BookViewer extends Flipping {
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
-      shadowRect,
-      shadowShape,
+      shadow3Shape,
+      shadow6Shape,
       viewport, 
       { width: page2El.offsetWidth, height: page2El.offsetHeight });
   }
@@ -756,8 +813,8 @@ export class BookViewer extends Flipping {
 
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
-    const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
 
@@ -770,8 +827,8 @@ export class BookViewer extends Flipping {
           page2El,
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2, 
-          shadowRect,
-          shadowShape,
+          shadow3Shape,
+          shadow6Shape,
           mouseGP, 
           pageWH
         );
@@ -803,8 +860,8 @@ export class BookViewer extends Flipping {
     if(dataToFlip.isSnappingBack){ this.eventStatus = EventStatus.SnappingBack; }
     else { this.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
 
-    const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
-    const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
 
     this.animateFlip(
       viewport, 
@@ -815,8 +872,8 @@ export class BookViewer extends Flipping {
           page2El, 
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2, 
-          shadowRect,
-          shadowShape,
+          shadow3Shape,
+          shadow6Shape,
           mouseGP, 
           pageWH
         );
@@ -846,15 +903,15 @@ export class BookViewer extends Flipping {
     const page2El = this.page2El;
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
 
-    const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
-    const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
 
     this.flipPage(
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
-      shadowRect,
-      shadowShape,
+      shadow3Shape,
+      shadow6Shape,
       viewport, 
       { width: page2El.offsetWidth, height: page2El.offsetHeight });
   }
