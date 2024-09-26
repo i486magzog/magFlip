@@ -1,9 +1,12 @@
-import { IBox, EventStatus, Gutter, IPageData, Point, Rect, Zone, IZoneEventParams, ISize, FlipData, PageType, DefaultSize, Line, AutoFlipType } from './models.js';
+import { EventStatus, IPageData, Zone, IZoneEventParams, PageType } from './models.js';
 import { Book } from './book.js'
 import { Page } from './page.js'
 import { BookManager } from './bookManager.js'
 import { Flipping } from './flipping.js'
 import { MZMath } from './mzMath.js';
+import { Gutter } from './gutter.js';
+import { Line, Point, Rect } from './shape.js';
+import { ISize } from './dimension.js';
 
 /**
  * This is an object type used to reference Elements related to the Viewer.
@@ -390,7 +393,7 @@ export class BookViewer extends Flipping {
     this.book = book;
     const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
     this.attachBook();
-    this.setViewer(openRightPageIndex);
+    this.setViewer();
     this.loadPages(newIndexRange);
     this.showPages(newIndexRange.start);
   }
@@ -481,7 +484,8 @@ export class BookViewer extends Flipping {
     });
   }
   /**
-   * 
+   * Sets the one of close/open states which has three states.
+   * This state represents that the book is ready to open from back.
    */
   private setReadyToOpenBackward(){ 
     this.isSpreadOpen = false;
@@ -511,9 +515,10 @@ export class BookViewer extends Flipping {
       bottom: bookRect.bottom
     });
   }
-
+  /**
+   * Reset shadow1 path data.
+   */
   private resetShadow1Paths(){
-    // if(this.isSpreadOpen){ return; }
     const path1Els = this.book?.element.querySelectorAll('.sh1-path1');
     const path2Els = this.book?.element.querySelectorAll('.sh1-path2');
     const pageW = this.book?.size.closed.width || 0;
@@ -521,15 +526,9 @@ export class BookViewer extends Flipping {
     path2Els?.forEach(path2El =>{ path2El.setAttribute('d', `M 0 0 C ${pageW/6} ${pageW/20}, ${pageW*2/15} ${pageW/20}, ${pageW*2/3} 0`); });
   }
   /**
-   * Sets the one of close/open states which has three states.
-   * This state represents that the book is ready to open from back.
-   */
-  private setReadyToOpenFromBack(){ this.bookViewerEl.classList.add("ready-to-open", "end"); }
-  /**
    * Set the viewer to work.
-   * @param openRightPageIndex The index of right page opened.
    */
-  private setViewer(openRightPageIndex:number){
+  private setViewer(){
     if(!this.book){ throw new Error("Book object does not exist."); }
     const { closed, opened } = this.book.size;
 
