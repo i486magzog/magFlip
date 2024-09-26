@@ -66,6 +66,10 @@ export class Flipping extends PageWindow {
    * The width for automatic flipping, initialized to 20.
    */
   autoFlipWidth = 20;
+  /**
+   * Returns and sets current mouse pointer global point.
+   */
+  curMouseGP:Point = new Point();
   /** 
    * Settings related to the flipping behavior.
    */
@@ -193,12 +197,8 @@ export class Flipping extends PageWindow {
     let targetGP:Point = new Point();
     const isFlipToMouse = (this.setting.autoFlip.type == AutoFlipType.MouseCursor) && !(this.eventZone & Zone.Center);
     const targetValue = isAutoFlippingFromCorner ? this.autoFlipWidth : 0;
-    if(isFlipToMouse){
-      if(!isAutoFlippingFromCorner){ mouseGP = this.activeCornerGP }
-    }
-    else {
-      if(currentValue == targetValue){ return onComplete(); }  
-    }
+    if(isFlipToMouse && !isAutoFlippingFromCorner){ mouseGP = this.activeCornerGP }
+    else if(currentValue == targetValue){ return onComplete(); }
 
     const startTime = performance.now();
     const duration:number = 200; // 2000ms
@@ -232,11 +232,17 @@ export class Flipping extends PageWindow {
     }
     const animationFrame = (currentTime:number) => {
       const eventStatus = this.eventStatus;
+
+      if(isFlipToMouse){
+        if(isAutoFlippingFromCorner){ endP = this.curMouseGP; }
+        else { startP = this.curMouseGP; }
+      }
+
       if( ( eventStatus != EventStatus.AutoFlipToCorner && eventStatus != EventStatus.AutoFlipFromCorner )
         || (isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipToCorner)
         || (!isAutoFlippingFromCorner && eventStatus == EventStatus.AutoFlipFromCorner))
       { 
-          return onComplete(); 
+        return onComplete(); 
       }
 
       const elapsed = (currentTime - startTime) / duration; // 0 ~ 1 사이 값
@@ -454,7 +460,7 @@ export class Flipping extends PageWindow {
     const k = { x: page3ActiveCorner.x + page2ActiveCorner.x - g.x, y: g.y }
     const l = { x: page3ActiveCorner.x + page2ActiveCorner.x - h.x, y: h.y }
     const m = { x: page3ActiveCorner.x, y: i.y }
-
+    
     return new FlipData({
       page2:{
         top: page2Top,

@@ -324,6 +324,7 @@ export class BookViewer extends Flipping {
    * Closes the book on the viewer.
    */
   closeViewer() { 
+    // TODO Save current book status.
     this.init();
     this.detachBook(); 
   }
@@ -346,6 +347,13 @@ export class BookViewer extends Flipping {
     }
   }
   /**
+   * Update dimension of the book viewer element.
+   */
+  updateDimension(){
+    if(this.curOpenLeftPageIndex > 0){ this.setSpreadOpen(); } 
+    else { this.setReadyToOpen(); }
+  }
+  /**
    * Shifts pages related the flip effect directly.
    * @param isFoward the direction of the flipping.
    */
@@ -355,8 +363,7 @@ export class BookViewer extends Flipping {
 
     // Global Var
     this.curOpenLeftPageIndex = isFoward ? this.curOpenLeftPageIndex + 2 : this.curOpenLeftPageIndex - 2;
-    if(this.curOpenLeftPageIndex > 0){ this.setSpreadOpen(); } 
-    else { this.setReadyToOpen(); }
+    this.updateDimension();
 
     if(isFoward){
       super.moveRight(newPage1, newPage2);
@@ -440,8 +447,7 @@ export class BookViewer extends Flipping {
     docStyle.setProperty('--page-height', `${closed.height}px`)
 
     // Closed
-    if(openRightPageIndex <= 0){ this.setReadyToOpen(); }
-    else if(openRightPageIndex > 0) { this.setSpreadOpen(); }
+    this.updateDimension();
 
     document.documentElement.style.setProperty('--page-diagonal-length', (closed.diagonal || 0) + 'px');
   }
@@ -654,7 +660,6 @@ export class BookViewer extends Flipping {
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
     const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
     const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-
     const msEvent = event as MouseEvent;
     const isCenter = this.eventZone & Zone.Center;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
@@ -718,6 +723,7 @@ export class BookViewer extends Flipping {
    * @returns 
    */
   zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
+    if(this.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
     if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
     if(this.eventZone & Zone.Center){ return; }
     this.eventZone = param.zone;
@@ -726,7 +732,6 @@ export class BookViewer extends Flipping {
     if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
     const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
     const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
 
@@ -832,6 +837,10 @@ export class BookViewer extends Flipping {
    * @returns 
    */
   documentMouseMove(event:Event){
+    const msEvent = event as MouseEvent;
+    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+    this.curMouseGP = viewport;
+
     if(!(this.eventStatus & EventStatus.Dragging)){ return; }
 
     const page2El = this.page2El;
@@ -839,9 +848,6 @@ export class BookViewer extends Flipping {
 
     const shadowRect = page2El.querySelector('div.shadow6') as HTMLElement | null;
     const shadowShape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
 
     this.flipPage(
       page2El, 
@@ -871,5 +877,6 @@ export class BookViewer extends Flipping {
     })
     document.addEventListener('mouseup', this.documentMouseUp.bind(this));
     document.addEventListener('mousemove', this.documentMouseMove.bind(this));
+    window.addEventListener('resize', () => { this.updateDimension(); });
   }
 }
