@@ -1,7 +1,7 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType } from "./models.js";
-import { BookEl } from "./bookEl.js";
-import { Page } from "./page.js";
-import { BookSize, ISize, SizeExt } from "./dimension.js";
+import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType } from "./models";
+import { BookEl } from "./bookEl";
+import { Page } from "./page";
+import { BookSize, ISize, SizeExt } from "./dimension";
 
 /**
  * Book class

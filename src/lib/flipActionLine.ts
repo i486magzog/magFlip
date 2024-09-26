@@ -1,4 +1,4 @@
-import { Point } from "./shape.js";
+import { Point } from "./shape";
 
 export class FlipActionLine {
   private _leftP:Point;

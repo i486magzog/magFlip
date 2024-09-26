@@ -1,4 +1,4 @@
-import { BookManager } from './lib/bookManager.js';
+import { BookManager } from './lib/bookManager';
 
 document.addEventListener('DOMContentLoaded', function () {
   console.log('DOM fully loaded and parsed');

@@ -1,5 +1,5 @@
-import { ISize } from "./dimension.js";
-import { DefaultSize, IPageData, PageType, IEventHandlers } from "./models.js";
+import { ISize } from "./dimension";
+import { DefaultSize, IPageData, PageType, IEventHandlers } from "./models";
 /**
  * Page class
  */

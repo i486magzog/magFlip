@@ -1,6 +1,6 @@
-import './models.js'
-import { Book } from './book.js'
-import { BookManager } from './bookManager.js'
+// import './models'
+import { Book } from './book'
+import { BookManager } from './bookManager'
 
 interface IBookOnShelf {
   book: Book; 

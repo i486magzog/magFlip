@@ -1,4 +1,4 @@
-import { ISize } from "./dimension.js";
+import { ISize } from "./dimension";
 
 /**
  * Book element management class

@@ -1,12 +1,12 @@
-import { MZMath } from './mzMath.js';
-import { AutoFlipType, EventStatus, Zone } from './models.js';
-import { PageWindow } from './pageWindow.js';
-import { FlipDiagonals } from './flipDiagonals.js';
-import { Point, Rect } from './shape.js';
-import { Gutter } from './gutter.js';
-import { FlipActionLine } from './flipActionLine.js';
-import { ISize } from './dimension.js';
-import { FlipData } from './flipData.js';
+import { MZMath } from './mzMath';
+import { AutoFlipType, EventStatus, Zone } from './models';
+import { PageWindow } from './pageWindow';
+import { FlipDiagonals } from './flipDiagonals';
+import { Point, Rect } from './shape';
+import { Gutter } from './gutter';
+import { FlipActionLine } from './flipActionLine';
+import { ISize } from './dimension';
+import { FlipData } from './flipData';
 /**
  * Flipping class
  */

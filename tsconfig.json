@@ -1,15 +1,21 @@
 {
-    "compilerOptions": {
-        "module": "es6",
-        // "target": "es5",
-        // "lib": ["dom", "dom.iterable", "es2015"],
-        "target": "es5", // "ES2015",
-        "lib": ["dom", "dom.iterable", "esnext"],
+  "compilerOptions": {
+    "module": "es6",
+    // "target": "es5",
+    // "lib": ["dom", "dom.iterable", "es2015"],
+    "target": "ES6", //"es5", // "ES2015",
+    "lib": ["dom", "dom.iterable", "esnext"],
 
-        "outDir": "./dist",
-        "strict": true,
-        "esModuleInterop": true,
-        // "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    // "declaration": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@lib/*": ["src/lib/*"]
     },
-    "include": ["./src/**/*.ts"]
+  },
+  "include": ["./src/**/*"]
 }

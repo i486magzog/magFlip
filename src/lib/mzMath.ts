@@ -1,4 +1,4 @@
-import { Line, Point, Rect } from "./shape.js";
+import { Line, Point, Rect } from "./shape";
 
 /**
  * This is Magzog Math object that contains math util-methods.

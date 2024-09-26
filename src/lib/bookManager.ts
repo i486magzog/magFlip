@@ -1,8 +1,8 @@
-import { IBookData, BookStatus, BookType } from './models.js';
-import { BookShelf } from './bookShelf.js';
-import { BookViewer } from './bookViewer.js';
-import { Book } from './book.js';
-import { BookSize } from './dimension.js';
+import { IBookData, BookStatus, BookType } from './models';
+import { BookShelf } from './bookShelf';
+import { FlippingViewer } from './flippingViewer';
+import { Book } from './book';
+import { BookSize } from './dimension';
 /**
  * BookManager class
  */
@@ -14,7 +14,7 @@ export class BookManager {
   /**
    * Returns the BookViewer instance.
    */
-  bookViewer: BookViewer;
+  bookViewer: FlippingViewer;
   /**
    * 
    * @param bookShelfDocId 
@@ -22,7 +22,7 @@ export class BookManager {
    */
   constructor(bookShelfDocId?:string, bookViewerId?:string) {
     this.bookShelf = new BookShelf(this, bookShelfDocId);
-    this.bookViewer = new BookViewer(this, bookViewerId);
+    this.bookViewer = new FlippingViewer(this, bookViewerId);
   }
   /**
    * Gets a book holder's element with the book's id.

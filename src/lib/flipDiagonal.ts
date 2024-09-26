@@ -1,6 +1,6 @@
 
-import { MZMath } from './mzMath.js';
-import { Point } from './shape.js';
+import { MZMath } from './mzMath';
+import { Point } from './shape';
 
 export class FlipDiagonal {
     private _length: number = 0;

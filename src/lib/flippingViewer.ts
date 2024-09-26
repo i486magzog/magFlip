@@ -1,17 +1,17 @@
-import { EventStatus, IPageData, Zone, IZoneEventParams, PageType } from './models.js';
-import { Book } from './book.js'
-import { Page } from './page.js'
-import { BookManager } from './bookManager.js'
-import { Flipping } from './flipping.js'
-import { MZMath } from './mzMath.js';
-import { Gutter } from './gutter.js';
-import { Line, Point, Rect } from './shape.js';
-import { ISize } from './dimension.js';
+import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IViewer } from './models';
+import { Book } from './book'
+import { Page } from './page'
+import { BookManager } from './bookManager'
+import { Flipping } from './flipping'
+import { MZMath } from './mzMath';
+import { Gutter } from './gutter';
+import { Line, Point, Rect } from './shape';
+import { ISize } from './dimension';
 
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
-type ViewerElements = {
+type FlippingViewerElements = {
   bookViewerEl: HTMLElement,
   bookContainerEl: HTMLElement,
   zoneLT: HTMLElement,
@@ -29,12 +29,12 @@ type ViewerElements = {
  * Gutter:
  * 
  */
-export class BookViewer extends Flipping {
+export class FlippingViewer extends Flipping implements IViewer {
   /**
    * Book object.
    * This contains the most information of a book loaded to this viewer.
    */
-  book: Book | undefined;
+  private book: Book | undefined;
   /**
    * This is html document id of the book viewer.
    * It is set when creating a viewer instance or default value 'bookViewer' is set.
@@ -63,74 +63,74 @@ export class BookViewer extends Flipping {
   /**
    * Returns the element of the mouse event zone on the viewer's left top.
    */
-  readonly zoneLT: HTMLElement;
+  private readonly zoneLT: HTMLElement;
   /**
    * Returns the element of the mouse event zone on the viewer's left center.
    */
-  readonly zoneLC: HTMLElement;
+  private readonly zoneLC: HTMLElement;
   /**
    * Returns the element of the mouse event zone on the viewer's left bottom.
    */
-  readonly zoneLB: HTMLElement;
+  private readonly zoneLB: HTMLElement;
   /**
    * Returns the element of the mouse event zone on the viewer's right top.
    */
-  readonly zoneRT: HTMLElement;
+  private readonly zoneRT: HTMLElement;
   /**
    * Returns the element of the mouse event zone on the viewer's right center.
    */
-  readonly zoneRC: HTMLElement;
+  private readonly zoneRC: HTMLElement;
   /**
    * Returns the element of the mouse event zone on the viewer's right bottom.
    */
-  readonly zoneRB: HTMLElement;
+  private readonly zoneRB: HTMLElement;
   /**
    * Returns the mask1 shape element. The element is added to Page 1 for flip effect.
    */
-  readonly maskShapeOnPage1: SVGPolygonElement;
+  private readonly maskShapeOnPage1: SVGPolygonElement;
   /**
    * Returns the mask2 shape element. The element is added to Page 2 for flip effect.
    */
-  readonly maskShapeOnPage2: SVGPolygonElement;
+  private readonly maskShapeOnPage2: SVGPolygonElement;
   /**
    * Sets or retrieves the index of left page when book is open.
    */
-  curOpenLeftPageIndex: number = -1;
+  private curOpenLeftPageIndex: number = -1;
   /**
    * Sets or retrieves the index of left page when book is open.
    */
-  isSpreadOpen:boolean = false;
+  private isSpreadOpen:boolean = false;
   /**
    * Gets whether the page is flipping. (Includes auto-filp and draggring).
    */
-  get isFlipping(){ return ( this.eventStatus & EventStatus.AutoFlip
+  private get isFlipping(){ return ( this.eventStatus & EventStatus.AutoFlip
     || this.eventStatus & EventStatus.Flipping
     || this.eventStatus & EventStatus.Dragging ); 
   };
   /**
    * Gets whether the left page is flipping.
    */
-  get isLeftPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Left; };
+  private get isLeftPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Left; };
   /**
    * Gets whether the right page is flipping.
    */
-  get isRightPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Right; };
+  private get isRightPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Right; };
   /**
    * Gets whether the first page(index is 0) is Opening.
    */
-  get isFirstPageOpening(){ return this.isRightPageFlipping && this.getActivePage(1)?.index == 0; }
+  private get isFirstPageOpening(){ return this.isRightPageFlipping && this.getActivePage(1)?.index == 0; }
   /**
    * Gets whether the first page(index is 0) is closing.
    */
-  get isFirstPageClosing(){ return this.isLeftPageFlipping && this.getActivePage(2)?.index == 0; }
+  private get isFirstPageClosing(){ return this.isLeftPageFlipping && this.getActivePage(2)?.index == 0; }
   /**
    * Gets whether the last page is Opening.
    */
-  get isLastPageOpening(){ return this.isLeftPageFlipping && this.getActivePage(1)?.index == this.book?.lastPageIndex; }
+  private get isLastPageOpening(){ return this.isLeftPageFlipping && this.getActivePage(1)?.index == this.book?.lastPageIndex; }
   /**
    * Gets whether the last page is closing.
    */
-  get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.book?.lastPageIndex; }
+  private get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.book?.lastPageIndex; }
   /**
    * Returns the instance of Page with sequence of active page.
    * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
@@ -169,49 +169,22 @@ export class BookViewer extends Flipping {
   /**
    * Inits variables and properties when a new book opens.
    */
-  init(){ 
+  private init(){ 
     this.curOpenLeftPageIndex = -1;
   }
   /**
    * Creates the viewer related elements.
    * @returns ViewerElements
    */
-  createElements():ViewerElements {    
+  createElements():FlippingViewerElements {    
     if(!this.bookViewerEl){
       let viewerEl = document.getElementById(this.bookViewerDocId);
 
       if(viewerEl){ viewerEl.innerHTML = ""; } 
       else { viewerEl = document.createElement('div'); }
-      //
-      // <div id="bookViewer" class="hidden">
-      //   <div id="bookContainer">
-      //     <div id="mzZoneLT"></div>
-      //     <div id="mzZoneLC"></div>
-      //     <div id="mzZoneLB"></div>
-      //     <div id="mzZoneRT"></div>
-      //     <div id="mzZoneRC"></div>
-      //     <div id="mzZoneRB"></div>
-      //   </div>
-      //   <button id="btnCloseViewer">X</button>
-      // </div>
-      //
-      // <svg width="0" height="0">
-      //     <defs>
-      //         <mask id="mask1">
-      //             <rect x="0" y="0" width="100%" height="100%" fill="black"/>
-      //             <polygon id="mask1-shape" points="50,50 150,50 150,150 50,150" fill="white"/>
-      //         </mask>
-      //     </defs>
-      // </svg>
-      // <svg width="0" height="0">
-      //     <defs>
-      //         <mask id="mask2">
-      //             <rect x="0" y="0" width="100%" height="100%" fill="black"/>
-      //             <polygon id="mask2-shape" points="0,0" fill="white"/>
-      //         </mask>
-      //     </defs>
-      // </svg>
-      // SVG 네임스페이스
+
+      viewerEl.innerHTML = "";
+
       const svgNS = "http://www.w3.org/2000/svg";
       viewerEl.id = this.bookViewerDocId;
       viewerEl.classList.add("hidden");
@@ -410,7 +383,7 @@ export class BookViewer extends Flipping {
    * @param isForward 
    * @returns 
    */
-  getNewPages(isForward:boolean){
+  private getNewPages(isForward:boolean){
     // TODO: Exception
     if(!this.book){ throw new Error("No book loaded.") }
     const book = this.book;
@@ -426,7 +399,7 @@ export class BookViewer extends Flipping {
   /**
    * Update dimension of the book viewer element.
    */
-  updateDimension(){
+  private updateDimension(){
     if(this.curOpenLeftPageIndex < 0){ this.setReadyToOpenForward(); } 
     else if(this.curOpenLeftPageIndex >= this.book!.lastPageIndex){ this.setReadyToOpenBackward(); }
     else { this.setSpreadOpen(); }
@@ -435,7 +408,7 @@ export class BookViewer extends Flipping {
    * Shifts pages related the flip effect directly.
    * @param isFoward the direction of the flipping.
    */
-  shiftPages(isFoward:boolean){
+  private shiftPages(isFoward:boolean){
     const { newPage1, newPage2, removedPage1, removedPage2 } = this.getNewPages(isFoward);
     const book = this.book;
 
@@ -810,20 +783,20 @@ export class BookViewer extends Flipping {
   /**
    * Sets the status of viewer as Auto Flipping.
    */
-  setViewerToAutoFlip(){
+  private setViewerToAutoFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
     this.bookViewerEl.classList.add(`${className}-page-flipping`);
   }
   /**
    * Unsets the status of viewer as Auto Flipping.
    */
-  unsetViewerToAutoFlip(){
+  private unsetViewerToAutoFlip(){
     this.bookViewerEl.classList.remove('left-page-flipping', 'right-page-flipping');
   }
   /**
    * Sets the status of viewer as the status Flipping by dragging.
    */
-  setViewerToFlip(){
+  private setViewerToFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
     this.bookViewerEl.classList.add(`${className}-page-flipping`, "noselect");
     this.curAutoFlipWidth = 0;
@@ -831,7 +804,7 @@ export class BookViewer extends Flipping {
   /**
    * Unsets the status of viewer as the status Flipping by dragging.
    */
-  unsetViewerToFlip(){
+  private unsetViewerToFlip(){
     this.bookViewerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`);
   }
   /**
@@ -840,7 +813,7 @@ export class BookViewer extends Flipping {
    * @param param 
    * @returns 
    */
-  zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
+  private zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
     if(this.eventStatus & EventStatus.Flipping
       || this.eventStatus & EventStatus.Dragging){ return; }
     this.eventStatus = EventStatus.AutoFlipFromCorner;
@@ -881,7 +854,7 @@ export class BookViewer extends Flipping {
    * @param param 
    * @returns 
    */
-  zoneMouseDowned(event:MouseEvent, param:IZoneEventParams){
+  private zoneMouseDowned(event:MouseEvent, param:IZoneEventParams){
     if(this.eventStatus & EventStatus.Flipping){ return; }
     this.eventStatus = EventStatus.Dragging;
     this.eventZone = param.zone;
@@ -916,7 +889,7 @@ export class BookViewer extends Flipping {
    * @param param 
    * @returns 
    */
-  zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
+  private zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
     if(this.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
     if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
     if(this.eventZone & Zone.Center){ return; }
@@ -947,7 +920,7 @@ export class BookViewer extends Flipping {
    * @param param 
    * @returns 
    */
-  zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
+  private zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
     if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
     this.eventStatus = EventStatus.AutoFlipToCorner;
 
@@ -990,7 +963,7 @@ export class BookViewer extends Flipping {
    * @param param 
    * @returns 
    */
-  documentMouseUp(event:Event){
+  private documentMouseUp(event:Event){
     if(!(this.eventStatus & EventStatus.Dragging)){ return; }
     
     const page2El = this.activePage2El;
@@ -1038,7 +1011,7 @@ export class BookViewer extends Flipping {
    * @param param 
    * @returns 
    */
-  documentMouseMove(event:Event){
+  private documentMouseMove(event:Event){
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
     this.curMouseGP = viewport;
@@ -1065,7 +1038,7 @@ export class BookViewer extends Flipping {
   /**
    * Sets all events for viewer.
    */
-  addEventListeners(){ 
+  private addEventListeners(){ 
     [
       { zoneEl: this.zoneLT, zone: Zone.LT },
       { zoneEl: this.zoneLC, zone: Zone.LC },

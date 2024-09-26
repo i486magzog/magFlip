@@ -1,4 +1,4 @@
-import { IPoint } from "./models.js";
+import { IPoint } from "./models";
 
 export interface ILine {
   p1:Point

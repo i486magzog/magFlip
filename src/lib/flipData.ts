@@ -1,5 +1,5 @@
-import { ISize } from "./dimension.js";
-import { Point } from "./shape.js";
+import { ISize } from "./dimension";
+import { Point } from "./shape";
 
 export interface IFlipData {
   alpa: number;

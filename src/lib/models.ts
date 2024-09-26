@@ -1,4 +1,7 @@
-import { IBookSize, ISize } from "./dimension.js";
+import { Book } from "./book";
+import { BookManager } from "./bookManager";
+import { IBookSize, ISize } from "./dimension";
+import { Rect } from "./shape";
 
 
 export interface IPublication {
@@ -120,4 +123,15 @@ export interface IPageData {
   number: number | undefined;  // displayed number of the page in the book
   ignore: boolean;    // ignore the page when displaying the book
   content: any;
+}
+
+export interface IViewer {
+  readonly bookManager: BookManager;
+  readonly bookViewerDocId: string;
+  readonly bookViewerEl: HTMLElement;
+  readonly bookContainerEl: HTMLElement;
+  get pageContainerRect():Rect;
+  view(book:Book, openRightPageIndex?:number):void;
+  closeViewer():void;
+  createElements():void;
 }

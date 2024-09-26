@@ -1,5 +1,5 @@
-import { FlipDiagonal } from './flipDiagonal.js';
-import { Point, Rect } from './shape.js';
+import { FlipDiagonal } from './flipDiagonal';
+import { Point, Rect } from './shape';
 
 export class FlipDiagonals {
     area1:{

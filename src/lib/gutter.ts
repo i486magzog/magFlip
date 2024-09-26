@@ -1,4 +1,4 @@
-import { IRect, Rect } from "./shape.js";
+import { IRect, Rect } from "./shape";
 
 export class Gutter extends Rect{
   constructor(gutter?:IRect){
