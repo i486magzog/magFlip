@@ -546,7 +546,7 @@ export class BookViewer extends Flipping {
     const l = flipData.mask.page1.p3;
     const c = flipData.c;
     let x1, y1, x2, y2 = 100;
-    const isTopZone = this.eventZone & Zone.Top;
+    const isTopOrCenterZone = (this.eventZone & Zone.Top) || (this.eventZone & Zone.Center);
     // Points are located on the gradient objectBoundingBox
     let longLineLength = 1;
     let p:Point = new Point({x:.5,y:.5});
@@ -560,14 +560,14 @@ export class BookViewer extends Flipping {
         p = MZMath.findPerpendicularFoot( new Line( { x:k.x-l.x, y:0}, { x:0, y:k.x} ), { x:k.x, y:k.x} );
       } else {
         longLineLength = l.x;
-        p = MZMath.findPerpendicularFoot( new Line( { x:0, y:0}, { x:l.x-k.x, y:l.x} ), { x:l.x, y:isTopZone ? 0 : l.x} );
-        if(isTopZone){ y2 = 0 }
+        p = MZMath.findPerpendicularFoot( new Line( { x:0, y:0}, { x:l.x-k.x, y:l.x} ), { x:l.x, y:isTopOrCenterZone ? 0 : l.x} );
+        if(isTopOrCenterZone){ y2 = 0 }
       }
       x2 = 100;
     }
     else {
       // Shape is triangle and dragging point is top corner.
-      if(c < 0){ y2 = 0; }
+      if(c < 0){ y2 = 0; console.log("Top")}
       // Shape is triangle and dragging point is bottom corner.
       else if(f == g){  }
       else if(h.x < g.x){
@@ -575,8 +575,8 @@ export class BookViewer extends Flipping {
         p = MZMath.findPerpendicularFoot( new Line( { x:h.x, y:0}, { x:g.x, y:g.x} ), { x:0, y:g.x} );
       } else {
         longLineLength = h.x;
-        p = MZMath.findPerpendicularFoot( new Line( { x:h.x, y:0}, { x:g.x, y:h.x} ), { x:0, y: isTopZone ? 0 : h.x} );
-        if(isTopZone){ y2 = 0 }
+        p = MZMath.findPerpendicularFoot( new Line( { x:h.x, y:0}, { x:g.x, y:h.x} ), { x:0, y: isTopOrCenterZone ? 0 : h.x} );
+        if(isTopOrCenterZone){ y2 = 0 }
       }
       x2 = 0;
     }
