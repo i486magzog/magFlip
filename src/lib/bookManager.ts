@@ -57,6 +57,7 @@ export class BookManager {
             closed: { width: 600, height: 900, diagonal:0 },
             opened: { width: 1200, height: 900, diagonal:0 }
           }),
+          lastPageIndex:5,
           thumbnails: {
             spine: "resources/cover.jpg",
             small: "resources/cover.jpg",
@@ -94,6 +95,7 @@ export class BookManager {
           closed: { width: 600, height: 900, diagonal:0 },
           opened: { width: 1200, height: 900, diagonal:0 }
         }),
+        lastPageIndex:5,
         thumbnails: {
           spine: "resources/cover.webp",
           small: "resources/cover.webp",

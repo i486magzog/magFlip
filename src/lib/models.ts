@@ -72,13 +72,16 @@ export enum BookStatus {
 
 export enum EventStatus {
   None = 0b0000_0000,
+  
   AutoFlip = 0b0000_1000,
   AutoFlipFromCorner = 0b0000_1100,
   AutoFlipToCorner = 0b0000_1010,
+  
   Flipping = 0b1000_0000,
   SnappingBack = 0b1001_0000,
   FlippingForward = 0b1010_0000,
   FlippingBackward = 0b1100_0000,
+  
   Dragging = 0b1000_0000_0000,
 }
 
@@ -417,6 +420,7 @@ export interface IBookData {
   author: string;
   type: BookType;
   publication?: IPublication;
+  lastPageIndex: number;
   /**
    * The book size when it is close.
    */

@@ -125,28 +125,43 @@ export class Page implements IPageData {
       else {
         // Shadow
         const svgNS = "http://www.w3.org/2000/svg";
-        const shadow6 = document.createElement('div');
-        shadow6.classList.add('shadow6');
-        const shadow6Svg = document.createElementNS(svgNS, 'svg');
-        shadow6Svg.classList.add('shadow6-svg');
-        const shadow6Shape = document.createElementNS(svgNS, 'polygon');
-        shadow6Shape.classList.add('shape');
-        shadow6Shape.setAttribute('points', '0,0');
-        shadow6Shape.setAttribute('fill', 'white');
-        shadow6Svg.appendChild(shadow6Shape);
-        shadow6.appendChild(shadow6Svg);
-
-        const shadowDiv = document.createElement('div');
-        shadowDiv.classList.add('shadow');
-        const shadow3Svg = document.createElementNS(svgNS, 'svg');
-        shadow3Svg.classList.add('shadow3-svg');
-        const shadow3Shape = document.createElementNS(svgNS, 'polygon');
-        shadow3Shape.classList.add('shape');
-        shadow3Shape.setAttribute('points', '0,0');
-        shadow3Shape.setAttribute('fill', 'url(#shadow3)');
-        shadow3Svg.appendChild(shadow3Shape);
-        shadowDiv.appendChild(shadow3Svg);
         
+        // Shadow 1
+        const sh1Svg = document.createElementNS(svgNS, 'svg');
+        sh1Svg.classList.add("shadow1");
+        const sh1Path = document.createElementNS(svgNS, 'path');
+        sh1Path.setAttribute('class', 'sh1-path1');
+        sh1Path.setAttribute('d', `M ${this.size.width/3} 0 C ${this.size.width*13/15} ${this.size.width/20}, ${this.size.width*5/6} ${this.size.width/20}, ${this.size.width} 0`);
+        const sh2Path = document.createElementNS(svgNS, 'path');
+        sh2Path.setAttribute('class', 'sh1-path2');
+        sh2Path.setAttribute('d', `M 0 0 C ${this.size.width/6} ${this.size.width/20}, ${this.size.width*2/15} ${this.size.width/20}, ${this.size.width*2/3} 0`);
+        sh1Svg.appendChild(sh1Path); 
+        sh1Svg.appendChild(sh2Path); 
+
+        // const shadow6 = document.createElement('div');
+        // shadow6.classList.add('shadow6');
+        const sh6Svg = document.createElementNS(svgNS, 'svg');
+        sh6Svg.classList.add('shadow6');
+        const sh6Shape = document.createElementNS(svgNS, 'polygon');
+        sh6Shape.classList.add('shape');
+        sh6Shape.setAttribute('points', '0,0');
+        sh6Shape.setAttribute('fill', 'white');
+        sh6Svg.appendChild(sh6Shape);
+        // shadow6.appendChild(sh6Svg);
+
+        // Shadow 3
+        // const shadowDiv = document.createElement('div');
+        // shadowDiv.classList.add('shadow');
+        const sh3Svg = document.createElementNS(svgNS, 'svg');
+        sh3Svg.classList.add('shadow3');
+        const sh3Shape = document.createElementNS(svgNS, 'polygon');
+        sh3Shape.classList.add('shape');
+        sh3Shape.setAttribute('points', '0,0');
+        sh3Shape.setAttribute('fill', 'url(#shadow3)');
+        sh3Svg.appendChild(sh3Shape);
+        // shadowDiv.appendChild(shadow3Svg);
+        
+        // Shadow 2
         const gutterShadow = document.createElement('div');
         gutterShadow.className = "shadow2";
         const contentContainerEl = document.createElement('div');
@@ -161,8 +176,9 @@ export class Page implements IPageData {
         contentContainerEl.appendChild(contentEl)
         contentContainerEl.appendChild(gutterShadow)
         pageEl.appendChild(contentContainerEl);
-        pageEl.appendChild(shadow6);
-        pageEl.appendChild(shadowDiv);
+        pageEl.appendChild(sh6Svg);
+        pageEl.appendChild(sh3Svg);
+        pageEl.appendChild(sh1Svg)
       }
 
       return pageEl;

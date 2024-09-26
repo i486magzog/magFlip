@@ -35,6 +35,10 @@ export class Book extends BookEl implements IBookData {
    */
   readonly size:BookSize;
   /**
+   * Return the last page index.
+   */
+  readonly lastPageIndex: number;
+  /**
    * Returns and sets pages that the book contains
    */
   private pages: { [n:number|string]: Page };
@@ -65,6 +69,7 @@ export class Book extends BookEl implements IBookData {
       closed: new SizeExt(DefaultSize.bookWidth, DefaultSize.bookHeight),
       opened: new SizeExt(DefaultSize.bookWidth*2, DefaultSize.bookHeight)
     };
+    this.lastPageIndex = book.lastPageIndex;
     this.pages = {};
     this.thumbnails = book.thumbnails || {
       spine: "resources/default_spine.webp",
@@ -134,7 +139,7 @@ export class Book extends BookEl implements IBookData {
         index: i,
         number: undefined,
         ignore: false,
-        content: "",
+        content: ""
       },);
     }
 
@@ -167,6 +172,15 @@ export class Book extends BookEl implements IBookData {
    * @returns 
    */
   getPage(index: number){ return this.pages[index]; }
+  /**
+   * Returns the pages object.
+   * @returns 
+   */
+  getPages(){ return this.pages; }
+  /**
+   * Return the pages array length.
+   */
+  getPageCnt(){ return Object.keys(this.pages).length; }
   /**
    * Returns the page element with the page index.
    * @param index 

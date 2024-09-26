@@ -98,26 +98,53 @@ export class BookViewer extends Flipping {
    */
   isSpreadOpen:boolean = false;
   /**
-   * Gets whether the left page is flipping or the right page is doing.
+   * Gets whether the page is flipping. (Includes auto-filp and draggring).
    */
-  get isLeftPageFlipping(){ return this.eventZone & Zone.Left; };
+  get isFlipping(){ return ( this.eventStatus & EventStatus.AutoFlip
+    || this.eventStatus & EventStatus.Flipping
+    || this.eventStatus & EventStatus.Dragging ); 
+  };
+  /**
+   * Gets whether the left page is flipping.
+   */
+  get isLeftPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Left; };
+  /**
+   * Gets whether the right page is flipping.
+   */
+  get isRightPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Right; };
+  /**
+   * Gets whether the first page(index is 0) is Opening.
+   */
+  get isFirstPageOpening(){ return this.isRightPageFlipping && this.getActivePage(1)?.index == 0; }
+  /**
+   * Gets whether the first page(index is 0) is closing.
+   */
+  get isFirstPageClosing(){ return this.isLeftPageFlipping && this.getActivePage(2)?.index == 0; }
+  /**
+   * Gets whether the last page is Opening.
+   */
+  get isLastPageOpening(){ return this.isLeftPageFlipping && this.getActivePage(1)?.index == this.book?.lastPageIndex; }
+  /**
+   * Gets whether the last page is closing.
+   */
+  get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.book?.lastPageIndex; }
   /**
    * Returns the instance of Page with sequence of active page.
-   * @param seq 
+   * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
    */
-  private getActivePage(seq:number):Page|undefined { return this.isLeftPageFlipping ? this.windows[3-seq].page : this.windows[2+seq].page; }
+  private getActivePage(activePageNum:number):Page|undefined { return this.isLeftPageFlipping ? this.windows[3-activePageNum].page : this.windows[2+activePageNum].page; }
   /**
-   * Returns the instance of Page for page 2.
+   * Returns the instance of Page for active page 2.
    */
-  private get page2():Page|undefined { return this.getActivePage(2); }
+  private get activePage2():Page|undefined { return this.getActivePage(2); }
   /**
-   * Returns the element of the page 1.
+   * Returns the element of the active page 1.
    */
-  private get page1El():HTMLElement|undefined { return this.getActivePage(1)?.element; }
+  private get activePage1El():HTMLElement|undefined { return this.getActivePage(1)?.element; }
   /**
-   * Returns the element of the page 2.
+   * Returns the element of the active page 2.
    */
-  private get page2El():HTMLElement|undefined { return this.getActivePage(2)?.element; }
+  private get activePage2El():HTMLElement|undefined { return this.getActivePage(2)?.element; }
 
   constructor(bookManager:BookManager, viewerId?:string) {
     super();
@@ -181,11 +208,13 @@ export class BookViewer extends Flipping {
       //         </mask>
       //     </defs>
       // </svg>
+      // SVG 네임스페이스
+      const svgNS = "http://www.w3.org/2000/svg";
       viewerEl.id = this.bookViewerDocId;
       viewerEl.classList.add("hidden");
+      // Book Container
       const bookContainer = document.createElement('div');
       bookContainer.id = "bookContainer";
-      
       const zoneLT = document.createElement('div');
       const zoneLC = document.createElement('div');
       const zoneLB = document.createElement('div');
@@ -210,17 +239,23 @@ export class BookViewer extends Flipping {
       bookContainer.appendChild(zoneRT);
       bookContainer.appendChild(zoneRC);
       bookContainer.appendChild(zoneRB);
-
+      // // Shadow 1
+      // const shadow1Svg = document.createElementNS(svgNS, 'svg');
+      // shadow1Svg.classList.add("shadow1");
+      // const sh1Path = document.createElementNS(svgNS, 'path');
+      // sh1Path.setAttribute('class', 'sh1-path1');
+      // sh1Path.setAttribute('d', 'M 0 0 C 520 20, 540 20, 600 0');
+      // shadow1Svg.appendChild(sh1Path);
+      // bookContainer.appendChild(shadow1Svg);
+      
       viewerEl.appendChild(bookContainer);
+
       const btnClose = document.createElement('button');
       btnClose.id = "btnCloseViewer";
       btnClose.innerHTML = "X";
       btnClose.addEventListener('click', (event: Event) => { this.closeViewer(); });
       viewerEl.appendChild(btnClose);
       
-      // SVG 네임스페이스
-      const svgNS = "http://www.w3.org/2000/svg";
-
       const svg = document.createElementNS(svgNS, 'svg');
       svg.setAttribute('width', '0');
       svg.setAttribute('height', '0');
@@ -259,6 +294,36 @@ export class BookViewer extends Flipping {
       mask2Polygon.setAttribute('fill', 'white');
       mask2.appendChild(mask2Rect);
       mask2.appendChild(mask2Polygon);
+      
+      // Shadow1
+      const sh1Gradient = document.createElementNS(svgNS, 'linearGradient');
+      sh1Gradient.id ='shadow1';
+      sh1Gradient.setAttribute('x1', '50%');
+      sh1Gradient.setAttribute('y1', '0%');
+      sh1Gradient.setAttribute('x2', '50%');
+      sh1Gradient.setAttribute('y2', '100%');
+      // const sh1Stop1 = document.createElementNS(svgNS, 'stop');
+      const sh1Stop2 = document.createElementNS(svgNS, 'stop');
+      const sh1Stop3 = document.createElementNS(svgNS, 'stop');
+      // sh1Stop1.setAttribute('offset', '0%');
+      // sh1Stop1.setAttribute('stop-color', 'rgba(255,255,255,0.5)');
+      sh1Stop2.setAttribute('offset', '0%');
+      sh1Stop2.setAttribute('stop-color', 'rgba(0,0,0,0.8)');
+      sh1Stop3.setAttribute('offset', '100%');
+      sh1Stop3.setAttribute('stop-color', 'rgba(0,0,0,0.2)');
+      // sh1Gradient.appendChild(sh1Stop1);
+      sh1Gradient.appendChild(sh1Stop2);
+      sh1Gradient.appendChild(sh1Stop3);
+      const sh1Filter = document.createElementNS(svgNS, 'filter');
+      sh1Filter.id = "sh1BlurFilter";
+      sh1Filter.setAttribute('x', '0%');
+      sh1Filter.setAttribute('y', '0%');
+      sh1Filter.setAttribute('width', '100%');
+      sh1Filter.setAttribute('height', '200%');
+      const sh1Blur = document.createElementNS(svgNS, 'feGaussianBlur');
+      sh1Blur.setAttribute('in', 'SourceGraphic');
+      sh1Blur.setAttribute('stdDeviation', '3');
+      sh1Filter.appendChild(sh1Blur);
 
       // Shadow3
       const shadow3 = document.createElementNS(svgNS, 'linearGradient');
@@ -277,12 +342,12 @@ export class BookViewer extends Flipping {
       shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
       shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
-      // shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
-      // shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
 
       //      
       defs.appendChild(mask1);
       defs.appendChild(mask2);
+      defs.appendChild(sh1Gradient);
+      defs.appendChild(sh1Filter);
       defs.appendChild(shadow3);
       defs.appendChild(shadow6);
       viewerEl.appendChild(svg);
@@ -359,8 +424,9 @@ export class BookViewer extends Flipping {
    * Update dimension of the book viewer element.
    */
   updateDimension(){
-    if(this.curOpenLeftPageIndex > 0){ this.setSpreadOpen(); } 
-    else { this.setReadyToOpen(); }
+    if(this.curOpenLeftPageIndex < 0){ this.setReadyToOpenForward(); } 
+    else if(this.curOpenLeftPageIndex >= this.book!.lastPageIndex){ this.setReadyToOpenBackward(); }
+    else { this.setSpreadOpen(); }
   }
   /**
    * Shifts pages related the flip effect directly.
@@ -372,7 +438,6 @@ export class BookViewer extends Flipping {
 
     // Global Var
     this.curOpenLeftPageIndex = isFoward ? this.curOpenLeftPageIndex + 2 : this.curOpenLeftPageIndex - 2;
-    this.updateDimension();
 
     if(isFoward){
       super.moveRight(newPage1, newPage2);
@@ -387,6 +452,9 @@ export class BookViewer extends Flipping {
 
     book?.removePageEl(removedPage1.element);
     book?.removePageEl(removedPage2.element);
+
+    this.updateDimension();
+    this.resetShadow1Paths();
   }
   /**
    * Attach a book to this book viewer.
@@ -400,7 +468,7 @@ export class BookViewer extends Flipping {
    * Sets the one of close/open states which has three states.
    * This state represents that the book is ready to open from front.
    */
-  private setReadyToOpen(){ 
+  private setReadyToOpenForward(){ 
     this.isSpreadOpen = false;
     this.bookViewerEl.classList.add("ready-to-open", "front"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
@@ -410,7 +478,22 @@ export class BookViewer extends Flipping {
       right: bookRect.left,
       top: bookRect.top,
       bottom: bookRect.bottom
-    })
+    });
+  }
+  /**
+   * 
+   */
+  private setReadyToOpenBackward(){ 
+    this.isSpreadOpen = false;
+    this.bookViewerEl.classList.add("ready-to-open", "end"); 
+    const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
+    this.gutter = new Gutter({
+      width:0, height:0,
+      left: bookRect.right, 
+      right: bookRect.right,
+      top: bookRect.top,
+      bottom: bookRect.bottom
+    });
   }
   /**
    * Sets the one of close/open states which has three states.
@@ -426,7 +509,16 @@ export class BookViewer extends Flipping {
       right: bookRect.left + bookRect.width/2,
       top: bookRect.top,
       bottom: bookRect.bottom
-    })
+    });
+  }
+
+  private resetShadow1Paths(){
+    // if(this.isSpreadOpen){ return; }
+    const path1Els = this.book?.element.querySelectorAll('.sh1-path1');
+    const path2Els = this.book?.element.querySelectorAll('.sh1-path2');
+    const pageW = this.book?.size.closed.width || 0;
+    path1Els?.forEach(path1El => { path1El.setAttribute('d', `M ${pageW/3} 0 C ${pageW*13/15} ${pageW/20}, ${pageW*5/6} ${pageW/20}, ${pageW} 0`); });
+    path2Els?.forEach(path2El =>{ path2El.setAttribute('d', `M 0 0 C ${pageW/6} ${pageW/20}, ${pageW*2/15} ${pageW/20}, ${pageW*2/3} 0`); });
   }
   /**
    * Sets the one of close/open states which has three states.
@@ -492,6 +584,17 @@ export class BookViewer extends Flipping {
     if(!this.book){ throw new Error("Error the book opening"); }
     return this.book.fetchPages(indexRange);
   }
+  private getLoadedViewablePageCnt(){
+    if(!this.book){ return 0; }
+    let cnt = this.book.getPageCnt();
+    const pages = this.book.getPages();
+    for(const index in pages){
+      const page = pages[index];
+      if(Number(index) < 0){ --cnt; }
+      else if(page.type == PageType.Empty){ --cnt; }
+    }
+    return cnt;
+  }
   /**
    * 
    * @param index 
@@ -513,7 +616,16 @@ export class BookViewer extends Flipping {
     }
   }
 
-  private flipPage(page2El:HTMLElement, page1Mask:SVGPolygonElement, page2Mask:SVGPolygonElement, shadow3Shape:SVGPolygonElement|null, shadow6Shape:SVGPolygonElement|null, mouseGP:Point, pageWH:ISize){
+  private flipPage(
+    page2El:HTMLElement, 
+    page1Mask:SVGPolygonElement, 
+    page2Mask:SVGPolygonElement, 
+    shadow1Paths:NodeListOf<SVGPathElement> | undefined,
+    shadow3Shape:SVGPolygonElement|null, 
+    shadow6Shape:SVGPolygonElement|null, 
+    mouseGP:Point, 
+    pageWH:ISize
+  ){
     const flipData = this.flip(mouseGP, pageWH, this.isSpreadOpen);
     const isLeftPageActive = this.isLeftPageFlipping;
     // Mask
@@ -531,17 +643,39 @@ export class BookViewer extends Flipping {
     const f = flipData.mask.page2.p1;
     const g = flipData.mask.page2.p2;
     const h = flipData.mask.page2.p3;
+    const j = flipData.mask.page1.p1;
     const k = flipData.mask.page1.p2;
     const l = flipData.mask.page1.p3;
     const c = flipData.c;
-    // Shadow6
-    // const shadowOrigin = flipData.shadow.rect.origin;
-    // const alpa = flipData.shadow.rect.rotate;
-    // cssVar.setProperty('--shadow-origin-x', `${shadowOrigin.x}px`)
-    // cssVar.setProperty('--shadow-origin-y', `${shadowOrigin.y}px`)
-    // cssVar.setProperty('--shadow-rotate', `${alpa}rad`)
     //
-    // Shadow5
+    // Shadow 1
+    //
+    const sh1Path1 = shadow1Paths && shadow1Paths[0];
+    const sh1Path2 = shadow1Paths && shadow1Paths[1];
+    let sh1CtlPy = pageWH.width/20;
+    let sh1P1EndPx = pageWH.width/3;
+    let sh1P2EndPx = pageWH.width*2/3;
+    if(this.isFirstPageClosing){
+      let sh1CtlPx1 = pageWH.width*13/15;
+      if(k.x > sh1P1EndPx){
+        sh1CtlPy = sh1CtlPy * (pageWH.width - k.x)/sh1P2EndPx;
+        sh1P1EndPx = k.x;
+        sh1CtlPx1 += k.x*.1;
+      }
+      sh1Path1?.setAttribute('d', `M ${sh1P1EndPx} 0 C ${sh1CtlPx1} ${sh1CtlPy}, ${pageWH.width*5/6} ${sh1CtlPy}, ${pageWH.width} 0`);
+    } else if(this.isLastPageClosing){
+      let sh1CtlPx2 = pageWH.width*2/15;
+      if(k.x < sh1P2EndPx){
+        sh1CtlPy = sh1CtlPy * k.x/sh1P2EndPx;
+        sh1P2EndPx = k.x;
+        sh1CtlPx2 -= (pageWH.width-k.x)*.1;
+      }
+      sh1Path2?.setAttribute('d', `M 0 0 C ${pageWH.width/6} ${sh1CtlPy}, ${sh1CtlPx2} ${sh1CtlPy}, ${sh1P2EndPx} 0`);
+    }
+    
+    
+    //
+    // Shadow 5
     //
     const p2Rotate = flipData.page2.rotate;
     const defaultOpacity = isLeftPageActive ? 0.3: 0.5;
@@ -551,7 +685,7 @@ export class BookViewer extends Flipping {
       : defaultOpacity + tempValue*(2*Math.PI - p2Rotate);
     cssVar.setProperty('--shadow5-opacity', `${opacity*opacityScale}`)
     //
-    // Shadow3
+    // Shadow 3
     //
     const shadow3El = document.getElementById('shadow3') as SVGLinearGradientElement|null;
     let x1, y1, x2, y2 = 100;
@@ -576,7 +710,7 @@ export class BookViewer extends Flipping {
     }
     else {
       // Shape is triangle and dragging point is top corner.
-      if(c < 0){ y2 = 0; console.log("Top")}
+      if(c < 0){ y2 = 0; }
       // Shape is triangle and dragging point is bottom corner.
       else if(f == g){  }
       else if(h.x < g.x){
@@ -713,12 +847,13 @@ export class BookViewer extends Flipping {
     this.eventStatus = EventStatus.AutoFlipFromCorner;
 
     this.eventZone = param.zone;
-    const page2El = this.page2El;
-    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
+    const page2El = this.activePage2El;
+    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
-    const isCenter = this.eventZone & Zone.Center;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
 
     this.setViewerToAutoFlip();
@@ -731,6 +866,7 @@ export class BookViewer extends Flipping {
           page2El, 
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2,
+          shadow1Paths,
           shadow3Shape,
           shadow6Shape,
           mouseGP, 
@@ -753,13 +889,14 @@ export class BookViewer extends Flipping {
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-    const page2El = this.page2El;
+    const page2El = this.activePage2El;
 
-    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
+    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     if(!this.pageContainerRect){ return; }
-
-    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
+    
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
     this.setViewerToFlip();
     this.setInitFlipping(param.zone, viewport, this.pageContainerRect)
@@ -767,6 +904,7 @@ export class BookViewer extends Flipping {
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
+      shadow1Paths,
       shadow3Shape,
       shadow6Shape,
       viewport, 
@@ -785,10 +923,12 @@ export class BookViewer extends Flipping {
     if(this.eventZone & Zone.Center){ return; }
     this.eventZone = param.zone;
 
-    const page2El = this.page2El;
-    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
+    const page2El = this.activePage2El;
+    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
 
@@ -796,6 +936,7 @@ export class BookViewer extends Flipping {
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
+      shadow1Paths,
       shadow3Shape,
       shadow6Shape,
       viewport, 
@@ -811,10 +952,12 @@ export class BookViewer extends Flipping {
     if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
     this.eventStatus = EventStatus.AutoFlipToCorner;
 
-    const page2El = this.page2El;
-    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
+    const page2El = this.activePage2El;
+    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
 
@@ -827,6 +970,7 @@ export class BookViewer extends Flipping {
           page2El,
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2, 
+          shadow1Paths,
           shadow3Shape,
           shadow6Shape,
           mouseGP, 
@@ -850,8 +994,8 @@ export class BookViewer extends Flipping {
   documentMouseUp(event:Event){
     if(!(this.eventStatus & EventStatus.Dragging)){ return; }
     
-    const page2El = this.page2El;
-    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
+    const page2El = this.activePage2El;
+    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
@@ -859,9 +1003,10 @@ export class BookViewer extends Flipping {
 
     if(dataToFlip.isSnappingBack){ this.eventStatus = EventStatus.SnappingBack; }
     else { this.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
-
-    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
+    
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
     this.animateFlip(
       viewport, 
@@ -872,6 +1017,7 @@ export class BookViewer extends Flipping {
           page2El, 
           this.maskShapeOnPage1, 
           this.maskShapeOnPage2, 
+          shadow1Paths,
           shadow3Shape,
           shadow6Shape,
           mouseGP, 
@@ -900,16 +1046,18 @@ export class BookViewer extends Flipping {
 
     if(!(this.eventStatus & EventStatus.Dragging)){ return; }
 
-    const page2El = this.page2El;
-    if(!page2El || (this.page2 && this.page2.type == PageType.Empty) ){ return }
-
-    const shadow3Shape = page2El.querySelector('div.shadow > .shadow3-svg > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.page1El?.querySelector('div.shadow6 > .shadow6-svg > polygon.shape') as SVGPolygonElement | null;
+    const page2El = this.activePage2El;
+    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
     this.flipPage(
       page2El, 
       this.maskShapeOnPage1, 
       this.maskShapeOnPage2, 
+      shadow1Paths,
       shadow3Shape,
       shadow6Shape,
       viewport, 
