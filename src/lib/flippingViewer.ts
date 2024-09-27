@@ -178,184 +178,172 @@ export class FlippingViewer extends Flipping implements IViewer {
    * @returns ViewerElements
    */
   createElements():FlippingViewerElements {    
-    if(!this.bookViewerEl){
-      let viewerEl = document.getElementById(this.bookViewerDocId);
+    let viewerEl = document.getElementById(this.bookViewerDocId);
 
-      if(viewerEl){ viewerEl.innerHTML = ""; } 
-      else { viewerEl = document.createElement('div'); }
-
-      viewerEl.innerHTML = "";
-
-      const svgNS = "http://www.w3.org/2000/svg";
+    if(viewerEl){ viewerEl.innerHTML = ""; } 
+    else { 
+      viewerEl = document.createElement('div'); 
       viewerEl.id = this.bookViewerDocId;
-      viewerEl.classList.add("hidden", "flipping");
-      // Book Container
-      const bookContainer = document.createElement('div');
-      bookContainer.id = "bookContainer";
-      const zoneLT = document.createElement('div');
-      const zoneLC = document.createElement('div');
-      const zoneLB = document.createElement('div');
-      const zoneRT = document.createElement('div');
-      const zoneRC = document.createElement('div');
-      const zoneRB = document.createElement('div');
-      zoneLT.id = 'mzZoneLT';
-      zoneLC.id = 'mzZoneLC';
-      zoneLB.id = 'mzZoneLB';
-      zoneRT.id = 'mzZoneRT';
-      zoneRC.id = 'mzZoneRC';
-      zoneRB.id = 'mzZoneRB';
-      zoneLT.classList.add('event-zone', 'left');
-      zoneLC.classList.add('event-zone', 'left');
-      zoneLB.classList.add('event-zone', 'left');
-      zoneRT.classList.add('event-zone', 'right');
-      zoneRC.classList.add('event-zone', 'right');
-      zoneRB.classList.add('event-zone', 'right');
-      bookContainer.appendChild(zoneLT);
-      bookContainer.appendChild(zoneLC);      
-      bookContainer.appendChild(zoneLB);
-      bookContainer.appendChild(zoneRT);
-      bookContainer.appendChild(zoneRC);
-      bookContainer.appendChild(zoneRB);
-      // // Shadow 1
-      // const shadow1Svg = document.createElementNS(svgNS, 'svg');
-      // shadow1Svg.classList.add("shadow1");
-      // const sh1Path = document.createElementNS(svgNS, 'path');
-      // sh1Path.setAttribute('class', 'sh1-path1');
-      // sh1Path.setAttribute('d', 'M 0 0 C 520 20, 540 20, 600 0');
-      // shadow1Svg.appendChild(sh1Path);
-      // bookContainer.appendChild(shadow1Svg);
-      
-      viewerEl.appendChild(bookContainer);
-
-      const btnClose = document.createElement('button');
-      btnClose.id = "btnCloseViewer";
-      btnClose.innerHTML = "X";
-      btnClose.addEventListener('click', (event: Event) => { this.closeViewer(); });
-      viewerEl.appendChild(btnClose);
-      
-      const svg = document.createElementNS(svgNS, 'svg');
-      svg.setAttribute('width', '0');
-      svg.setAttribute('height', '0');
-      const defs = document.createElementNS(svgNS, 'defs');
-      svg.appendChild(defs);
-      
-      const mask1 = document.createElementNS(svgNS, 'mask');
-      mask1.setAttribute('id', 'mask1');
-      const mask1Rect = document.createElementNS(svgNS, 'rect');
-      mask1Rect.setAttribute('id', 'mask1-rect');
-      mask1Rect.setAttribute('x', '0');
-      mask1Rect.setAttribute('y', '0');
-      mask1Rect.setAttribute('width', '100%');
-      mask1Rect.setAttribute('height', '100%');
-      mask1Rect.setAttribute('fill', 'white');
-      const mask1Polygon = document.createElementNS(svgNS, 'polygon');
-      mask1Polygon.setAttribute('id', 'mask1-shape');
-      mask1Polygon.setAttribute('points', '0,0');
-      mask1Polygon.setAttribute('fill', 'black');
-      mask1Polygon.setAttribute('stroke', 'black');
-      mask1Polygon.setAttribute('stroke-width', '1');
-      mask1.appendChild(mask1Rect);
-      mask1.appendChild(mask1Polygon);
-
-      const mask2 = document.createElementNS(svgNS, 'mask');
-      mask2.setAttribute('id', 'mask2');
-      const mask2Rect = document.createElementNS(svgNS, 'rect');
-      mask2Rect.setAttribute('x', '0');
-      mask2Rect.setAttribute('y', '0');
-      mask2Rect.setAttribute('width', '100%');
-      mask2Rect.setAttribute('height', '100%');
-      mask2Rect.setAttribute('fill', 'black');
-      const mask2Polygon = document.createElementNS(svgNS, 'polygon');
-      mask2Polygon.setAttribute('id', 'mask2-shape');
-      mask2Polygon.setAttribute('points', '0,0');
-      mask2Polygon.setAttribute('fill', 'white');
-      mask2.appendChild(mask2Rect);
-      mask2.appendChild(mask2Polygon);
-      
-      // Shadow1
-      const sh1Gradient = document.createElementNS(svgNS, 'linearGradient');
-      sh1Gradient.id ='shadow1';
-      sh1Gradient.setAttribute('x1', '50%');
-      sh1Gradient.setAttribute('y1', '0%');
-      sh1Gradient.setAttribute('x2', '50%');
-      sh1Gradient.setAttribute('y2', '100%');
-      // const sh1Stop1 = document.createElementNS(svgNS, 'stop');
-      const sh1Stop2 = document.createElementNS(svgNS, 'stop');
-      const sh1Stop3 = document.createElementNS(svgNS, 'stop');
-      // sh1Stop1.setAttribute('offset', '0%');
-      // sh1Stop1.setAttribute('stop-color', 'rgba(255,255,255,0.5)');
-      sh1Stop2.setAttribute('offset', '0%');
-      sh1Stop2.setAttribute('stop-color', 'rgba(0,0,0,0.8)');
-      sh1Stop3.setAttribute('offset', '100%');
-      sh1Stop3.setAttribute('stop-color', 'rgba(0,0,0,0.2)');
-      // sh1Gradient.appendChild(sh1Stop1);
-      sh1Gradient.appendChild(sh1Stop2);
-      sh1Gradient.appendChild(sh1Stop3);
-      const sh1Filter = document.createElementNS(svgNS, 'filter');
-      sh1Filter.id = "sh1BlurFilter";
-      sh1Filter.setAttribute('x', '0%');
-      sh1Filter.setAttribute('y', '0%');
-      sh1Filter.setAttribute('width', '100%');
-      sh1Filter.setAttribute('height', '200%');
-      const sh1Blur = document.createElementNS(svgNS, 'feGaussianBlur');
-      sh1Blur.setAttribute('in', 'SourceGraphic');
-      sh1Blur.setAttribute('stdDeviation', '3');
-      sh1Filter.appendChild(sh1Blur);
-
-      // Shadow3
-      const shadow3 = document.createElementNS(svgNS, 'linearGradient');
-      shadow3.id ='shadow3';
-      // shadow3.setAttribute('gradientUnits','userSpaceOnUse');
-      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
-
-      // Shadow6
-      const shadow6 = document.createElementNS(svgNS, 'linearGradient');
-      shadow6.id ='shadow6';
-      shadow6.setAttribute('gradientUnits','userSpaceOnUse');
-      shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
-      shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
-
-      //      
-      defs.appendChild(mask1);
-      defs.appendChild(mask2);
-      defs.appendChild(sh1Gradient);
-      defs.appendChild(sh1Filter);
-      defs.appendChild(shadow3);
-      defs.appendChild(shadow6);
-      viewerEl.appendChild(svg);
       document.body.appendChild(viewerEl);
-      return { 
-        bookContainerEl: bookContainer, 
-        bookViewerEl: viewerEl,
-        zoneLT: zoneLT,
-        zoneLC: zoneLC,
-        zoneLB: zoneLB,
-        zoneRT: zoneRT,
-        zoneRC: zoneRC,
-        zoneRB: zoneRB,
-        mask1Shape: mask1Polygon,
-        mask2Shape: mask2Polygon
-      } 
-    };
+    }
+    // Viewer
+    const svgNS = "http://www.w3.org/2000/svg";
+    viewerEl.className = "";
+    viewerEl.classList.add("hidden", "flipping");
+    // Book Container
+    const bookContainer = document.createElement('div');
+    bookContainer.id = "bookContainer";
+    const zoneLT = document.createElement('div');
+    const zoneLC = document.createElement('div');
+    const zoneLB = document.createElement('div');
+    const zoneRT = document.createElement('div');
+    const zoneRC = document.createElement('div');
+    const zoneRB = document.createElement('div');
+    zoneLT.id = 'mzZoneLT';
+    zoneLC.id = 'mzZoneLC';
+    zoneLB.id = 'mzZoneLB';
+    zoneRT.id = 'mzZoneRT';
+    zoneRC.id = 'mzZoneRC';
+    zoneRB.id = 'mzZoneRB';
+    zoneLT.classList.add('event-zone', 'left');
+    zoneLC.classList.add('event-zone', 'left');
+    zoneLB.classList.add('event-zone', 'left');
+    zoneRT.classList.add('event-zone', 'right');
+    zoneRC.classList.add('event-zone', 'right');
+    zoneRB.classList.add('event-zone', 'right');
+    bookContainer.appendChild(zoneLT);
+    bookContainer.appendChild(zoneLC);      
+    bookContainer.appendChild(zoneLB);
+    bookContainer.appendChild(zoneRT);
+    bookContainer.appendChild(zoneRC);
+    bookContainer.appendChild(zoneRB);
+    // // Shadow 1
+    // const shadow1Svg = document.createElementNS(svgNS, 'svg');
+    // shadow1Svg.classList.add("shadow1");
+    // const sh1Path = document.createElementNS(svgNS, 'path');
+    // sh1Path.setAttribute('class', 'sh1-path1');
+    // sh1Path.setAttribute('d', 'M 0 0 C 520 20, 540 20, 600 0');
+    // shadow1Svg.appendChild(sh1Path);
+    // bookContainer.appendChild(shadow1Svg);
+    
+    viewerEl.appendChild(bookContainer);
+
+    const btnClose = document.createElement('button');
+    btnClose.id = "btnClose";
+    btnClose.innerHTML = "X";
+    btnClose.addEventListener('click', (event: Event) => { this.closeViewer(); });
+    viewerEl.appendChild(btnClose);
+    
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+    const defs = document.createElementNS(svgNS, 'defs');
+    svg.appendChild(defs);
+    
+    const mask1 = document.createElementNS(svgNS, 'mask');
+    mask1.setAttribute('id', 'mask1');
+    const mask1Rect = document.createElementNS(svgNS, 'rect');
+    mask1Rect.setAttribute('id', 'mask1-rect');
+    mask1Rect.setAttribute('x', '0');
+    mask1Rect.setAttribute('y', '0');
+    mask1Rect.setAttribute('width', '100%');
+    mask1Rect.setAttribute('height', '100%');
+    mask1Rect.setAttribute('fill', 'white');
+    const mask1Polygon = document.createElementNS(svgNS, 'polygon');
+    mask1Polygon.setAttribute('id', 'mask1-shape');
+    mask1Polygon.setAttribute('points', '0,0');
+    mask1Polygon.setAttribute('fill', 'black');
+    mask1Polygon.setAttribute('stroke', 'black');
+    mask1Polygon.setAttribute('stroke-width', '1');
+    mask1.appendChild(mask1Rect);
+    mask1.appendChild(mask1Polygon);
+
+    const mask2 = document.createElementNS(svgNS, 'mask');
+    mask2.setAttribute('id', 'mask2');
+    const mask2Rect = document.createElementNS(svgNS, 'rect');
+    mask2Rect.setAttribute('x', '0');
+    mask2Rect.setAttribute('y', '0');
+    mask2Rect.setAttribute('width', '100%');
+    mask2Rect.setAttribute('height', '100%');
+    mask2Rect.setAttribute('fill', 'black');
+    const mask2Polygon = document.createElementNS(svgNS, 'polygon');
+    mask2Polygon.setAttribute('id', 'mask2-shape');
+    mask2Polygon.setAttribute('points', '0,0');
+    mask2Polygon.setAttribute('fill', 'white');
+    mask2.appendChild(mask2Rect);
+    mask2.appendChild(mask2Polygon);
+    
+    // Shadow1
+    const sh1Gradient = document.createElementNS(svgNS, 'linearGradient');
+    sh1Gradient.id ='shadow1';
+    sh1Gradient.setAttribute('x1', '50%');
+    sh1Gradient.setAttribute('y1', '0%');
+    sh1Gradient.setAttribute('x2', '50%');
+    sh1Gradient.setAttribute('y2', '100%');
+    // const sh1Stop1 = document.createElementNS(svgNS, 'stop');
+    const sh1Stop2 = document.createElementNS(svgNS, 'stop');
+    const sh1Stop3 = document.createElementNS(svgNS, 'stop');
+    // sh1Stop1.setAttribute('offset', '0%');
+    // sh1Stop1.setAttribute('stop-color', 'rgba(255,255,255,0.5)');
+    sh1Stop2.setAttribute('offset', '0%');
+    sh1Stop2.setAttribute('stop-color', 'rgba(0,0,0,0.8)');
+    sh1Stop3.setAttribute('offset', '100%');
+    sh1Stop3.setAttribute('stop-color', 'rgba(0,0,0,0.2)');
+    // sh1Gradient.appendChild(sh1Stop1);
+    sh1Gradient.appendChild(sh1Stop2);
+    sh1Gradient.appendChild(sh1Stop3);
+    const sh1Filter = document.createElementNS(svgNS, 'filter');
+    sh1Filter.id = "sh1BlurFilter";
+    sh1Filter.setAttribute('x', '0%');
+    sh1Filter.setAttribute('y', '0%');
+    sh1Filter.setAttribute('width', '100%');
+    sh1Filter.setAttribute('height', '200%');
+    const sh1Blur = document.createElementNS(svgNS, 'feGaussianBlur');
+    sh1Blur.setAttribute('in', 'SourceGraphic');
+    sh1Blur.setAttribute('stdDeviation', '3');
+    sh1Filter.appendChild(sh1Blur);
+
+    // Shadow3
+    const shadow3 = document.createElementNS(svgNS, 'linearGradient');
+    shadow3.id ='shadow3';
+    // shadow3.setAttribute('gradientUnits','userSpaceOnUse');
+    shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+    shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+    shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+    shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+    shadow3.appendChild(document.createElementNS(svgNS, 'stop'));
+
+    // Shadow6
+    const shadow6 = document.createElementNS(svgNS, 'linearGradient');
+    shadow6.id ='shadow6';
+    shadow6.setAttribute('gradientUnits','userSpaceOnUse');
+    shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+    shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+    shadow6.appendChild(document.createElementNS(svgNS, 'stop'));
+
+    //      
+    defs.appendChild(mask1);
+    defs.appendChild(mask2);
+    defs.appendChild(sh1Gradient);
+    defs.appendChild(sh1Filter);
+    defs.appendChild(shadow3);
+    defs.appendChild(shadow6);
+    viewerEl.appendChild(svg);
 
     return { 
-      bookContainerEl: this.bookContainerEl, 
-      bookViewerEl: this.bookViewerEl,
-      zoneLT: this.zoneLT,
-      zoneLC: this.zoneLC,
-      zoneLB: this.zoneLB,
-      zoneRT: this.zoneRT,
-      zoneRC: this.zoneRC,
-      zoneRB: this.zoneRB,
-      mask1Shape: this.maskShapeOnPage1,
-      mask2Shape: this.maskShapeOnPage2
-    };
-  }
+      bookContainerEl: bookContainer, 
+      bookViewerEl: viewerEl,
+      zoneLT: zoneLT,
+      zoneLC: zoneLC,
+      zoneLB: zoneLB,
+      zoneRT: zoneRT,
+      zoneRC: zoneRC,
+      zoneRB: zoneRB,
+      mask1Shape: mask1Polygon,
+      mask2Shape: mask2Polygon
+    } 
+  };
+
   /**
    * Opens the book on the viewer.
    * @param book 
@@ -363,6 +351,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   view(book: Book, openRightPageIndex: number = 0) {
     this.init();
+    this.bookViewerEl?.classList.add('flipping');
     this.bookViewerEl?.classList.remove("hidden");
     this.book = book;
     const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
