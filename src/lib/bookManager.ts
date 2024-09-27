@@ -20,9 +20,9 @@ export class BookManager {
    * @param bookShelfDocId 
    * @param bookViewerId 
    */
-  constructor(bookShelfDocId?:string, bookViewerId?:string) {
+  constructor(bookShelfDocId?:string) {
     this.bookShelf = new BookShelf(this, bookShelfDocId);
-    this.bookViewer = new FlippingViewer(this, bookViewerId);
+    this.bookViewer = new FlippingViewer(this);
   }
   /**
    * Gets a book holder's element with the book's id.

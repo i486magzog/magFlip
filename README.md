@@ -3,6 +3,7 @@ In relation to this project 'MagFlip', back when Flash was popular, I first crea
 
 # How to Start
 ```bash
+npm run build 
 npm start
 ```
 

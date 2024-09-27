@@ -30,6 +30,7 @@ type FlippingViewerElements = {
  * 
  */
 export class FlippingViewer extends Flipping implements IViewer {
+  zoomLevel:number = 1;
   /**
    * Book object.
    * This contains the most information of a book loaded to this viewer.
@@ -149,9 +150,9 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   private get activePage2El():HTMLElement|undefined { return this.getActivePage(2)?.element; }
 
-  constructor(bookManager:BookManager, viewerId?:string) {
+  constructor(bookManager:BookManager) {
     super();
-    this.bookViewerDocId = viewerId || "bookViewer";
+    this.bookViewerDocId = "bookViewer";
     this.bookManager = bookManager;
     ({ bookContainerEl:this.bookContainerEl, 
       bookViewerEl: this.bookViewerEl,
@@ -187,7 +188,7 @@ export class FlippingViewer extends Flipping implements IViewer {
 
       const svgNS = "http://www.w3.org/2000/svg";
       viewerEl.id = this.bookViewerDocId;
-      viewerEl.classList.add("hidden");
+      viewerEl.classList.add("hidden", "flipping");
       // Book Container
       const bookContainer = document.createElement('div');
       bookContainer.id = "bookContainer";
@@ -446,7 +447,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   private setReadyToOpenForward(){ 
     this.isSpreadOpen = false;
-    this.bookViewerEl.classList.add("ready-to-open", "front"); 
+    this.bookContainerEl.classList.add("ready-to-open", "front"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
     this.gutter = new Gutter({
       width:0, height:0,
@@ -462,7 +463,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   private setReadyToOpenBackward(){ 
     this.isSpreadOpen = false;
-    this.bookViewerEl.classList.add("ready-to-open", "end"); 
+    this.bookContainerEl.classList.add("ready-to-open", "end"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
     this.gutter = new Gutter({
       width:0, height:0,
@@ -478,7 +479,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   private setSpreadOpen(){ 
     this.isSpreadOpen = true;
-    this.bookViewerEl.classList.remove("ready-to-open", "front", "end"); 
+    this.bookContainerEl.classList.remove("ready-to-open", "front", "end"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
     this.gutter = new Gutter({
       width:0, height:0,
@@ -528,6 +529,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    * Returns the book back to the BookManager.
    */
   private detachBook() {
+    this.bookContainerEl.className = "";
     this.bookViewerEl.className = "";
     this.bookViewerEl.classList.add("hidden");  
     if(this.book){
@@ -785,27 +787,27 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   private setViewerToAutoFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
-    this.bookViewerEl.classList.add(`${className}-page-flipping`);
+    this.bookContainerEl.classList.add(`${className}-page-flipping`);
   }
   /**
    * Unsets the status of viewer as Auto Flipping.
    */
   private unsetViewerToAutoFlip(){
-    this.bookViewerEl.classList.remove('left-page-flipping', 'right-page-flipping');
+    this.bookContainerEl.classList.remove('left-page-flipping', 'right-page-flipping');
   }
   /**
    * Sets the status of viewer as the status Flipping by dragging.
    */
   private setViewerToFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
-    this.bookViewerEl.classList.add(`${className}-page-flipping`, "noselect");
+    this.bookContainerEl.classList.add(`${className}-page-flipping`, "noselect");
     this.curAutoFlipWidth = 0;
   }
   /**
    * Unsets the status of viewer as the status Flipping by dragging.
    */
   private unsetViewerToFlip(){
-    this.bookViewerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`);
+    this.bookContainerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`);
   }
   /**
    * This is the mouseenter event handler on the 6 event zones.
