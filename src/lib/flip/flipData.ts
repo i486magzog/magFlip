@@ -1,5 +1,5 @@
-import { ISize } from "./dimension";
-import { Point } from "./shape";
+import { ISize } from "../dimension";
+import { Point } from "../shape";
 
 export interface IFlipData {
   alpa: number;

@@ -1,10 +1,13 @@
-import { BookManager } from './lib/bookManager';
+import { BookManager } from './lib/core/bookManager';
 
+var bookManager: BookManager;
 document.addEventListener('DOMContentLoaded', function () {
   console.log('DOM fully loaded and parsed');
   // DOM이 로딩된 후 실행할 코드를 여기에 작성
-  const bookManager = new BookManager();
+  bookManager = new BookManager();
   bookManager.loadAndAddBooks();
+
+  (window as any).bookManager = bookManager;
 });
   
 window.onload = function () {

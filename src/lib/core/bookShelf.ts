@@ -29,10 +29,10 @@ export class BookShelf {
    */
   readonly element: Element;
 
-  constructor(bookManager:BookManager, bookShelfDocId?:string) {
+  constructor(bookManager:BookManager) {
     this.booksOnShelf = {};
     this.bookManager = bookManager;
-    this.bookShelfDocId = bookShelfDocId || "bookShelf";
+    this.bookShelfDocId = "bookShelf";
     this.element = this.createElement();
   }
   /**

@@ -1,8 +1,9 @@
-import { IBookData, BookStatus, BookType } from './models';
+import { IBookData, BookStatus, BookType, ViewerType, IViewer } from '../models';
 import { BookShelf } from './bookShelf';
-import { FlippingViewer } from './flippingViewer';
+import { FlipViewer } from '../flip/flipViewer';
 import { Book } from './book';
-import { BookSize } from './dimension';
+import { BookSize } from '../dimension';
+import { ScrollViewer } from '../scroll/scrollViewer';
 /**
  * BookManager class
  */
@@ -14,15 +15,25 @@ export class BookManager {
   /**
    * Returns the BookViewer instance.
    */
-  bookViewer: FlippingViewer;
+  bookViewer: IViewer;
   /**
    * 
    * @param bookShelfDocId 
    * @param bookViewerId 
    */
-  constructor(bookShelfDocId?:string) {
-    this.bookShelf = new BookShelf(this, bookShelfDocId);
-    this.bookViewer = new FlippingViewer(this);
+  constructor() {
+    this.bookShelf = new BookShelf(this);
+    this.bookViewer = new FlipViewer(this);
+  }
+  /**
+   * Change viewing book style.
+   * @param type 
+   */
+  setViewer(type:ViewerType){
+    switch(type){
+      case ViewerType.Flipping: this.bookViewer = new FlipViewer(this); break;
+      case ViewerType.Scrolling: this.bookViewer = new ScrollViewer(this); break;
+    }
   }
   /**
    * Gets a book holder's element with the book's id.

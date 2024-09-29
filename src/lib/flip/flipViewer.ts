@@ -1,19 +1,18 @@
-import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IViewer } from './models';
-import { Book } from './book'
-import { Page } from './page'
-import { BookManager } from './bookManager'
-import { Flipping } from './flipping'
-import { MZMath } from './mzMath';
+import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IViewer } from '../models';
+import { Book, BookEvent } from '../core/book'
+import { Page } from '../core/page'
+import { BookManager } from '../core/bookManager'
+import { BookViewer, BookViewerElements } from '../core/bookViewer'
+import { Flipping as FlipManager } from './flipManager'
+import { MZMath } from '../mzMath';
 import { Gutter } from './gutter';
-import { Line, Point, Rect } from './shape';
-import { ISize } from './dimension';
+import { Line, Point, Rect } from '../shape';
+import { ISize } from '../dimension';
 
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
-type FlippingViewerElements = {
-  bookViewerEl: HTMLElement,
-  bookContainerEl: HTMLElement,
+type FlipViewerElements = {
   zoneLT: HTMLElement,
   zoneLC: HTMLElement,
   zoneLB: HTMLElement,
@@ -23,39 +22,16 @@ type FlippingViewerElements = {
   mask1Shape: SVGPolygonElement;
   mask2Shape: SVGPolygonElement;
 }
-
 /**
  * BookViewer class
  * Gutter:
  * 
  */
-export class FlippingViewer extends Flipping implements IViewer {
-  zoomLevel:number = 1;
-  /**
-   * Book object.
-   * This contains the most information of a book loaded to this viewer.
-   */
-  private book: Book | undefined;
-  /**
-   * This is html document id of the book viewer.
-   * It is set when creating a viewer instance or default value 'bookViewer' is set.
-   */
-  readonly bookViewerDocId: string;
-  /**
-   * Returns the instance of BookManager.
-   */
-  readonly bookManager: BookManager;
-  /**
-   * Returns the DOM element of the book viewer with id 'bookViewer'.
-   */
-  readonly bookViewerEl: HTMLElement;
-  /**
-   * Returns the DOM element of the book container with id 'bookContainer'.
-   */
-  readonly bookContainerEl: HTMLElement;
-  /**
-   * This getter returns Rect data of the page container which is the child element of the book element.
-   */
+export class FlipViewer extends BookViewer implements IViewer{
+  private zoomLevel:number = 1;
+  // /**
+  //  * This getter returns Rect data of the page container which is the child element of the book element.
+  //  */
   get pageContainerRect(){
     const el = this.book?.pageContainerEl;
     if(!el){ throw new Error("Not found the page container.") }
@@ -104,18 +80,18 @@ export class FlippingViewer extends Flipping implements IViewer {
   /**
    * Gets whether the page is flipping. (Includes auto-filp and draggring).
    */
-  private get isFlipping(){ return ( this.eventStatus & EventStatus.AutoFlip
-    || this.eventStatus & EventStatus.Flipping
-    || this.eventStatus & EventStatus.Dragging ); 
+  private get isFlipping(){ return ( this.flipManager.eventStatus & EventStatus.AutoFlip
+    || this.flipManager.eventStatus & EventStatus.Flipping
+    || this.flipManager.eventStatus & EventStatus.Dragging ); 
   };
   /**
    * Gets whether the left page is flipping.
    */
-  private get isLeftPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Left; };
+  private get isLeftPageFlipping(){ return this.isFlipping && this.flipManager.eventZone & Zone.Left; };
   /**
    * Gets whether the right page is flipping.
    */
-  private get isRightPageFlipping(){ return this.isFlipping && this.eventZone & Zone.Right; };
+  private get isRightPageFlipping(){ return this.isFlipping && this.flipManager.eventZone & Zone.Right; };
   /**
    * Gets whether the first page(index is 0) is Opening.
    */
@@ -136,7 +112,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    * Returns the instance of Page with sequence of active page.
    * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
    */
-  private getActivePage(activePageNum:number):Page|undefined { return this.isLeftPageFlipping ? this.windows[3-activePageNum].page : this.windows[2+activePageNum].page; }
+  private getActivePage(activePageNum:number):Page|undefined { return this.isLeftPageFlipping ? this.flipManager.windows[3-activePageNum].page : this.flipManager.windows[2+activePageNum].page; }
   /**
    * Returns the instance of Page for active page 2.
    */
@@ -149,14 +125,15 @@ export class FlippingViewer extends Flipping implements IViewer {
    * Returns the element of the active page 2.
    */
   private get activePage2El():HTMLElement|undefined { return this.getActivePage(2)?.element; }
+  /**
+   * 
+   */
+  private flipManager = new FlipManager();
 
   constructor(bookManager:BookManager) {
-    super();
-    this.bookViewerDocId = "bookViewer";
-    this.bookManager = bookManager;
-    ({ bookContainerEl:this.bookContainerEl, 
-      bookViewerEl: this.bookViewerEl,
-      zoneLT: this.zoneLT,
+    super(bookManager);
+
+    ({zoneLT: this.zoneLT,
       zoneLC: this.zoneLC,
       zoneLB: this.zoneLB,
       zoneRT: this.zoneRT,
@@ -165,7 +142,7 @@ export class FlippingViewer extends Flipping implements IViewer {
       mask1Shape: this.maskShapeOnPage1,
       mask2Shape: this.maskShapeOnPage2 } = this.createElements());
     
-    this.addEventListeners();
+    this.setEvents();
   }
   /**
    * Inits variables and properties when a new book opens.
@@ -177,22 +154,14 @@ export class FlippingViewer extends Flipping implements IViewer {
    * Creates the viewer related elements.
    * @returns ViewerElements
    */
-  createElements():FlippingViewerElements {    
-    let viewerEl = document.getElementById(this.bookViewerDocId);
+  private createElements():FlipViewerElements {
+    const bookViewerEl = this.bookViewerEl;
+    const bookContainerEl = this.bookContainerEl;
 
-    if(viewerEl){ viewerEl.innerHTML = ""; } 
-    else { 
-      viewerEl = document.createElement('div'); 
-      viewerEl.id = this.bookViewerDocId;
-      document.body.appendChild(viewerEl);
-    }
     // Viewer
     const svgNS = "http://www.w3.org/2000/svg";
-    viewerEl.className = "";
-    viewerEl.classList.add("hidden", "flipping");
+    bookViewerEl.classList.add("flip-type");
     // Book Container
-    const bookContainer = document.createElement('div');
-    bookContainer.id = "bookContainer";
     const zoneLT = document.createElement('div');
     const zoneLC = document.createElement('div');
     const zoneLB = document.createElement('div');
@@ -211,35 +180,20 @@ export class FlippingViewer extends Flipping implements IViewer {
     zoneRT.classList.add('event-zone', 'right');
     zoneRC.classList.add('event-zone', 'right');
     zoneRB.classList.add('event-zone', 'right');
-    bookContainer.appendChild(zoneLT);
-    bookContainer.appendChild(zoneLC);      
-    bookContainer.appendChild(zoneLB);
-    bookContainer.appendChild(zoneRT);
-    bookContainer.appendChild(zoneRC);
-    bookContainer.appendChild(zoneRB);
-    // // Shadow 1
-    // const shadow1Svg = document.createElementNS(svgNS, 'svg');
-    // shadow1Svg.classList.add("shadow1");
-    // const sh1Path = document.createElementNS(svgNS, 'path');
-    // sh1Path.setAttribute('class', 'sh1-path1');
-    // sh1Path.setAttribute('d', 'M 0 0 C 520 20, 540 20, 600 0');
-    // shadow1Svg.appendChild(sh1Path);
-    // bookContainer.appendChild(shadow1Svg);
-    
-    viewerEl.appendChild(bookContainer);
+    bookContainerEl.appendChild(zoneLT);
+    bookContainerEl.appendChild(zoneLC);      
+    bookContainerEl.appendChild(zoneLB);
+    bookContainerEl.appendChild(zoneRT);
+    bookContainerEl.appendChild(zoneRC);
+    bookContainerEl.appendChild(zoneRB);
 
-    const btnClose = document.createElement('button');
-    btnClose.id = "btnClose";
-    btnClose.innerHTML = "X";
-    btnClose.addEventListener('click', (event: Event) => { this.closeViewer(); });
-    viewerEl.appendChild(btnClose);
-    
+    // Masks & Shadows defs
     const svg = document.createElementNS(svgNS, 'svg');
     svg.setAttribute('width', '0');
     svg.setAttribute('height', '0');
     const defs = document.createElementNS(svgNS, 'defs');
     svg.appendChild(defs);
-    
+    // Mash 1
     const mask1 = document.createElementNS(svgNS, 'mask');
     mask1.setAttribute('id', 'mask1');
     const mask1Rect = document.createElementNS(svgNS, 'rect');
@@ -258,6 +212,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     mask1.appendChild(mask1Rect);
     mask1.appendChild(mask1Polygon);
 
+    // Mask 2
     const mask2 = document.createElementNS(svgNS, 'mask');
     mask2.setAttribute('id', 'mask2');
     const mask2Rect = document.createElementNS(svgNS, 'rect');
@@ -280,16 +235,12 @@ export class FlippingViewer extends Flipping implements IViewer {
     sh1Gradient.setAttribute('y1', '0%');
     sh1Gradient.setAttribute('x2', '50%');
     sh1Gradient.setAttribute('y2', '100%');
-    // const sh1Stop1 = document.createElementNS(svgNS, 'stop');
     const sh1Stop2 = document.createElementNS(svgNS, 'stop');
     const sh1Stop3 = document.createElementNS(svgNS, 'stop');
-    // sh1Stop1.setAttribute('offset', '0%');
-    // sh1Stop1.setAttribute('stop-color', 'rgba(255,255,255,0.5)');
     sh1Stop2.setAttribute('offset', '0%');
     sh1Stop2.setAttribute('stop-color', 'rgba(0,0,0,0.8)');
     sh1Stop3.setAttribute('offset', '100%');
     sh1Stop3.setAttribute('stop-color', 'rgba(0,0,0,0.2)');
-    // sh1Gradient.appendChild(sh1Stop1);
     sh1Gradient.appendChild(sh1Stop2);
     sh1Gradient.appendChild(sh1Stop3);
     const sh1Filter = document.createElementNS(svgNS, 'filter');
@@ -328,11 +279,11 @@ export class FlippingViewer extends Flipping implements IViewer {
     defs.appendChild(sh1Filter);
     defs.appendChild(shadow3);
     defs.appendChild(shadow6);
-    viewerEl.appendChild(svg);
+    bookViewerEl.appendChild(svg);
 
     return { 
-      bookContainerEl: bookContainer, 
-      bookViewerEl: viewerEl,
+      // bookContainerEl: bookContainerEl, 
+      // bookViewerEl: bookViewerEl,
       zoneLT: zoneLT,
       zoneLC: zoneLC,
       zoneLB: zoneLB,
@@ -343,17 +294,85 @@ export class FlippingViewer extends Flipping implements IViewer {
       mask2Shape: mask2Polygon
     } 
   };
+  /**
+   * 
+   * @param page 
+   */
+  private appendShadowElIntoPageEl(page:Page){
+    const pageW = page.size.width;
+    const pageEl = page.element;
+    // Shadow
+    const svgNS = "http://www.w3.org/2000/svg";
+    // Shadow 1
+    const sh1El = pageEl.getElementsByClassName('shadow1')[0];
+    if(sh1El){ sh1El.remove(); }
+    const sh1Svg = document.createElementNS(svgNS, 'svg');
+    sh1Svg.classList.add("shadow1");
+    const sh1Path = document.createElementNS(svgNS, 'path');
+    sh1Path.setAttribute('class', 'sh1-path1');
+    sh1Path.setAttribute('d', `M ${pageW/3} 0 C ${pageW*13/15} ${pageW/20}, ${pageW*5/6} ${pageW/20}, ${pageW} 0`);
+    const sh2Path = document.createElementNS(svgNS, 'path');
+    sh2Path.setAttribute('class', 'sh1-path2');
+    sh2Path.setAttribute('d', `M 0 0 C ${pageW/6} ${pageW/20}, ${pageW*2/15} ${pageW/20}, ${pageW*2/3} 0`);
+    sh1Svg.appendChild(sh1Path); 
+    sh1Svg.appendChild(sh2Path); 
 
+    // Shadow 6
+    const sh6El = pageEl.getElementsByClassName('shadow6')[0];
+    if(sh6El){ sh6El.remove(); }
+    const sh6Svg = document.createElementNS(svgNS, 'svg');
+    sh6Svg.classList.add('shadow6');
+    const sh6Shape = document.createElementNS(svgNS, 'polygon');
+    sh6Shape.classList.add('shape');
+    sh6Shape.setAttribute('points', '0,0');
+    sh6Shape.setAttribute('fill', 'white');
+    sh6Svg.appendChild(sh6Shape);
+
+    // Shadow 3
+    const sh3El = pageEl.getElementsByClassName('shadow3')[0];
+    if(sh3El){ sh3El.remove(); }
+    const sh3Svg = document.createElementNS(svgNS, 'svg');
+    sh3Svg.classList.add('shadow3');
+    const sh3Shape = document.createElementNS(svgNS, 'polygon');
+    sh3Shape.classList.add('shape');
+    sh3Shape.setAttribute('points', '0,0');
+    sh3Shape.setAttribute('fill', 'url(#shadow3)');
+    sh3Svg.appendChild(sh3Shape);
+
+    // Shadow 2
+    const sh2El = page.contentContainerEl.getElementsByClassName('shadow2')[0];
+    if(sh2El){ sh2El.remove(); }
+    const gutterShadow = document.createElement('div');
+    gutterShadow.className = "shadow2";
+    
+    page.contentContainerEl.appendChild(gutterShadow)
+    pageEl.appendChild(page.contentContainerEl);
+    pageEl.appendChild(sh6Svg);
+    pageEl.appendChild(sh3Svg);
+    pageEl.appendChild(sh1Svg)
+  }
+  /**
+   * 
+   */
+  private appendShadowEl4AllPage(){
+    const pages = this.book?.getPages();
+    for(const index in pages){
+      this.appendShadowElIntoPageEl(pages[index]);
+    }
+  }
   /**
    * Opens the book on the viewer.
    * @param book 
    * @param openRightPageIndex 
    */
   view(book: Book, openRightPageIndex: number = 0) {
+    super.view(book);
+
     this.init();
-    this.bookViewerEl?.classList.add('flipping');
+    this.bookViewerEl?.classList.add('flip-type');
     this.bookViewerEl?.classList.remove("hidden");
     this.book = book;
+    this.setBookEventListener();
     const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
     this.attachBook();
     this.setViewer();
@@ -366,6 +385,7 @@ export class FlippingViewer extends Flipping implements IViewer {
   closeViewer() { 
     // TODO Save current book status.
     this.init();
+    this.removeBookEventListener();
     this.detachBook(); 
   }
   /**
@@ -406,12 +426,12 @@ export class FlippingViewer extends Flipping implements IViewer {
     this.curOpenLeftPageIndex = isFoward ? this.curOpenLeftPageIndex + 2 : this.curOpenLeftPageIndex - 2;
 
     if(isFoward){
-      super.moveRight(newPage1, newPage2);
+      this.flipManager.moveRight(newPage1, newPage2);
       book?.appendPageEl(newPage1.element);
       book?.appendPageEl(newPage2.element);
     }
     else {
-      super.moveLeft(newPage1, newPage2);
+      this.flipManager.moveLeft(newPage1, newPage2);
       book?.prependPageEl(newPage2.element);
       book?.prependPageEl(newPage1.element);
     }
@@ -428,7 +448,10 @@ export class FlippingViewer extends Flipping implements IViewer {
   private attachBook() {
     const book = this.book;
     if(!book?.element){ throw new Error("Error the book opening"); }
+  
+    // if(this.book?.getPage())
     this.bookContainerEl.appendChild(book.element);
+    this.appendShadowEl4AllPage();
   }
   /**
    * Sets the one of close/open states which has three states.
@@ -438,7 +461,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     this.isSpreadOpen = false;
     this.bookContainerEl.classList.add("ready-to-open", "front"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
-    this.gutter = new Gutter({
+    this.flipManager.gutter = new Gutter({
       width:0, height:0,
       left: bookRect.left, 
       right: bookRect.left,
@@ -454,7 +477,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     this.isSpreadOpen = false;
     this.bookContainerEl.classList.add("ready-to-open", "end"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
-    this.gutter = new Gutter({
+    this.flipManager.gutter = new Gutter({
       width:0, height:0,
       left: bookRect.right, 
       right: bookRect.right,
@@ -470,7 +493,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     this.isSpreadOpen = true;
     this.bookContainerEl.classList.remove("ready-to-open", "front", "end"); 
     const bookRect = MZMath.getOffset4Fixed(this.book?.element as HTMLDivElement);
-    this.gutter = new Gutter({
+    this.flipManager.gutter = new Gutter({
       width:0, height:0,
       left: bookRect.left + bookRect.width/2, 
       right: bookRect.left + bookRect.width/2,
@@ -523,12 +546,12 @@ export class FlippingViewer extends Flipping implements IViewer {
     this.bookViewerEl.classList.add("hidden");  
     if(this.book){
       this.book.element.removeAttribute('style');
-      this.book.clearPageEls();
+      this.book.resetBook();
       this.bookContainerEl.removeChild(this.book.element);
       this.bookManager.returnBookToShelf(this.book);
     }
     this.book = undefined;
-    this.clearPageWindow();
+    this.flipManager.clearPageWindow();
   }
   /**
    * Returns the first page's index of 6 pages related flipping effect.
@@ -537,7 +560,7 @@ export class FlippingViewer extends Flipping implements IViewer {
    */
   private getStartPageIndexToLoad(openPageIndex: number){
     const index = openPageIndex%2 == 1 ? openPageIndex - 2 : openPageIndex - 3; 
-    return { start:index, cnt: this.windowSize };
+    return { start:index, cnt: this.flipManager.windowSize };
   }
   /**
    * Fetches and loads pages.
@@ -547,6 +570,10 @@ export class FlippingViewer extends Flipping implements IViewer {
     if(!this.book){ throw new Error("Error the book opening"); }
     return this.book.fetchPages(indexRange);
   }
+  /**
+   * 
+   * @returns 
+   */
   private getLoadedViewablePageCnt(){
     if(!this.book){ return 0; }
     let cnt = this.book.getPageCnt();
@@ -560,7 +587,7 @@ export class FlippingViewer extends Flipping implements IViewer {
   }
   /**
    * 
-   * @param index 
+   * @param startIndex 
    */
   private showPages(startIndex:number) {
     const book = this.book;
@@ -569,12 +596,17 @@ export class FlippingViewer extends Flipping implements IViewer {
     // Load the pages to the window 
     // & append page elements to dom.
     //
-    const maxIndex = startIndex + this.windowSize;
+    startIndex = startIndex || -3;
+    const maxIndex = startIndex + this.flipManager.windowSize;
     for(let i=startIndex, winIdx=0; i<maxIndex; i++, winIdx++){
       const page = book.getPage(i);
       if(page){
-        this.loadPageToWindow(winIdx, page);
+        this.flipManager.loadPageToWindow(winIdx, page);
         book.appendPageEl(page.element);
+      } else {
+        const emptyPage = book.createEmptyPage(i);
+        this.flipManager.loadPageToWindow(winIdx, emptyPage);
+        book.appendPageEl(emptyPage.element);
       }
     }
   }
@@ -589,7 +621,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     mouseGP:Point, 
     pageWH:ISize
   ){
-    const flipData = this.flip(mouseGP, pageWH, this.isSpreadOpen);
+    const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
     const isLeftPageActive = this.isLeftPageFlipping;
     // Mask
     page1Mask.setAttribute('points', flipData.printPage1MaskShape() );
@@ -635,8 +667,6 @@ export class FlippingViewer extends Flipping implements IViewer {
       }
       sh1Path2?.setAttribute('d', `M 0 0 C ${pageWH.width/6} ${sh1CtlPy}, ${sh1CtlPx2} ${sh1CtlPy}, ${sh1P2EndPx} 0`);
     }
-    
-    
     //
     // Shadow 5
     //
@@ -652,7 +682,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     //
     const shadow3El = document.getElementById('shadow3') as SVGLinearGradientElement|null;
     let x1, y1, x2, y2 = 100;
-    const isTopOrCenterZone = (this.eventZone & Zone.Top) || (this.eventZone & Zone.Center);
+    const isTopOrCenterZone = (this.flipManager.eventZone & Zone.Top) || (this.flipManager.eventZone & Zone.Center);
     // Points are located on the gradient objectBoundingBox
     let longLineLength = 1;
     let p:Point = new Point({x:.5,y:.5});
@@ -734,7 +764,7 @@ export class FlippingViewer extends Flipping implements IViewer {
       line.p2.y = l.y;
     }
 
-    if(this.eventZone & Zone.Top){
+    if(this.flipManager.eventZone & Zone.Top){
       originP.y = pageWH.height;
       endCorner.y = 0;
     } else {
@@ -790,7 +820,7 @@ export class FlippingViewer extends Flipping implements IViewer {
   private setViewerToFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
     this.bookContainerEl.classList.add(`${className}-page-flipping`, "noselect");
-    this.curAutoFlipWidth = 0;
+    this.flipManager.curAutoFlipWidth = 0;
   }
   /**
    * Unsets the status of viewer as the status Flipping by dragging.
@@ -805,11 +835,11 @@ export class FlippingViewer extends Flipping implements IViewer {
    * @returns 
    */
   private zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
-    if(this.eventStatus & EventStatus.Flipping
-      || this.eventStatus & EventStatus.Dragging){ return; }
-    this.eventStatus = EventStatus.AutoFlipFromCorner;
+    if(this.flipManager.eventStatus & EventStatus.Flipping
+      || this.flipManager.eventStatus & EventStatus.Dragging){ return; }
+      this.flipManager.eventStatus = EventStatus.AutoFlipFromCorner;
 
-    this.eventZone = param.zone;
+      this.flipManager.eventZone = param.zone;
     const page2El = this.activePage2El;
     if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
@@ -820,8 +850,8 @@ export class FlippingViewer extends Flipping implements IViewer {
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
 
     this.setViewerToAutoFlip();
-    this.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect);
-    this.animateFlipFromCorner(
+    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect);
+    this.flipManager.animateFlipFromCorner(
       viewport,
       { width: page2El.offsetWidth, height: page2El.offsetHeight },
       (mouseGP:Point, pageWH:ISize) => {
@@ -846,9 +876,9 @@ export class FlippingViewer extends Flipping implements IViewer {
    * @returns 
    */
   private zoneMouseDowned(event:MouseEvent, param:IZoneEventParams){
-    if(this.eventStatus & EventStatus.Flipping){ return; }
-    this.eventStatus = EventStatus.Dragging;
-    this.eventZone = param.zone;
+    if(this.flipManager.eventStatus & EventStatus.Flipping){ return; }
+    this.flipManager.eventStatus = EventStatus.Dragging;
+    this.flipManager.eventZone = param.zone;
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
@@ -862,7 +892,7 @@ export class FlippingViewer extends Flipping implements IViewer {
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
     this.setViewerToFlip();
-    this.setInitFlipping(param.zone, viewport, this.pageContainerRect)
+    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect)
     this.flipPage(
       page2El, 
       this.maskShapeOnPage1, 
@@ -881,10 +911,10 @@ export class FlippingViewer extends Flipping implements IViewer {
    * @returns 
    */
   private zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
-    if(this.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
-    if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
-    if(this.eventZone & Zone.Center){ return; }
-    this.eventZone = param.zone;
+    if(this.flipManager.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
+    if(this.flipManager.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
+    if(this.flipManager.eventZone & Zone.Center){ return; }
+    this.flipManager.eventZone = param.zone;
 
     const page2El = this.activePage2El;
     if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
@@ -912,8 +942,8 @@ export class FlippingViewer extends Flipping implements IViewer {
    * @returns 
    */
   private zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
-    if(this.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
-    this.eventStatus = EventStatus.AutoFlipToCorner;
+    if(this.flipManager.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
+    this.flipManager.eventStatus = EventStatus.AutoFlipToCorner;
 
     const page2El = this.activePage2El;
     if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
@@ -924,8 +954,8 @@ export class FlippingViewer extends Flipping implements IViewer {
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY }
 
-    this.eventZone = param.zone;
-    this.animateFlipToCorner(
+    this.flipManager.eventZone = param.zone;
+    this.flipManager.animateFlipToCorner(
       viewport,
       { width: page2El.offsetWidth, height: page2El.offsetHeight },
       (mouseGP:Point, pageWH:ISize) => {
@@ -941,9 +971,9 @@ export class FlippingViewer extends Flipping implements IViewer {
         );
       },
       () => { 
-        if(this.eventStatus == EventStatus.AutoFlipToCorner){ 
+        if(this.flipManager.eventStatus == EventStatus.AutoFlipToCorner){ 
           this.unsetViewerToAutoFlip();
-          this.eventStatus = EventStatus.None; 
+          this.flipManager.eventStatus = EventStatus.None; 
         }
       }
     );
@@ -955,23 +985,23 @@ export class FlippingViewer extends Flipping implements IViewer {
    * @returns 
    */
   private documentMouseUp(event:Event){
-    if(!(this.eventStatus & EventStatus.Dragging)){ return; }
+    if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
     
     const page2El = this.activePage2El;
     if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-    const dataToFlip = this.getInfoToFlip(viewport);
+    const dataToFlip = this.flipManager.getInfoToFlip(viewport);
 
-    if(dataToFlip.isSnappingBack){ this.eventStatus = EventStatus.SnappingBack; }
-    else { this.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
+    if(dataToFlip.isSnappingBack){ this.flipManager.eventStatus = EventStatus.SnappingBack; }
+    else { this.flipManager.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
-    this.animateFlip(
+    this.flipManager.animateFlip(
       viewport, 
       dataToFlip.targetCornerGP,
       { width: page2El.offsetWidth, height: page2El.offsetHeight },
@@ -992,7 +1022,7 @@ export class FlippingViewer extends Flipping implements IViewer {
           this.shiftPages(dataToFlip.isFlippingForward)
         }
         this.unsetViewerToFlip();
-        this.eventStatus = EventStatus.None;
+        this.flipManager.eventStatus = EventStatus.None;
       }
     );
   }
@@ -1005,9 +1035,9 @@ export class FlippingViewer extends Flipping implements IViewer {
   private documentMouseMove(event:Event){
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
-    this.curMouseGP = viewport;
+    this.flipManager.curMouseGP = viewport;
 
-    if(!(this.eventStatus & EventStatus.Dragging)){ return; }
+    if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
 
     const page2El = this.activePage2El;
     if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
@@ -1029,7 +1059,7 @@ export class FlippingViewer extends Flipping implements IViewer {
   /**
    * Sets all events for viewer.
    */
-  private addEventListeners(){ 
+  private setEvents(){ 
     [
       { zoneEl: this.zoneLT, zone: Zone.LT },
       { zoneEl: this.zoneLC, zone: Zone.LC },
@@ -1046,5 +1076,14 @@ export class FlippingViewer extends Flipping implements IViewer {
     document.addEventListener('mouseup', this.documentMouseUp.bind(this));
     document.addEventListener('mousemove', this.documentMouseMove.bind(this));
     window.addEventListener('resize', () => { this.updateDimension(); });
+  }
+  /**
+   * 
+   */
+  private setBookEventListener(){
+    this.book?.addEventListener(BookEvent.pageAdded, this.appendShadowElIntoPageEl)
+  }
+  private removeBookEventListener(){
+    this.book?.removeEventListener(BookEvent.pageAdded, this.appendShadowElIntoPageEl)
   }
 }

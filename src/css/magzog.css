@@ -60,7 +60,7 @@ html, body {
   position: fixed;
   top: 0;
   left: 0;
-  padding: 50px;
+  padding: 0;
   width: 100vw;
   height: 100vh;
   background: rgba(255, 255, 255, 0.9);
@@ -92,41 +92,7 @@ html, body {
   line-height: 30px;
 }
 
-#bookViewer #bookContainer {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-#bookViewer #bookContainer .book {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: content-box;
-  width: 100%;
-  height: 100%;
-}
-
-/* Page container */
-#bookViewer .book > .container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-}
-
-/* Page */
-#bookViewer .book > .container > .page {
-  position:absolute;
-  box-sizing: border-box;
-  border:0px;
-  width: 100%;
-  height: 100%;
-}
 
 /* Temporary */
 img { width: 100%; height:100%; }

@@ -1,8 +1,12 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType } from "./models";
+import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType } from "../models";
 import { BookEl } from "./bookEl";
 import { Page } from "./page";
-import { BookSize, ISize, SizeExt } from "./dimension";
+import { BookSize, ISize, SizeExt } from "../dimension";
+import Event from "../event";
 
+export enum BookEvent {
+  pageAdded = 'pageAdded',
+}
 /**
  * Book class
  */
@@ -43,6 +47,9 @@ export class Book extends BookEl implements IBookData {
    * Returns and sets pages that the book contains
    */
   private pages: { [n:number|string]: Page };
+  /**
+   * 
+   */
   thumbnails: {
     spine: string;
     small: string;
@@ -54,7 +61,7 @@ export class Book extends BookEl implements IBookData {
   };
 
   constructor(book:IBookData) {
-    super(book.size.closed, book.thumbnails);
+    super(book);
     // TODO: id should be unique and exist.
     this.id = book.id;
     this.status = BookStatus.Close;
@@ -81,18 +88,6 @@ export class Book extends BookEl implements IBookData {
         back: "resources/default_back_cover.webp",
       }
     };
-    //
-    // Create initial pages
-    //
-    this.createInitialPages();
-  }
-  /**
-   * Creats empty pages to fill the book viewer for flipping effect.
-   */
-  createInitialPages() {
-    this.createEmptyPage(-3);
-    this.createEmptyPage(-2);
-    this.createEmptyPage(-1);
   }
   /**
    * Fetches and adds a page from server.
@@ -145,10 +140,7 @@ export class Book extends BookEl implements IBookData {
     }
 
     pageSamples.forEach((pageSample) => {
-      const page = new Page(pageSample, { 
-        clicked: this.pageClicked,
-        mousemoved: this.pageActive
-      });
+      const page = new Page(pageSample);
       this.addPage(page, page.index);
     });
 
@@ -161,12 +153,17 @@ export class Book extends BookEl implements IBookData {
    * @param page 
    * @param index 
    */
-  addPage(page: Page, index: number) { this.pages[index] = page; }
+  addPage(page: Page, index: number) {
+    this.pages[index] = page;
+    this.emitEvent(BookEvent.pageAdded, page);
+  }
   /**
    * Remove a page object from the book.
    * @param index 
    */
-  removePage(index: number) { delete this.pages[index]; }
+  removePage(index: number) { 
+    delete this.pages[index];
+  }
   /**
    * Returns the page object with the page index.
    * @param index 
@@ -199,6 +196,20 @@ export class Book extends BookEl implements IBookData {
     this.addPage(page, index);
     return page;
   }
-  pageClicked = (event:Event, param:any) => { }
-  pageActive = (event:Event, param:any) => { }
+
+  setEvents(event:BookEvent, handler:(event:Event)=>void){
+
+  }
+
+  resetBook():Promise<void>{
+    return new Promise((resolve, reject) => {
+      this.resetBookEls();
+      for(const idxStr in this.pages){ 
+        const page = this.pages[idxStr];
+        if(page.type == PageType.Empty){ this.removePage(Number(idxStr)); }
+        page.resetPageEls(); 
+      }
+      resolve();
+    })
+  }
 }

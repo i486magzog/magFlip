@@ -1,9 +1,10 @@
-import { ISize } from "./dimension";
+import { IBookData } from "../models";
+import { Base } from "./base";
 
 /**
  * Book element management class
  */
-export class BookEl {
+export class BookEl extends Base {
   /**
    * Returns and sets the info of thumbnails for the book.
    */
@@ -29,9 +30,10 @@ export class BookEl {
    */
   readonly pageContainerEl: HTMLElement;
 
-  constructor(size:ISize, thumbnails:any) {
+  constructor(book:IBookData) {
+    super();
     // TODO: id should be unique and exist.
-    this.thumbnails = thumbnails || {
+    this.thumbnails = book.thumbnails || {
       spine: "resources/default_spine.webp",
       small: "resources/default_small.webp",
       medium: "resources/default_medium.webp",
@@ -43,15 +45,11 @@ export class BookEl {
     //
     // Element creation
     //
-    const elements = this.createBookElement(size);
+    const elements = this.createBookElement();
     this.elementOnShelf = elements.bookOnShelfEl;
     this.element = elements.bookEl;
     this.pageContainerEl = elements.containerEl;
   }
-  /**
-   * Clears the children elements of the page container's element.
-   */
-  clearPageEls() { this.pageContainerEl.innerHTML = ""; }
   /**
    * Appends a page element into the page container element.
    * @param pageEl the page element to append.
@@ -69,10 +67,9 @@ export class BookEl {
   removePageEl(pageEl:HTMLElement){ this.pageContainerEl.removeChild(pageEl); }
   /**
    * Creates the book element and child elements
-   * @param size 
    * @returns 
    */
-  createBookElement(size:ISize): { bookOnShelfEl: HTMLElement, bookEl: HTMLElement, containerEl: HTMLElement } {
+  private createBookElement(): { bookOnShelfEl: HTMLElement, bookEl: HTMLElement, containerEl: HTMLElement } {
     const bookOnShelfEl = document.createElement('div');
     bookOnShelfEl.className = "book-on-shelf";
     const coverEl = document.createElement('img');
@@ -85,5 +82,19 @@ export class BookEl {
     bookEl.appendChild(containerEl);
 
     return { bookOnShelfEl: bookOnShelfEl, bookEl: bookEl, containerEl: containerEl };
+  }
+  /**
+   * Clears the children elements of the page container's element.
+   */
+  private clearPageEls() { this.pageContainerEl.innerHTML = ""; }
+  /**
+   * 
+   */
+  protected resetBookEls(){ 
+    const children = Array.from(this.element.children);
+    children.forEach(child => {
+      if(child !== this.pageContainerEl){ this.element.removeChild(child); }
+    });
+    this.clearPageEls(); 
   }
 }

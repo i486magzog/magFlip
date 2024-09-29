@@ -1,11 +1,11 @@
-import { MZMath } from './mzMath';
-import { AutoFlipType, EventStatus, Zone } from './models';
+import { MZMath } from '../mzMath';
+import { AutoFlipType, EventStatus, Zone } from '../models';
 import { PageWindow } from './pageWindow';
 import { FlipDiagonals } from './flipDiagonals';
-import { Point, Rect } from './shape';
+import { Point, Rect } from '../shape';
 import { Gutter } from './gutter';
 import { FlipActionLine } from './flipActionLine';
-import { ISize } from './dimension';
+import { ISize } from '../dimension';
 import { FlipData } from './flipData';
 /**
  * Flipping class

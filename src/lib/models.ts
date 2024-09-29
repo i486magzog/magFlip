@@ -1,5 +1,5 @@
-import { Book } from "./book";
-import { BookManager } from "./bookManager";
+import { Book } from "./core/book";
+import { BookManager } from "./core/bookManager";
 import { IBookSize, ISize } from "./dimension";
 import { Rect } from "./shape";
 
@@ -69,6 +69,11 @@ export enum AutoFlipType {
   MouseCursor=1,
 }
 
+export enum ViewerType {
+  Flipping="flipping",
+  Scrolling="scrolling"
+}
+
 export interface IZoneEventParams {
   zone: Zone,
   // backPage1El: HTMLElement,
@@ -131,7 +136,7 @@ export interface IViewer {
   readonly bookViewerEl: HTMLElement;
   readonly bookContainerEl: HTMLElement;
   get pageContainerRect():Rect;
-  view(book:Book, openRightPageIndex?:number):void;
+  view(book:Book, openPageIndex?:number):void;
   closeViewer():void;
-  createElements():void;
+  // createElements():void;
 }

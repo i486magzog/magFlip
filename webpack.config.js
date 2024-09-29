@@ -31,5 +31,5 @@ module.exports = {
       ],
     }),
   ],
-  mode: 'production', // 또는 'production'
+  mode: 'development', // 또는 'production'
 };
