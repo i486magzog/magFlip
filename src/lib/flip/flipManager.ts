@@ -147,6 +147,7 @@ export class Flipping extends PageWindow {
     //
     // Transform origin
     //
+    console.log(this.flipActionLine.y, containerRect.top, this.gutter)
     const originY = this.flipActionLine.y - containerRect.top;
     // page2El.style.transformOrigin = `${originX}px ${originY}px`;
     const docEl = document.documentElement;

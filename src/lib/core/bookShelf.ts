@@ -1,6 +1,6 @@
 // import './models'
 import { Book } from './book'
-import { BookManager } from './bookManager'
+import { BookShelfManager } from './bookShelfManager'
 
 interface IBookOnShelf {
   book: Book; 
@@ -15,7 +15,7 @@ export class BookShelf {
   /**
    * Returns the BookManager's instance.
    */
-  readonly bookManager: BookManager;
+  readonly bookManager: BookShelfManager;
   /**
    * Returns the book shelf's document id.
    */
@@ -29,7 +29,7 @@ export class BookShelf {
    */
   readonly element: Element;
 
-  constructor(bookManager:BookManager) {
+  constructor(bookManager:BookShelfManager) {
     this.booksOnShelf = {};
     this.bookManager = bookManager;
     this.bookShelfDocId = "bookShelf";

@@ -1,14 +1,16 @@
+import { IBookView } from '@lib/models';
 import { Book, BookEvent } from '../core/book'
-import { BookManager } from '../core/bookManager'
+import { BookShelfManager as BookShelfManager } from './bookShelfManager'
 import { MZMath } from '../mzMath';
 import { Base } from './base';
+import { FlipView } from '@lib/flip/flipViewer';
+import { ScrollView } from '@lib/scroll/scrollViewer';
 
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
 export type BookViewerElements = {
   bookViewerEl: HTMLElement,
-  bookContainerEl: HTMLElement
 }
 /**
  * BookViewer class
@@ -17,42 +19,60 @@ export type BookViewerElements = {
  */
 export class BookViewer extends Base {
   /**
+   * 
+   */
+  private registeredViews: { [n:string] : IBookView } = {};
+  /**
+   * 
+   * @param id 
+   * @param view 
+   */
+  registerView(id:string, view: IBookView) { this.registeredViews[id] = view; }
+  /**
+   * 
+   * @param id 
+   * @returns 
+   */
+  private getView(id:string){ return this.registeredViews[id]; }
+  /**
    * Book object.
    * This contains the most information of a book loaded to this viewer.
    */
-  protected book: Book | undefined;
+  private book:Book|undefined;
   /**
    * This is html document id of the book viewer.
    * It is set when creating a viewer instance or default value 'bookViewer' is set.
    */
-  readonly bookViewerDocId: string;
+  private readonly bookViewerDocId: string;
   /**
    * Returns the instance of BookManager.
    */
-  readonly bookManager: BookManager;
+  private readonly bookShelfManager: BookShelfManager;
   /**
    * Returns the DOM element of the book viewer with id 'bookViewer'.
    */
-  readonly bookViewerEl: HTMLElement;
+  private readonly element: HTMLElement;
   /**
    * Returns the DOM element of the book container with id 'bookContainer'.
    */
-  readonly bookContainerEl: HTMLElement;
+  private bookContainerEl: HTMLElement|undefined;
   /**
-   * This getter returns Rect data of the page container which is the child element of the book element.
+   * Returns the instance of current Viewer.
    */
-  get pageContainerRect(){
-    const el = this.book?.pageContainerEl;
-    if(!el){ throw new Error("Not found the page container.") }
-    return el && MZMath.getOffset4Fixed(el as HTMLDivElement)
-  }
+  private curView:IBookView;
 
-  constructor(bookManager:BookManager) {
+  constructor(bookManager:BookShelfManager) {
     super();
     this.bookViewerDocId = "bookViewer";
-    this.bookManager = bookManager;
-    ({ bookContainerEl:this.bookContainerEl, 
-      bookViewerEl: this.bookViewerEl } = this.createViewerElements());
+    this.bookShelfManager = bookManager;
+    const flipView = new FlipView();
+    this.registerView(flipView.id, flipView);
+    const scrollView = new ScrollView();
+    this.registerView(scrollView.id, scrollView);
+
+    this.curView = flipView;
+
+    ({ bookViewerEl: this.element } = this.createViewerElements());
   }
   /**
    * Creates the viewer related elements.
@@ -70,10 +90,7 @@ export class BookViewer extends Base {
     // Viewer
     viewerEl.className = "";
     viewerEl.classList.add("hidden");
-    // Book Container
-    const bookContainer = document.createElement('div');
-    bookContainer.id = "bookContainer";
-    viewerEl.appendChild(bookContainer);
+
     // Close Button
     const btnClose = document.createElement('button');
     btnClose.id = "btnClose";
@@ -81,22 +98,49 @@ export class BookViewer extends Base {
     btnClose.addEventListener('click', (event: Event) => { this.closeViewer(); });
     viewerEl.appendChild(btnClose);
 
-    return { 
-      bookContainerEl: bookContainer, 
-      bookViewerEl: viewerEl
-    } 
+    return { bookViewerEl: viewerEl } 
   };
   /**
    * Opens the book on the viewer.
    * @param book 
-   * @param openRightPageIndex 
+   * @param openPageIndex 
    */
-  view(book: Book, openRightPageIndex: number = 0) {
-    this.bookViewerEl?.classList.remove("hidden");
+  view(book: Book, openPageIndex: number = 0) {
     this.book = book;
+    this.element.className = 'hidden';
+    const bookContainerEl = this.bookContainerEl = this.curView.getBookContainerEl();
+    this.element.appendChild(bookContainerEl);
+    this.element.classList.add(this.curView.id);
+    this.curView.view(book, openPageIndex);
+    this.element.classList.remove("hidden");
   }
   /**
    * Closes the book on the viewer.
    */
-  closeViewer() { }
+  closeViewer(){
+    this.element.className = 'hidden';
+    this.bookContainerEl && this.element.removeChild(this.bookContainerEl);
+    this.curView.closeViewer();
+    this.bookShelfManager.returnBookToShelf(this.book);
+    if(this.book){
+      this.book.resetBook();
+      if(this.bookContainerEl){
+        this.bookContainerEl.className = "";
+        this.bookContainerEl.removeChild(this.book.element);
+        this.bookContainerEl = undefined;
+      }
+      this.book = undefined;
+    }
+  }
+  /**
+   * 
+   * @param id 
+   */
+  changeView(id:string){
+    console.log(this.registeredViews)
+    const view = this.getView(id);
+    if(view){
+      this.curView = view;
+    }
+  }
 }

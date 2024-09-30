@@ -1,7 +1,7 @@
-import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IViewer } from '../models';
+import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView } from '../models';
 import { Book, BookEvent } from '../core/book'
 import { Page } from '../core/page'
-import { BookManager } from '../core/bookManager'
+import { BookShelfManager } from '../core/bookShelfManager'
 import { BookViewer, BookViewerElements } from '../core/bookViewer'
 import { Flipping as FlipManager } from './flipManager'
 import { MZMath } from '../mzMath';
@@ -13,6 +13,7 @@ import { ISize } from '../dimension';
  * This is an object type used to reference Elements related to the Viewer.
  */
 type FlipViewerElements = {
+  bookContainerEl: HTMLElement,
   zoneLT: HTMLElement,
   zoneLC: HTMLElement,
   zoneLB: HTMLElement,
@@ -27,11 +28,26 @@ type FlipViewerElements = {
  * Gutter:
  * 
  */
-export class FlipViewer extends BookViewer implements IViewer{
+export class FlipView implements IBookView {
   private zoomLevel:number = 1;
-  // /**
-  //  * This getter returns Rect data of the page container which is the child element of the book element.
-  //  */
+  /**
+   * This id is unique string for FlipView object.
+   */
+  readonly id = 'flip-view';
+  /**
+   * Book object.
+   * This contains the most information of a book loaded to this viewer.
+   */
+  private book: Book | undefined;
+  /**
+   * Returns the DOM element of the book container with id 'bookContainer'.
+   */
+  readonly bookContainerEl: HTMLElement;
+
+  // readonly bookShelfManager: BookShelfManager;
+  /**
+   * This getter returns Rect data of the page container which is the child element of the book element.
+   */
   get pageContainerRect(){
     const el = this.book?.pageContainerEl;
     if(!el){ throw new Error("Not found the page container.") }
@@ -130,10 +146,9 @@ export class FlipViewer extends BookViewer implements IViewer{
    */
   private flipManager = new FlipManager();
 
-  constructor(bookManager:BookManager) {
-    super(bookManager);
-
-    ({zoneLT: this.zoneLT,
+  constructor() {
+    ({ bookContainerEl: this.bookContainerEl,
+      zoneLT: this.zoneLT,
       zoneLC: this.zoneLC,
       zoneLB: this.zoneLB,
       zoneRT: this.zoneRT,
@@ -155,12 +170,12 @@ export class FlipViewer extends BookViewer implements IViewer{
    * @returns ViewerElements
    */
   private createElements():FlipViewerElements {
-    const bookViewerEl = this.bookViewerEl;
-    const bookContainerEl = this.bookContainerEl;
-
+    // const bookViewerEl = this.bookViewerEl;
+    const bookContainerEl = document.createElement('div');
+    bookContainerEl.id = "bookContainer";
     // Viewer
     const svgNS = "http://www.w3.org/2000/svg";
-    bookViewerEl.classList.add("flip-type");
+    // bookViewerEl.classList.add("flip-view");
     // Book Container
     const zoneLT = document.createElement('div');
     const zoneLC = document.createElement('div');
@@ -279,10 +294,10 @@ export class FlipViewer extends BookViewer implements IViewer{
     defs.appendChild(sh1Filter);
     defs.appendChild(shadow3);
     defs.appendChild(shadow6);
-    bookViewerEl.appendChild(svg);
+    bookContainerEl.appendChild(svg);
 
     return { 
-      // bookContainerEl: bookContainerEl, 
+      bookContainerEl: bookContainerEl, 
       // bookViewerEl: bookViewerEl,
       zoneLT: zoneLT,
       zoneLC: zoneLC,
@@ -361,23 +376,36 @@ export class FlipViewer extends BookViewer implements IViewer{
     }
   }
   /**
+   * 
+   * @returns 
+   */
+  getBookContainerEl(){ return this.bookContainerEl; }
+  
+  private checkNum = 0;
+  private updateDimensionWhenRendered(){
+    if(++this.checkNum > 100){ return; }
+    setTimeout(() => {
+      if(this.flipManager.gutter.top == 0 && this.flipManager.gutter.bottom == 0){
+        this.updateDimension()
+      } else { this.updateDimensionWhenRendered(); }
+    }, 200);
+  }
+  /**
    * Opens the book on the viewer.
    * @param book 
    * @param openRightPageIndex 
    */
   view(book: Book, openRightPageIndex: number = 0) {
-    super.view(book);
-
     this.init();
-    this.bookViewerEl?.classList.add('flip-type');
-    this.bookViewerEl?.classList.remove("hidden");
-    this.book = book;
+    this.attachBook(book);
     this.setBookEventListener();
-    const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
-    this.attachBook();
     this.setViewer();
+    const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
     this.loadPages(newIndexRange);
     this.showPages(newIndexRange.start);
+    
+    this.updateDimensionWhenRendered();
+    return this.bookContainerEl;
   }
   /**
    * Closes the book on the viewer.
@@ -445,13 +473,19 @@ export class FlipViewer extends BookViewer implements IViewer{
   /**
    * Attach a book to this book viewer.
    */
-  private attachBook() {
-    const book = this.book;
+  private attachBook(book:Book) {
+    this.book = book;
     if(!book?.element){ throw new Error("Error the book opening"); }
   
-    // if(this.book?.getPage())
     this.bookContainerEl.appendChild(book.element);
     this.appendShadowEl4AllPage();
+  }
+  /**
+   * Returns the book back to the BookManager.
+   */
+  private detachBook() {
+    this.book = undefined;
+    this.flipManager.clearPageWindow();
   }
   /**
    * Sets the one of close/open states which has three states.
@@ -536,22 +570,6 @@ export class FlipViewer extends BookViewer implements IViewer{
     this.updateDimension();
 
     document.documentElement.style.setProperty('--page-diagonal-length', (closed.diagonal || 0) + 'px');
-  }
-  /**
-   * Returns the book back to the BookManager.
-   */
-  private detachBook() {
-    this.bookContainerEl.className = "";
-    this.bookViewerEl.className = "";
-    this.bookViewerEl.classList.add("hidden");  
-    if(this.book){
-      this.book.element.removeAttribute('style');
-      this.book.resetBook();
-      this.bookContainerEl.removeChild(this.book.element);
-      this.bookManager.returnBookToShelf(this.book);
-    }
-    this.book = undefined;
-    this.flipManager.clearPageWindow();
   }
   /**
    * Returns the first page's index of 6 pages related flipping effect.
@@ -837,9 +855,9 @@ export class FlipViewer extends BookViewer implements IViewer{
   private zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
     if(this.flipManager.eventStatus & EventStatus.Flipping
       || this.flipManager.eventStatus & EventStatus.Dragging){ return; }
-      this.flipManager.eventStatus = EventStatus.AutoFlipFromCorner;
+    this.flipManager.eventStatus = EventStatus.AutoFlipFromCorner;
+    this.flipManager.eventZone = param.zone;
 
-      this.flipManager.eventZone = param.zone;
     const page2El = this.activePage2El;
     if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     

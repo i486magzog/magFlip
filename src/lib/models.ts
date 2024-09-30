@@ -1,5 +1,6 @@
 import { Book } from "./core/book";
-import { BookManager } from "./core/bookManager";
+import { BookShelfManager } from "./core/bookShelfManager";
+import { BookViewer } from "./core/bookViewer";
 import { IBookSize, ISize } from "./dimension";
 import { Rect } from "./shape";
 
@@ -130,13 +131,11 @@ export interface IPageData {
   content: any;
 }
 
-export interface IViewer {
-  readonly bookManager: BookManager;
-  readonly bookViewerDocId: string;
-  readonly bookViewerEl: HTMLElement;
+export interface IBookView {
+  readonly id: string;
+  // private book: Book|undefined;
   readonly bookContainerEl: HTMLElement;
-  get pageContainerRect():Rect;
-  view(book:Book, openPageIndex?:number):void;
+  getBookContainerEl():HTMLElement;
+  view(book:Book, openPageIndex?:number):HTMLElement;
   closeViewer():void;
-  // createElements():void;
 }

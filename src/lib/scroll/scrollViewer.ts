@@ -1,91 +1,81 @@
 import { BookViewer, BookViewerElements } from "@lib/core/bookViewer";
 import { Book } from "../core/book";
-import { BookManager } from "../core/bookManager";
-import { IPageData, IViewer } from "../models";
+import { BookShelfManager } from "../core/bookShelfManager";
+import { IPageData, IBookView } from "../models";
 import { MZMath } from "../mzMath";
 /**
  * This is an object type used to reference Elements related to the ScrollingViewer.
  */
 type ScrollViewerElements =  {
-  
+  bookContainerEl:HTMLElement
 }
 /**
  * 
  */
-export class ScrollViewer extends BookViewer implements IViewer {
+export class ScrollView implements IBookView{
   /**
-   * This getter returns Rect data of the page container which is the child element of the book element.
+   * This id is unique string for FlipView object.
    */
-  get pageContainerRect(){
-    const el = this.book?.pageContainerEl;
-    if(!el){ throw new Error("Not found the page container.") }
-    return el && MZMath.getOffset4Fixed(el as HTMLDivElement)
-  }
-  constructor(bookManager:BookManager, viewerId?:string) {
-    super(bookManager);
-    this.createElements();
+  readonly id = 'scroll-view';
+  /**
+   * Book object.
+   * This contains the most information of a book loaded to this viewer.
+   */
+  private book: Book | undefined;
+  /**
+   * Returns the DOM element of the book container with id 'bookContainer'.
+   */
+  readonly bookContainerEl: HTMLElement;
+  constructor() {
+    ({ bookContainerEl: this.bookContainerEl} = this.createElements());
   }
   /**
    * Creates the viewer related elements.
    * @returns ViewerElements
    */
   createElements():ScrollViewerElements {  
-    const bookViewerEl = this.bookViewerEl;
-    const bookContainerEl = this.bookContainerEl;
-    // Viewer
-    // const svgNS = "http://www.w3.org/2000/svg";
-    bookViewerEl.classList.add("scroll-type");
-
+    const svgNS = "http://www.w3.org/2000/svg";
+    const bookContainerEl = document.createElement('div');
+    bookContainerEl.id = "bookContainer";
+    
     return {
-      bookViewerEl: bookViewerEl,
+      // bookViewerEl: bookViewerEl,
       bookContainerEl: bookContainerEl
     };
   };
+  getBookContainerEl(){ return this.bookContainerEl; }
   /**
    * 
    * @param book 
    * @param openPageIndex 
    */
-  view(book:Book, openPageIndex:number = 0):void{
-    super.view(book);
-    // this.init();
-    this.bookViewerEl?.classList.add('scroll-type');
-    this.bookViewerEl?.classList.remove("hidden");
-    this.book = book;
-    this.attachBook();
+  view(book:Book, openPageIndex:number = 0):HTMLElement{
+    this.attachBook(book);
     this.setViewer();
     const indexRange = { start:openPageIndex-3, cnt:6 };
     this.loadPages(indexRange);
     this.showPages(indexRange);
+
+    return this.bookContainerEl;
   }
   /**
    * 
    */
   closeViewer():void{
     // TODO Save current book status.
-    // this.init();
     this.detachBook(); 
   }
   /**
    * Returns the book back to the BookManager.
    */
   private detachBook() {
-    this.bookContainerEl.className = "";
-    this.bookViewerEl.className = "";
-    this.bookViewerEl.classList.add("hidden");  
-    if(this.book){
-      this.book.element.removeAttribute('style');
-      this.book.resetBook();
-      this.bookContainerEl.removeChild(this.book.element);
-      this.bookManager.returnBookToShelf(this.book);
-    }
     this.book = undefined;
   }
   /**
    * Attach a book to this book viewer.
    */
-  private attachBook() {
-    const book = this.book;
+  private attachBook(book:Book) {
+    this.book = book;
     if(!book?.element){ throw new Error("Error the book opening"); }
     this.bookContainerEl.appendChild(book.element);
   }

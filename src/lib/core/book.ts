@@ -203,6 +203,7 @@ export class Book extends BookEl implements IBookData {
 
   resetBook():Promise<void>{
     return new Promise((resolve, reject) => {
+      this.element.removeAttribute('style');
       this.resetBookEls();
       for(const idxStr in this.pages){ 
         const page = this.pages[idxStr];
