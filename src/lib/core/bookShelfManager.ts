@@ -117,6 +117,11 @@ export class BookShelfManager {
 
     this.addBookToShelf(bookSample);
   }
+  importBookToShelf(book:Book){
+    this.bookShelf.addBook(book, {
+      click: (event: Event) => { this.pickupAndView(this.getBook(book.id)); }
+    });
+  }
   /**
    * Append the book to the shelf.
    * @param id 

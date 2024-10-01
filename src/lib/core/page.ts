@@ -4,9 +4,6 @@ import { PageEl } from "./pageEl";
 /**
  * 
  */
-/**
- * 
- */
 export enum PageEvent {
 }
 /**
@@ -42,6 +39,7 @@ export class Page extends PageEl implements IPageData {
    * Returns the content of this page.
    */
   content: any;
+  image: string;
 
   
   constructor(page:IPageData) {
@@ -55,7 +53,8 @@ export class Page extends PageEl implements IPageData {
     this.index = page.index;
     this.ignore = page.ignore || false;
     this.content = page.content || "";
-    
+    this.image = page.image || '';
+
     this.setEvents();
   }
   /**

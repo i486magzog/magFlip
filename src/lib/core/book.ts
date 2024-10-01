@@ -73,11 +73,11 @@ export class Book extends BookEl implements IBookData {
       location: "Location",
       publishedDate: "Published Date"
     };
-    this.size = new BookSize(book.size) || {
+    this.size = new BookSize(book.size|| {
       closed: new SizeExt(DefaultSize.bookWidth, DefaultSize.bookHeight),
       opened: new SizeExt(DefaultSize.bookWidth*2, DefaultSize.bookHeight)
-    };
-    this.lastPageIndex = book.lastPageIndex;
+    });
+    this.lastPageIndex = book.lastPageIndex%2 == 0 ? book.lastPageIndex+1: book.lastPageIndex ;
     this.pages = {};
     this.thumbnails = book.thumbnails || {
       spine: "resources/default_spine.webp",
@@ -104,6 +104,7 @@ export class Book extends BookEl implements IBookData {
       number: undefined,
       ignore: false,
       content: "",
+      image: `./resources/page${index}.jpg`
     };
     const page = new Page(pageSample);
     this.addPage(page, index);
@@ -123,7 +124,8 @@ export class Book extends BookEl implements IBookData {
     if(startIndex < 0){ startIndex = 0; }
     // TODO: fecth page from the server
     const pageSamples:IPageData[] = [];
-    const maxIndex = startIndex + indexRange.cnt;
+    let maxIndex = startIndex + indexRange.cnt;
+    if(maxIndex > this.lastPageIndex){ maxIndex = this.lastPageIndex; }
     for(let i=startIndex; i<maxIndex; i++){
       // TODO: if the page is already loaded, do not fetch the page.
       if(this.pages[i]){ continue; }
@@ -135,7 +137,8 @@ export class Book extends BookEl implements IBookData {
         index: i,
         number: undefined,
         ignore: false,
-        content: ""
+        content: "",
+        image: `./resources/page${i}.jpg`
       },);
     }
 
@@ -146,6 +149,15 @@ export class Book extends BookEl implements IBookData {
 
     return new Promise((resolve, reject) => {
       resolve(pageSamples);
+    })
+  }
+
+  importPages(pages:IPageData[], size: ISize){
+    this.size.closed = new SizeExt(size.width, size.height);
+    this.size.opened = new SizeExt(size.width*2, size.height);
+    pages.forEach(pageData => {
+      const page = new Page(pageData);
+      this.addPage(page, page.index);
     })
   }
   /**

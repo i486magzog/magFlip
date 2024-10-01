@@ -100,17 +100,17 @@ export interface IBox {
 
 export interface IBookData {
   id: string;
-  status: BookStatus;
-  title: string;
-  author: string;
-  type: BookType;
+  status?: BookStatus;
+  title?: string;
+  author?: string;
+  type?: BookType;
   publication?: IPublication;
   lastPageIndex: number;
   /**
    * The book size when it is close.
    */
-  size:IBookSize;
-  thumbnails: {
+  readonly size?:IBookSize;
+  thumbnails?: {
     spine: string;
     small: string;
     medium: string;
@@ -123,12 +123,13 @@ export interface IBookData {
 
 export interface IPageData {
   id: string;
-  type: PageType;
-  size: ISize;
+  type?: PageType;
+  size?: ISize;
   index: number;      // index of the page in the book
-  number: number | undefined;  // displayed number of the page in the book
-  ignore: boolean;    // ignore the page when displaying the book
-  content: any;
+  number?: number | undefined;  // displayed number of the page in the book
+  ignore?: boolean;    // ignore the page when displaying the book
+  content?: any;
+  image?: string;
 }
 
 export interface IBookView {

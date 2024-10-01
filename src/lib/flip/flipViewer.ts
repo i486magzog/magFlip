@@ -859,7 +859,8 @@ export class FlipView implements IBookView {
     this.flipManager.eventZone = param.zone;
 
     const page2El = this.activePage2El;
-    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    if(!page2El){ return }
+    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
@@ -902,7 +903,8 @@ export class FlipView implements IBookView {
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
     const page2El = this.activePage2El;
 
-    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    if(!page2El){ return }
+    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     if(!this.pageContainerRect){ return; }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
@@ -935,7 +937,8 @@ export class FlipView implements IBookView {
     this.flipManager.eventZone = param.zone;
 
     const page2El = this.activePage2El;
-    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    if(!page2El){ return }
+    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
@@ -964,7 +967,8 @@ export class FlipView implements IBookView {
     this.flipManager.eventStatus = EventStatus.AutoFlipToCorner;
 
     const page2El = this.activePage2El;
-    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    if(!page2El){ return }
+    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
@@ -1006,7 +1010,8 @@ export class FlipView implements IBookView {
     if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
     
     const page2El = this.activePage2El;
-    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    if(!page2El){ return }
+    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
@@ -1058,7 +1063,8 @@ export class FlipView implements IBookView {
     if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
 
     const page2El = this.activePage2El;
-    if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
+    if(!page2El){ return }
+    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
