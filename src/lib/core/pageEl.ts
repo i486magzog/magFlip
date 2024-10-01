@@ -77,8 +77,8 @@ export class PageEl extends Base {
       contentContainerEl.className = `content-container`;
       const contentEl = document.createElement('div');
       contentEl.className = `content`;
-      contentEl.innerHTML = page.content;
-      contentEl.innerHTML += `<img src="./resources/page${page.index+1}.jpg"/>`;
+      contentEl.innerHTML = page.content || '';
+      contentEl.innerHTML += page.image ? `<img src="${page.image}"/>` : '';
       contentContainerEl.appendChild(contentEl)
       pageEl.appendChild(contentContainerEl);
       

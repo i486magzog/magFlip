@@ -87,7 +87,10 @@
 
 /* Page */
 #bookViewer.flip-view #bookContainer.ready-to-open .book > .container > .page { width:100%; }
-#bookViewer.flip-view .book > .container > .page.empty { opacity:0; }
+#bookViewer.flip-view .book > .container > .page.empty:nth-child(3) { opacity: 0; }
+#bookViewer.flip-view #bookContainer.ready-to-open.front .book > .container > .page.empty:nth-child(-n+3),
+#bookViewer.flip-view #bookContainer.ready-to-open.end .book > .container > .page.empty:nth-child(n+4):nth-child(-n+6) { display: none; }
+
 #bookViewer.flip-view .book > .container > .page {
   position:absolute;
   box-sizing: border-box;
