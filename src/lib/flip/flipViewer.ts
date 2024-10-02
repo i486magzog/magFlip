@@ -8,7 +8,7 @@ import { MZMath } from '../mzMath';
 import { Gutter } from './gutter';
 import { Line, Point, Rect } from '../shape';
 import { ISize } from '../dimension';
-
+import './flipViewer.css'; 
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */

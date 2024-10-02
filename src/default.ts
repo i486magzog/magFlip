@@ -2,6 +2,7 @@ import { BookViewer } from '@lib/core/bookViewer';
 import { BookShelfManager } from './lib/core/bookShelfManager';
 import { Book } from '@lib/core/book';
 import { Page } from '@lib/core/page';
+import './magzog.css';
 
 var bookManager: BookShelfManager;
 var bookViewer: BookViewer;
