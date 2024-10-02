@@ -20,13 +20,17 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
         { from: 'src/*.html', to: '[name][ext]' }, // HTML 파일 복사
-        { from: 'src/css', to: 'css' }, // CSS 폴더 복사
+        // { from: 'src/css', to: 'css' }, // CSS 폴더 복사
         { from: 'src/resources', to: 'resources' }, // 리소스 폴더 복사
       ],
     }),
