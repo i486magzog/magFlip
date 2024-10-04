@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "ES6",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true,
+    "declaration": true,
+    "declarationDir": "./types", 
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules", "./dist", "./types"]
+}
