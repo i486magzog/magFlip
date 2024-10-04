@@ -30,6 +30,7 @@
     "directory": "packages/minjs"
   },
   "scripts": {
+    "prebuild": "npm version patch",
     "build:dev": "BUILD=dev npx rollup -c",
     "build:dev:watch": "BUILD=dev npx rollup -cw",
     "build": "BUILD=prod npx rollup -c",
