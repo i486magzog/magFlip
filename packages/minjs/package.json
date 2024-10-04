@@ -1,0 +1,44 @@
+{
+  "name": "@magflip/minjs",
+  "version": "0.5.1",
+  "title": "MagFlip: Magzog's flip book",
+  "description": "Provides a bundled JavaScript file containing all magFlip-related packages, which can be easily added and used via a <script> tag.",
+  "type": "module",
+  "author": {
+    "name": "Sing Graajae Cho",
+    "email": "sing@magzog.com",
+    "url": "https://github.com/i486magzog"
+  },
+  "license": "MIT",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "keywords": [
+    "flip",
+    "flipbook",
+    "flippage",
+    "flipping",
+    "page-flip",
+    "magflip",
+    "ebook",
+    "book",
+    "magzog"
+  ],
+  "homepage": "https://github.com/i486magzog/magFlip",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/i486magzog/magFlip.git",
+    "directory": "packages/minjs"
+  },
+  "scripts": {
+    "build:dev": "BUILD=dev npx rollup -c",
+    "build:dev:watch": "BUILD=dev npx rollup -cw",
+    "build": "BUILD=prod npx rollup -c",
+    "build:watch": "BUILD=prod npx rollup -cw"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.24.0"
+  }
+}
