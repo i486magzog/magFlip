@@ -1,6 +1,8 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
+import postcss from 'rollup-plugin-postcss';
+import cssnano from 'cssnano';
 
 export default {
   input: 'src/index.js',  // 번들링의 진입점 (로컬 패키지들을 사용하는 파일)
@@ -13,8 +15,14 @@ export default {
     sourcemap: process.env.BUILD == 'dev',
   },
   plugins: [
-    resolve(),         // Node.js 모듈 로드
-    commonjs(),        // CommonJS 모듈 변환
-    terser()           // .min.js 파일로 압축
+    resolve(),
+    commonjs(),
+    terser(),
+    postcss({
+      plugins: [
+        cssnano()
+      ],
+      // extract: 'magflip.min.css',
+    })
   ],
 };
