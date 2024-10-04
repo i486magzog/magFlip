@@ -1,4 +1,4 @@
-# MagFlip
+# MagFlip ![npm version](https://img.shields.io/npm/v/@magflip/minjs)
 ***<span style="color:yellow">MagFlip</span>*** is *<u>Magzog</u>'s first open project, implementing a page-flipping effect for books. Additionally, the ***<span style="color:green">MagFlipEditor</span>***, which allows for the creation and editing of books, and the ***<span style="color:green">MagFlipServer</span>***, which manages and serves book information, are also currently in development.
 See [demo](https://i486magzog.github.io/magflip.html).
 
@@ -19,8 +19,8 @@ npm install --save-dev @magflip/scrollview
 <br>
 
 ### Pre-built browser ready bundle
-Include the following lines of code in the `<head>` section of your page:
-Please refer to the [sample code](./example/prebuild/) for more details.
+Include the following lines of code in the `<head>` section of your page:<br>
+Please refer to the [sample code](./docs/examples/prebuild) for more details.
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.11/magflip.min.js"></script>
 ```
