@@ -11,20 +11,17 @@
     "build:dev:watch:minjs": "npm run build:dev:watch --workspace packages/minjs",
     "build:minjs": "npm run build --workspace packages/minjs",
     "build:watch:minjs": "npm run build:watch --workspace packages/minjs",
-
     "build:common": "npm run build --workspace packages/common",
     "build:watch:common": "npm run build:watch --workspace packages/common",
-
     "build:core": "npm run build --workspace packages/core",
     "build:watch:core": "npm run build:watch --workspace packages/core",
-
     "build:flipview": "npm run build --workspace packages/flipview",
     "build:watch:flipview": "npm run build:watch --workspace packages/flipview",
-
     "build:scrollview": "npm run build --workspace packages/scrollview",
     "build:watch:scrollview": "npm run build:watch --workspace packages/scrollview",
     
-    "build:all": "npm run build --workspaces"
+    "build:all": "npm run build --workspaces",
+    "versionup:minor:all": "npm version minor --git-tag-version"
   },
   "devDependencies": {}
 }

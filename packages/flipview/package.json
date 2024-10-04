@@ -30,6 +30,7 @@
     "directory": "packages/flipview"
   },
   "scripts": {
+    "versionup:minor": "npm version minor --git-tag-version",
     "prebuild": "npm version patch",
     "build": "tsc && npx rollup -c",
     "build:watch": "tsc && npx rollup -cw"
