@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, BookSize, ISize, SizeExt } from "@magflip/common";
+import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, BookSize, ISize, SizeExt, IBook, IPage } from "@magflip/common";
 import { BookEl } from "./bookEl";
 import { Page } from "./page";
 
@@ -8,7 +8,7 @@ export enum BookEvent {
 /**
  * Book class
  */
-export class Book extends BookEl implements IBookData {
+export class Book extends BookEl implements IBook {
   /**
    * Returns the book id.
    */
@@ -44,7 +44,7 @@ export class Book extends BookEl implements IBookData {
   /**
    * Returns and sets pages that the book contains
    */
-  private pages: { [n:number|string]: Page };
+  private pages: { [n:number|string]: IPage };
   /**
    * 
    */
@@ -120,12 +120,13 @@ export class Book extends BookEl implements IBookData {
     let startIndex = indexRange.start;
     // if start index is negative set it as zero.
     if(startIndex < 0){ startIndex = 0; }
-    // TODO: fecth page from the server
     const pageSamples:IPageData[] = [];
     let maxIndex = startIndex + indexRange.cnt;
     if(maxIndex > this.lastPageIndex){ maxIndex = this.lastPageIndex; }
+
+    // TODO: fecth page from the server
     for(let i=startIndex; i<maxIndex; i++){
-      // TODO: if the page is already loaded, do not fetch the page.
+      // If the page is already loaded, do not fetch the page.
       if(this.pages[i]){ continue; }
 
       pageSamples.push({
@@ -163,7 +164,7 @@ export class Book extends BookEl implements IBookData {
    * @param page 
    * @param index 
    */
-  addPage(page: Page, index: number) {
+  addPage(page: IPage, index: number) {
     this.pages[index] = page;
     this.emitEvent(BookEvent.pageAdded, page);
   }

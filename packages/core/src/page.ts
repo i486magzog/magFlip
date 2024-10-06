@@ -1,4 +1,4 @@
-import { ISize, DefaultSize, IPageData, PageType } from "@magflip/common";
+import { ISize, DefaultSize, IPage, IPageData, PageType } from "@magflip/common";
 import { PageEl } from "./pageEl";
 /**
  * 
@@ -8,7 +8,7 @@ export enum PageEvent {
 /**
  * Page class
  */
-export class Page extends PageEl implements IPageData {
+export class Page extends PageEl implements IPage {
   /**
    * Returns the page's id.
    */
@@ -91,7 +91,7 @@ export class Page extends PageEl implements IPageData {
    * Adds all events related to this page.
    * @param handlers 
    */
-  setEvents(){
+  setEvents():void{
     
   }
 }

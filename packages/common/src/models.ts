@@ -121,6 +121,42 @@ export interface IBookData {
   };
 }
 
+export interface IBook extends IBookData {
+  fetchPage(index: number):Promise<IPageData>;
+  fetchPages(indexRange: {start:number, cnt:number}):Promise<IPageData[]>;
+  importPages(pages:IPageData[], size: ISize):void;
+  addPage(page: IPage, index: number):void;
+  removePage(index: number):void;
+  getPage(index: number):IPage;
+  getPages():{ [n:string]: IPage };
+  getPageCnt():number;
+  getPageEl(index: number):HTMLElement;
+  createEmptyPage(index:number, size?:ISize):IPage;
+  // setEvents(event:BookEvent, handler:(event:Event)=>void):void;
+  resetBook():Promise<void>;
+}
+
+export interface IBookEl {
+  readonly elementOnShelf: HTMLElement;
+  readonly element: HTMLElement;
+  readonly pageContainerEl: HTMLElement;
+  
+  appendPageEl(pageEl:HTMLElement):void;
+  prependPageEl(pageEl:HTMLElement):void;
+  removePageEl(pageEl:HTMLElement):void;
+}
+
+export interface IPage extends IPageData, IPageEl {
+  setEvents():void;
+}
+
+export interface IPageEl {
+  readonly element: HTMLElement;
+  readonly contentContainerEl: HTMLElement;
+  readonly contentEl: HTMLElement;
+  resetPageEls():void;
+}
+
 export interface IPageData {
   id: string;
   type?: PageType;

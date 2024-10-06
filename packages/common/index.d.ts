@@ -128,6 +128,41 @@ interface IBookData {
         };
     };
 }
+interface IBook extends IBookData {
+    fetchPage(index: number): Promise<IPageData>;
+    fetchPages(indexRange: {
+        start: number;
+        cnt: number;
+    }): Promise<IPageData[]>;
+    importPages(pages: IPageData[], size: ISize): void;
+    addPage(page: IPage, index: number): void;
+    removePage(index: number): void;
+    getPage(index: number): IPage;
+    getPages(): {
+        [n: string]: IPage;
+    };
+    getPageCnt(): number;
+    getPageEl(index: number): HTMLElement;
+    createEmptyPage(index: number, size?: ISize): IPage;
+    resetBook(): Promise<void>;
+}
+interface IBookEl {
+    readonly elementOnShelf: HTMLElement;
+    readonly element: HTMLElement;
+    readonly pageContainerEl: HTMLElement;
+    appendPageEl(pageEl: HTMLElement): void;
+    prependPageEl(pageEl: HTMLElement): void;
+    removePageEl(pageEl: HTMLElement): void;
+}
+interface IPage extends IPageData, IPageEl {
+    setEvents(): void;
+}
+interface IPageEl {
+    readonly element: HTMLElement;
+    readonly contentContainerEl: HTMLElement;
+    readonly contentEl: HTMLElement;
+    resetPageEls(): void;
+}
 interface IPageData {
     id: string;
     type?: PageType;
@@ -308,4 +343,4 @@ declare class MZMath {
     static findPerpendicularFoot(line: Line, c: Point): Point;
 }
 
-export { AutoFlipType, BookSize, BookStatus, BookType, DefaultSize, EventStatus, type IBookData, type IBookSize, type IBookView, type IBox, type IEventHandlers, type ILeftRight, type ILine, type IPageData, type IPoint, type IPublication, type IRect, type ISize, type ISizeExt, type ITopBottom, type IZoneEventParams, Line, MZEvent, MZMath, PageType, Point, Rect, SizeExt, ViewerType, Zone };
+export { AutoFlipType, BookSize, BookStatus, BookType, DefaultSize, EventStatus, type IBook, type IBookData, type IBookEl, type IBookSize, type IBookView, type IBox, type IEventHandlers, type ILeftRight, type ILine, type IPage, type IPageData, type IPageEl, type IPoint, type IPublication, type IRect, type ISize, type ISizeExt, type ITopBottom, type IZoneEventParams, Line, MZEvent, MZMath, PageType, Point, Rect, SizeExt, ViewerType, Zone };

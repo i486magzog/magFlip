@@ -37,7 +37,7 @@ export class PageEl extends Base {
    * @param page 
    * @returns 
    */
-  createPageElement(page: IPageData):PageElements {
+  private createPageElement(page: IPageData):PageElements {
     const pageEl = document.createElement('div'); 
     pageEl.className = "page";
     pageEl.setAttribute('pageIdx', `${page.index}`);
