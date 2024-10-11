@@ -47,16 +47,11 @@
             index: 5,
             image: './resources/book1/page5.jpg'
         },
-        {
-            id: "page6",
-            index: 6,
-            image: './resources/book1/page6.jpg'
-        },
       ];
 
       const book = new Book({ 
         id: 'mybook1', 
-        lastPageIndex: 7,
+        lastPageIndex: 5,
         thumbnails: {
           spine: pages[0].image,
           small: pages[0].image,
@@ -76,8 +71,8 @@
       bookViewer.setCurView(view.id)
       // bookManager.loadAndAddBooks();
       bookManager.importBookToShelf(book);
-      bookManager.importBookToShelf(getSampleBook(2, 11));
-      bookManager.importBookToShelf(getSampleBook(3, 17));
+      bookManager.importBookToShelf(getSampleBook(2, 10));
+      bookManager.importBookToShelf(getSampleBook(3, 16));
 
       window.bookManager = bookManager;
       window.bookViewer = bookViewer;
