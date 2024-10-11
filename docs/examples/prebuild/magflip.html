@@ -2,7 +2,14 @@
 <html>
 <head>
     <title>Magzog</title>
-    <link rel="stylesheet" type="text/css" href="magzog.css">
+    <style>
+      #bookShelf .book, 
+      #bookShelf .book-holder, 
+      #bookShelf .book-on-shelf {
+        height: 200px !important;
+        width: 200px !important;
+      }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.13/magflip.min.js"></script>
     <script>
     <!--
@@ -45,11 +52,6 @@
             index: 6,
             image: './resources/book1/page6.jpg'
         },
-        {
-            id: "page7",
-            index: 7,
-            image: './resources/book1/page7.jpg'
-        }
       ];
 
       const book = new Book({ 
@@ -65,8 +67,8 @@
           }
         }
       })
-
-      book.importPages(pages, { width: 790, height: 1024 });
+      book.importPages(pages, { width: 1024, height: 1024 });
+      // Import Book
       bookManager = new BookShelfManager();
       bookViewer = bookManager.getBookViewer();
       const view = new FlipView();
@@ -74,6 +76,8 @@
       bookViewer.setCurView(view.id)
       // bookManager.loadAndAddBooks();
       bookManager.importBookToShelf(book);
+      bookManager.importBookToShelf(getSampleBook(2, 11));
+      bookManager.importBookToShelf(getSampleBook(3, 17));
 
       window.bookManager = bookManager;
       window.bookViewer = bookViewer;
@@ -82,6 +86,32 @@
     window.onload = function () {
       console.log('All resources including images are loaded');
     };
+
+    function getSampleBook(bookNum, pageCnt){
+      const pages = [];
+      for(let i=0;i<pageCnt;i++){
+        pages.push({
+          id: "page"+i,
+          index: i,
+          image: `./resources/book${bookNum}/page${i}.jpg`
+        })
+      }
+      const book = new Book({ 
+        id: 'mybook' + bookNum, 
+        lastPageIndex: pageCnt-1,
+        thumbnails: {
+          spine: pages[0].image,
+          small: pages[0].image,
+          medium: pages[0].image,
+          cover: {
+            front: pages[0].image,
+            back: pages[0].image,
+          }
+        }
+      })
+      book.importPages(pages, { width: 700, height: 700 });
+      return book;
+    }
     -->
   </script>
 </head>
