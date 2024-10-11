@@ -4,4 +4,6 @@
 /**/types
 
 /packages/minjs/magflip.min.js
-/packages/*/index.*
+/packages/*/index.d.ts
+/packages/*/index.js
+/packages/*/index.css
