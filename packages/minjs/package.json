@@ -1,6 +1,6 @@
 {
   "name": "@magflip/minjs",
-  "version": "0.5.25",
+  "version": "0.5.26",
   "title": "MagFlip: Magzog's flip book",
   "description": "Provides a bundled JavaScript file containing all magFlip-related packages, which can be easily added and used via a <script> tag.",
   "type": "module",
@@ -36,7 +36,7 @@
     "build:dev:watch": "BUILD=dev npx rollup -cw",
     "build": "BUILD=prod npx rollup -c",
     "build:watch": "BUILD=prod npx rollup -cw",
-    "pub": "node ./publish.mjs && npm publish --access public --otp=$npm_config_otp"
+    "pub": "node ./npm_scripts/update_version.mjs && npm publish --access public --otp=$npm_config_otp"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.0",
