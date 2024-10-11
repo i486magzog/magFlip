@@ -1,5 +1,4 @@
-import { Book } from "@magflip/core";
-import { IPageData, IBookView, MZMath } from "@magflip/common";
+import { IPageData, IBookView, Book } from "@magflip/core";
 /**
  * This is an object type used to reference Elements related to the ScrollingViewer.
  */

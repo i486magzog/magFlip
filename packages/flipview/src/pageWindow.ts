@@ -1,5 +1,4 @@
-import { IPage } from '@magflip/common';
-import { Page } from '@magflip/core';
+import { IPage } from '@magflip/core';
 /**
  * Page Window Interface
  */

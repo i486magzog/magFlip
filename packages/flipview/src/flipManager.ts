@@ -1,4 +1,4 @@
-import { MZMath, Point, Rect, ISize, AutoFlipType, EventStatus, Zone } from '@magflip/common';
+import { MZMath, Point, Rect, ISize, AutoFlipType, EventStatus, Zone } from '@magflip/core';
 import { Gutter } from './gutter';
 import { FlipData } from './flipData';
 import { PageWindow } from './pageWindow';
