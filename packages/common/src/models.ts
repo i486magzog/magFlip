@@ -147,6 +147,7 @@ export interface IBookEl {
 }
 
 export interface IPage extends IPageData, IPageEl {
+  size: ISize;
   setEvents():void;
 }
 

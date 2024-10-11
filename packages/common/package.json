@@ -1,6 +1,6 @@
 {
   "name": "@magflip/common",
-  "version": "0.5.1",
+  "version": "0.5.4",
   "title": "MagFlip(Magzog's flip book) Common libraries",
   "description": "A collection of commonly used libraries in MagFlip.",
   "type": "module",

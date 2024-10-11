@@ -1,6 +1,6 @@
 {
   "name": "@magflip/core",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "title": "MagFlip(Magzog's flip book) Core Package",
   "description": "Contains core MagFlip objects such as Book, Page, BookShelf, and BookViewer.",
   "type": "module",

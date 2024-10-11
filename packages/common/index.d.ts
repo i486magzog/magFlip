@@ -155,6 +155,7 @@ interface IBookEl {
     removePageEl(pageEl: HTMLElement): void;
 }
 interface IPage extends IPageData, IPageEl {
+    size: ISize;
     setEvents(): void;
 }
 interface IPageEl {

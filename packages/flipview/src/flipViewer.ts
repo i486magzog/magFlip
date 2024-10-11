@@ -1,4 +1,4 @@
-import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect } from '@magflip/common';
+import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage } from '@magflip/common';
 import { Book, BookEvent, Page } from '@magflip/core'
 import { Flipping as FlipManager } from './flipManager'
 import { Gutter } from './gutter';
@@ -122,11 +122,11 @@ export class FlipView implements IBookView {
    * Returns the instance of Page with sequence of active page.
    * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
    */
-  private getActivePage(activePageNum:number):Page|undefined { return this.isLeftPageFlipping ? this.flipManager.windows[3-activePageNum].page : this.flipManager.windows[2+activePageNum].page; }
+  private getActivePage(activePageNum:number):IPage|undefined { return this.isLeftPageFlipping ? this.flipManager.windows[3-activePageNum].page : this.flipManager.windows[2+activePageNum].page; }
   /**
    * Returns the instance of Page for active page 2.
    */
-  private get activePage2():Page|undefined { return this.getActivePage(2); }
+  private get activePage2():IPage|undefined { return this.getActivePage(2); }
   /**
    * Returns the element of the active page 1.
    */
@@ -312,7 +312,7 @@ export class FlipView implements IBookView {
    * 
    * @param page 
    */
-  private appendShadowElIntoPageEl(page:Page){
+  private appendShadowElIntoPageEl(page:IPage){
     const pageW = page.size.width;
     const pageEl = page.element;
     // Shadow

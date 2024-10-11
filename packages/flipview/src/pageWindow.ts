@@ -1,9 +1,10 @@
+import { IPage } from '@magflip/common';
 import { Page } from '@magflip/core';
 /**
  * Page Window Interface
  */
 interface IPageWindow {
-  page: Page | undefined;
+  page: IPage | undefined;
 }
 /**
  * PageWindow class
@@ -29,14 +30,14 @@ export class PageWindow {
    * @param index Window index
    * @param page 
    */
-  loadPageToWindow(index: number, page: Page) {
+  loadPageToWindow(index: number, page: IPage) {
     this.windows[index].page = page;
   }
   /**
    * Loads and adds pages to the window.
    * @param pages The length of the pages should be 6.
    */
-  loadPagesToWindow(pages: Page[]) {
+  loadPagesToWindow(pages: IPage[]) {
     for(let i=0; i<this.windowSize; i++){
       this.windows[i].page = pages[i];
     }
@@ -57,7 +58,7 @@ export class PageWindow {
    * @param page4 
    * @param page5 
    */
-  moveRight(page4: Page, page5: Page) {
+  moveRight(page4: IPage, page5: IPage) {
     this.windows.shift();
     this.windows.shift();
     this.windows.push({ page: page4 });
@@ -70,7 +71,7 @@ export class PageWindow {
    * @param page0 
    * @param page1 
    */
-  moveLeft(page0: Page, page1: Page) {
+  moveLeft(page0: IPage, page1: IPage) {
     this.windows.pop();
     this.windows.pop();
     this.windows.unshift({ page: page1 });
