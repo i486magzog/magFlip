@@ -1,4 +1,4 @@
-import { IPageData, PageType } from "@magflip/common";
+import { IPageData, PageType } from "./models";
 import { Base } from "./base";
 /**
  * This is an object type used to reference Elements related to the Page.

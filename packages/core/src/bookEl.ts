@@ -1,4 +1,4 @@
-import { IBookData } from "@magflip/common";
+import { IBookData } from "./models";
 import { Base } from "./base";
 
 /**

@@ -1,4 +1,5 @@
-import { IBookData, BookStatus, BookType, BookSize } from '@magflip/common';
+import { IBookData, BookStatus, BookType } from './models';
+import { BookSize } from './dimension';
 import { BookShelf } from './bookShelf';
 import { Book } from './book';
 import { BookViewer } from './bookViewer';
