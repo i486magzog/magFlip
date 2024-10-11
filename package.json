@@ -19,7 +19,7 @@
     "build:watch:flipview": "npm run build:watch --workspace packages/flipview",
     "build:scrollview": "npm run build --workspace packages/scrollview",
     "build:watch:scrollview": "npm run build:watch --workspace packages/scrollview",
-    "build:all": "npm run build --workspaces",
-    "versionup:minor:all": "npm version minor --git-tag-version"
+    "build": "npm run build --workspaces",
+    "versionup:minor": "npm version minor --git-tag-version"
   }
 }
