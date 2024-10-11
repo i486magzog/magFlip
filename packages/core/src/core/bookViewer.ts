@@ -1,4 +1,4 @@
-import { IBookView } from './models';
+import { IBookView } from '../common/models';
 import { Book} from './book'
 import { BookShelfManager as BookShelfManager } from './bookShelfManager'
 import { Base } from './base';

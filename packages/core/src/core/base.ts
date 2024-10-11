@@ -1,4 +1,4 @@
-import { MZEvent } from "./event";
+import { MZEvent } from "../common/event";
 
 export class Base extends MZEvent {
   constructor(){

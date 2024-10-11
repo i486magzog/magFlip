@@ -2,3 +2,6 @@
 /**/node_modules
 /**/dist
 /**/types
+
+/packages/minjs/magflip.min.js
+/packages/*/index.*

@@ -1,4 +1,4 @@
-import { IBookData } from "./models";
+import { IBookData } from "../common/models";
 import { Base } from "./base";
 
 /**

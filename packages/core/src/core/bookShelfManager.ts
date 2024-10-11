@@ -1,5 +1,5 @@
-import { IBookData, BookStatus, BookType } from './models';
-import { BookSize } from './dimension';
+import { IBookData, BookStatus, BookType } from '../common/models';
+import { BookSize } from '../common/dimension';
 import { BookShelf } from './bookShelf';
 import { Book } from './book';
 import { BookViewer } from './bookViewer';

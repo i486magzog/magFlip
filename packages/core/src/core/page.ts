@@ -1,5 +1,5 @@
-import { DefaultSize, IPage, IPageData, PageType } from "./models";
-import { ISize } from "./dimension";
+import { DefaultSize, IPage, IPageData, PageType } from "../common/models";
+import { ISize } from "../common/dimension";
 import { PageEl } from "./pageEl";
 /**
  * 

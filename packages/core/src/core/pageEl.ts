@@ -1,4 +1,4 @@
-import { IPageData, PageType } from "./models";
+import { IPageData, PageType } from "../common/models";
 import { Base } from "./base";
 /**
  * This is an object type used to reference Elements related to the Page.
