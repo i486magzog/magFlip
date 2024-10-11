@@ -430,14 +430,14 @@ class Book extends BookEl {
             if (startIndex < 0) {
                 startIndex = 0;
             }
-            // TODO: fecth page from the server
             const pageSamples = [];
             let maxIndex = startIndex + indexRange.cnt;
             if (maxIndex > this.lastPageIndex) {
                 maxIndex = this.lastPageIndex;
             }
+            // TODO: fecth page from the server
             for (let i = startIndex; i < maxIndex; i++) {
-                // TODO: if the page is already loaded, do not fetch the page.
+                // If the page is already loaded, do not fetch the page.
                 if (this.pages[i]) {
                     continue;
                 }

@@ -1,5 +1,5 @@
-import { Point, ISize, Rect, IRect, EventStatus, Zone, AutoFlipType, IBookView } from '@magflip/common';
-import { Page, Book } from '@magflip/core';
+import { Point, ISize, Rect, IRect, IPage, EventStatus, Zone, AutoFlipType, IBookView } from '@magflip/common';
+import { Book } from '@magflip/core';
 
 declare class FlipActionLine {
     private _leftP;
@@ -146,7 +146,7 @@ declare class Gutter extends Rect {
  * Page Window Interface
  */
 interface IPageWindow {
-    page: Page | undefined;
+    page: IPage | undefined;
 }
 /**
  * PageWindow class
@@ -166,12 +166,12 @@ declare class PageWindow {
      * @param index Window index
      * @param page
      */
-    loadPageToWindow(index: number, page: Page): void;
+    loadPageToWindow(index: number, page: IPage): void;
     /**
      * Loads and adds pages to the window.
      * @param pages The length of the pages should be 6.
      */
-    loadPagesToWindow(pages: Page[]): void;
+    loadPagesToWindow(pages: IPage[]): void;
     /**
      * Clears all pages on the window.
      */
@@ -183,7 +183,7 @@ declare class PageWindow {
      * @param page4
      * @param page5
      */
-    moveRight(page4: Page, page5: Page): void;
+    moveRight(page4: IPage, page5: IPage): void;
     /**
      * Window moves to the right.
      * Before: ----------[4][5][6][7][8][9]----
@@ -191,13 +191,13 @@ declare class PageWindow {
      * @param page0
      * @param page1
      */
-    moveLeft(page0: Page, page1: Page): void;
+    moveLeft(page0: IPage, page1: IPage): void;
     /**
      * Get a page with window index.
      * @param index Window index
      * @returns
      */
-    getPageInWindow(index: number): Page | undefined;
+    getPageInWindow(index: number): IPage | undefined;
 }
 
 /**
