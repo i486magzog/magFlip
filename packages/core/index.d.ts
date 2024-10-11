@@ -1,4 +1,4 @@
-import { MZEvent, IBookData, IPageData, PageType, ISize, BookStatus, BookType, IPublication, BookSize, IBookView } from '@magflip/common';
+import { MZEvent, IBookData, IPageData, IPage, PageType, ISize, IBook, BookStatus, BookType, IPublication, BookSize, IBookView } from '@magflip/common';
 
 declare class Base extends MZEvent {
     constructor();
@@ -64,14 +64,6 @@ declare class BookEl extends Base {
 }
 
 /**
- * This is an object type used to reference Elements related to the Page.
- */
-type PageElements = {
-    element: HTMLElement;
-    contentContainerEl: HTMLElement;
-    contentEl: HTMLElement;
-};
-/**
  * Page class
  */
 declare class PageEl extends Base {
@@ -93,7 +85,7 @@ declare class PageEl extends Base {
      * @param page
      * @returns
      */
-    createPageElement(page: IPageData): PageElements;
+    private createPageElement;
     resetPageEls(): void;
 }
 
@@ -105,7 +97,7 @@ declare enum PageEvent {
 /**
  * Page class
  */
-declare class Page extends PageEl implements IPageData {
+declare class Page extends PageEl implements IPage {
     /**
      * Returns the page's id.
      */
@@ -171,7 +163,7 @@ declare enum BookEvent {
 /**
  * Book class
  */
-declare class Book extends BookEl implements IBookData {
+declare class Book extends BookEl implements IBook {
     /**
      * Returns the book id.
      */
@@ -242,7 +234,7 @@ declare class Book extends BookEl implements IBookData {
      * @param page
      * @param index
      */
-    addPage(page: Page, index: number): void;
+    addPage(page: IPage, index: number): void;
     /**
      * Remove a page object from the book.
      * @param index
@@ -253,14 +245,14 @@ declare class Book extends BookEl implements IBookData {
      * @param index
      * @returns
      */
-    getPage(index: number): Page;
+    getPage(index: number): IPage;
     /**
      * Returns the pages object.
      * @returns
      */
     getPages(): {
-        [n: string]: Page;
-        [n: number]: Page;
+        [n: string]: IPage;
+        [n: number]: IPage;
     };
     /**
      * Return the pages array length.
