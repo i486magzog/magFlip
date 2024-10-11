@@ -1,6 +1,6 @@
 {
   "name": "@magflip/scrollview",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "title": "MagFlip(Magzog's flip book) view plugin, 'scrollview' Package",
   "description": "One of the core view plugins of MagFlip, displaying the book in a scrolling format.",
   "type": "module",
@@ -33,7 +33,8 @@
     "versionup:minor": "npm version minor --git-tag-version",
     "prebuild": "npm version patch",
     "build": "tsc && npx rollup -c",
-    "build:watch": "tsc && npx rollup -cw"
+    "build:watch": "tsc && npx rollup -cw",
+    "pub": "npm publish --access public --otp=$npm_config_otp"
   },
   "devDependencies": {
     "@magflip/common": "^0.5.1",
