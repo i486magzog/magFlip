@@ -1,6 +1,6 @@
 {
   "name": "@magflip/minjs",
-  "version": "0.5.22",
+  "version": "0.5.25",
   "title": "MagFlip: Magzog's flip book",
   "description": "Provides a bundled JavaScript file containing all magFlip-related packages, which can be easily added and used via a <script> tag.",
   "type": "module",
