@@ -42,8 +42,7 @@ html, body {
 #bookShelf .book-holder, 
 #bookShelf .book,
 #bookShelf .book-on-shelf {
-  width: 10vw;
-  height: 15vw;
+  width: 300px;
 }
 #bookShelf .book-on-shelf img {
   width: 100%;
