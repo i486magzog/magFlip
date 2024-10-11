@@ -1,7 +1,120 @@
-import { MZEvent, IBookData, IPageData, IPage, PageType, ISize, IBook, BookStatus, BookType, IPublication, BookSize, IBookView } from '@magflip/common';
+type Listener = (...args: any[]) => void;
+declare class MZEvent {
+    private listeners;
+    addEventListener(event: string, listener: Listener): void;
+    removeEventListener(event: string, listener: Listener): void;
+    emitEvent(event: string, ...args: any[]): void;
+}
 
 declare class Base extends MZEvent {
     constructor();
+}
+
+interface ISize {
+    width: number;
+    height: number;
+}
+interface ISizeExt {
+    width: number;
+    height: number;
+    readonly diagonal: number;
+}
+interface IBookSize {
+    closed: ISizeExt;
+    opened: ISizeExt;
+}
+declare class BookSize {
+    closed: ISizeExt;
+    opened: ISizeExt;
+    constructor(size: IBookSize);
+}
+
+interface IPublication {
+    name: string;
+    location: string;
+    publishedDate: string;
+}
+declare enum PageType {
+    Page = "Page",
+    Cover = "Cover",
+    Empty = "Empty",
+    Blank = "Blank"
+}
+declare enum BookType {
+    Book = "Book",
+    Magazine = "Magazine",
+    Newspaper = "Newspaper"
+}
+declare enum BookStatus {
+    Open = "Open",
+    Close = "Close"
+}
+interface IBookData {
+    id: string;
+    status?: BookStatus;
+    title?: string;
+    author?: string;
+    type?: BookType;
+    publication?: IPublication;
+    lastPageIndex: number;
+    /**
+     * The book size when it is close.
+     */
+    readonly size?: IBookSize;
+    thumbnails?: {
+        spine: string;
+        small: string;
+        medium: string;
+        cover: {
+            front: string;
+            back: string;
+        };
+    };
+}
+interface IBook extends IBookData {
+    fetchPage(index: number): Promise<IPageData>;
+    fetchPages(indexRange: {
+        start: number;
+        cnt: number;
+    }): Promise<IPageData[]>;
+    importPages(pages: IPageData[], size: ISize): void;
+    addPage(page: IPage, index: number): void;
+    removePage(index: number): void;
+    getPage(index: number): IPage;
+    getPages(): {
+        [n: string]: IPage;
+    };
+    getPageCnt(): number;
+    getPageEl(index: number): HTMLElement;
+    createEmptyPage(index: number, size?: ISize): IPage;
+    resetBook(): Promise<void>;
+}
+interface IPage extends IPageData, IPageEl {
+    size: ISize;
+    setEvents(): void;
+}
+interface IPageEl {
+    readonly element: HTMLElement;
+    readonly contentContainerEl: HTMLElement;
+    readonly contentEl: HTMLElement;
+    resetPageEls(): void;
+}
+interface IPageData {
+    id: string;
+    type?: PageType;
+    size?: ISize;
+    index: number;
+    number?: number | undefined;
+    ignore?: boolean;
+    content?: any;
+    image?: string;
+}
+interface IBookView {
+    readonly id: string;
+    readonly bookContainerEl: HTMLElement;
+    getBookContainerEl(): HTMLElement;
+    view(book: IBookData, openPageIndex?: number): HTMLElement;
+    closeViewer(): void;
 }
 
 /**

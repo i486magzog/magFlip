@@ -11,8 +11,6 @@
     "build:dev:watch:minjs": "npm run build:dev:watch --workspace packages/minjs",
     "build:minjs": "npm run build --workspace packages/minjs",
     "build:watch:minjs": "npm run build:watch --workspace packages/minjs",
-    "build:common": "npm run build --workspace packages/common",
-    "build:watch:common": "npm run build:watch --workspace packages/common",
     "build:core": "npm run build --workspace packages/core",
     "build:watch:core": "npm run build:watch --workspace packages/core",
     "build:flipview": "npm run build --workspace packages/flipview",
