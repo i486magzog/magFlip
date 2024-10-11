@@ -1,4 +1,4 @@
-import Event, { MZEvent } from "@magflip/common";
+import { MZEvent } from "./event";
 
 export class Base extends MZEvent {
   constructor(){

@@ -1,7 +1,0 @@
-src
-dist
-types
-node_modules
-package-lock.json
-rollup.config.js
-tsconfig.json

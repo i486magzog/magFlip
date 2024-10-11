@@ -1,4 +1,5 @@
-import { ISize, DefaultSize, IPage, IPageData, PageType } from "@magflip/common";
+import { DefaultSize, IPage, IPageData, PageType } from "./models";
+import { ISize } from "./dimension";
 import { PageEl } from "./pageEl";
 /**
  * 

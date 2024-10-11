@@ -1,4 +1,5 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, BookSize, ISize, SizeExt, IBook, IPage } from "@magflip/common";
+import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, IBook, IPage } from "./models";
+import { BookSize, ISize, SizeExt } from "./dimension";
 import { BookEl } from "./bookEl";
 import { Page } from "./page";
 
