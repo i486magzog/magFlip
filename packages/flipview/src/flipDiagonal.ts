@@ -1,6 +1,5 @@
 
-import { MZMath } from '@magflip/common';
-import { Point } from '@magflip/common';
+import { MZMath, Point } from '@magflip/core';
 
 export class FlipDiagonal {
     private _length: number = 0;

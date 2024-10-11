@@ -1,5 +1,5 @@
 import { FlipDiagonal } from './flipDiagonal';
-import { Point, Rect } from '@magflip/common';
+import { Point, Rect } from '@magflip/core';
 
 export class FlipDiagonals {
     area1:{

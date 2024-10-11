@@ -1,5 +1,4 @@
-import { ISize } from "@magflip/common";
-import { Point } from "@magflip/common";
+import { ISize, Point } from "@magflip/core";
 
 export interface IFlipData {
   alpa: number;

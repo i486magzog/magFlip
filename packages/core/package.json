@@ -1,6 +1,6 @@
 {
   "name": "@magflip/core",
-  "version": "0.5.5",
+  "version": "0.5.9",
   "title": "MagFlip(Magzog's flip book) Core Package",
   "description": "Contains core MagFlip objects such as Book, Page, BookShelf, and BookViewer.",
   "type": "module",
@@ -35,7 +35,8 @@
     "versionup:minor": "npm version minor --git-tag-version",
     "prebuild": "npm version patch",
     "build": "tsc && npx rollup -c",
-    "build:watch": "tsc && npx rollup -cw"
+    "build:watch": "tsc && npx rollup -cw",
+    "pub": "npm publish --access public --otp=$npm_config_otp"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.0",

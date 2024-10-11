@@ -1,4 +1,4 @@
-import { IRect, Rect } from "@magflip/common";
+import { IRect, Rect } from "@magflip/core";
 
 export class Gutter extends Rect{
   constructor(gutter?:IRect){

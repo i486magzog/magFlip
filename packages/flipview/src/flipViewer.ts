@@ -1,5 +1,4 @@
-import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage } from '@magflip/common';
-import { Book, BookEvent, Page } from '@magflip/core'
+import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage, Book, BookEvent } from '@magflip/core';
 import { Flipping as FlipManager } from './flipManager'
 import { Gutter } from './gutter';
 import styles from './flipViewer.css'; 

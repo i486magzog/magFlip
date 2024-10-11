@@ -1,4 +1,4 @@
-import { Point } from "@magflip/common";
+import { Point } from "@magflip/core";
 
 export class FlipActionLine {
   private _leftP:Point;

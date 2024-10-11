@@ -5,7 +5,9 @@
   "private": true,
   "author": "Sing Graajae Cho",
   "license": "MIT",
-  "workspaces": [ "packages/*" ],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build:dev:minjs": "npm run build:dev --workspace packages/minjs",
     "build:dev:watch:minjs": "npm run build:dev:watch --workspace packages/minjs",
@@ -17,9 +19,8 @@
     "build:watch:flipview": "npm run build:watch --workspace packages/flipview",
     "build:scrollview": "npm run build --workspace packages/scrollview",
     "build:watch:scrollview": "npm run build:watch --workspace packages/scrollview",
-    
-    "build:all": "npm run build --workspaces",
-    "versionup:minor:all": "npm version minor --git-tag-version"
-  },
-  "devDependencies": {}
+    "build": "npm run build --ws --if-present",
+    "versionup:minor": "npm version minor --git-tag-version",
+    "pub": "npm run pub --ws --if-present --otp $npm_config_otp"
+  }
 }
