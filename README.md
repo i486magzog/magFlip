@@ -10,7 +10,7 @@ See [demo](https://i486magzog.github.io/magFlip/examples/prebuild/magflip.html).
 ### JavaScript module
 The first step is to install the Event Calendar `core` package:
 ```bash
-npm install --save-dev @magflip/common @magflip/core @magflip/flipview
+npm install --save-dev @magflip/core @magflip/flipview
 ```
 <span style="color: red; font-weight: bold;">[In Progress]</span> Then install any additional view plugins you plan to use:
 ```bash
