@@ -836,7 +836,7 @@ export class FlipView implements IBookView {
   private setViewerToFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
     this.bookContainerEl.classList.add(`${className}-page-flipping`, "noselect");
-    this.flipManager.curAutoFlipWidth = 0;
+    this.flipManager.curAutoFlipWidth = {x:0, y:0};
   }
   /**
    * Unsets the status of viewer as the status Flipping by dragging.
@@ -858,7 +858,6 @@ export class FlipView implements IBookView {
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
@@ -902,7 +901,6 @@ export class FlipView implements IBookView {
     const page2El = this.activePage2El;
 
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     if(!this.pageContainerRect){ return; }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
@@ -931,18 +929,18 @@ export class FlipView implements IBookView {
   private zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
     if(this.flipManager.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
     if(this.flipManager.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
-    if(this.flipManager.eventZone & Zone.Center){ return; }
     this.flipManager.eventZone = param.zone;
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+    // If eventZone is Zone.Center, set the y value to the active corner's y value.
+    if(this.flipManager.eventZone & Zone.Center){ viewport.y = this.flipManager.activeCornerGP.y; }
 
     this.flipPage(
       page2El, 
@@ -966,7 +964,6 @@ export class FlipView implements IBookView {
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
@@ -1009,7 +1006,6 @@ export class FlipView implements IBookView {
     
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
     const msEvent = event as MouseEvent;
     const viewport = { x:msEvent.clientX, y:msEvent.clientY };
@@ -1062,7 +1058,6 @@ export class FlipView implements IBookView {
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
