@@ -317,7 +317,7 @@
   top: calc(2*var(--zone-width));
   right: 0px;
   width: var(--zone-width);
-  height: calc(var(--page-height) - var(--zone-width)*2);
+  height: calc(var(--page-height) - var(--zone-width)*4);
 }
 
 #bookViewer.flip-view #mzZoneRB {
