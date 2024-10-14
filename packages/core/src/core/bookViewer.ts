@@ -65,9 +65,6 @@ export class BookViewer extends Base {
 
     ({ bookViewerEl: this.element } = this.createViewerElements());
   }
-  setCurView(viewId:string){
-    this.curView = this.getView(viewId);
-  }
   /**
    * Creates the viewer related elements.
    * @returns ViewerElements
@@ -94,6 +91,11 @@ export class BookViewer extends Base {
 
     return { bookViewerEl: viewerEl } 
   };
+  /**
+   * Sets the current view.
+   * @param viewId 
+   */
+  setCurView(viewId:string){ this.curView = this.getView(viewId); }
   /**
    * Opens the book on the viewer.
    * @param book 
