@@ -1,25 +1,24 @@
 
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
-import copy from 'rollup-plugin-copy';
+import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
+import postcss from 'rollup-plugin-postcss';
 
 export default [
   {
-    input: './dist/index.js',
+    input: './src/index.ts',
     output: {
       file: './index.js',
-      format: 'cjs',
-      sourcemap: false,
+      format: 'es',
     },
     plugins: [
       resolve(),
       commonjs(),
-      copy({
-        targets: [
-          { src: 'src/*.css', dest: 'dist/' },
-          { src: 'src/*.css', dest: './' }
-        ]
+      typescript(),
+      postcss({
+        extract: true,
+        minimize: true,
       })
     ],
   },
@@ -29,6 +28,7 @@ export default [
       file: './index.d.ts',
       format: 'es',
     },
+    external: [/\.css$/],
     plugins: [dts()],
   }
 ];
