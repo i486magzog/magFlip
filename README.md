@@ -22,7 +22,7 @@ npm install --save-dev @magflip/scrollview
 Include the following lines of code in the `<head>` section of your page:<br>
 Please refer to the [sample code](./docs/examples/prebuild) for more details.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.11/magflip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.44/magflip.min.js"></script>
 ```
 
 <br>
