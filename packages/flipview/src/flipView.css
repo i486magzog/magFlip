@@ -177,7 +177,7 @@
 #bookViewer.flip-view .book > .container > .page:nth-child(4) .shadow1 path.sh1-path2 { display: block; }
 
 
-.shadow6 polygon { fill:url(#shadow6); }
+#bookViewer.flip-view .shadow6 polygon { fill:url(#shadow6); }
 #bookViewer.flip-view .book .page .shadow6 { display: none; }
 
 #bookViewer.flip-view .book .page .shadow6 { width:100%; height:100%; }
@@ -232,6 +232,7 @@
 #bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow3,
 #bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow3 {  display: block; }
 
+#bookViewer.flip-view .book > .container > .page.empty .shadow2{ display: none; }
 #bookViewer.flip-view .book > .container > .page:nth-child(odd) .shadow2{ 
   position: absolute;
   top: 0;

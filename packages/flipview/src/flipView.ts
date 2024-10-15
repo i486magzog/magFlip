@@ -1,7 +1,7 @@
 import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage, Book, BookEvent } from '@magflip/core';
 import { Flipping as FlipManager } from './flipManager'
 import { Gutter } from './gutter';
-import styles from './flipViewer.css'; 
+import styles from './flipView.css'; 
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -22,6 +22,9 @@ type FlipViewerElements = {
  * 
  */
 export class FlipView implements IBookView {
+  /**
+   * Zoom level of the viewer.
+   */
   private zoomLevel:number = 1;
   /**
    * This id is unique string for FlipView object.
@@ -44,7 +47,7 @@ export class FlipView implements IBookView {
   get pageContainerRect(){
     const el = this.book?.pageContainerEl;
     if(!el){ throw new Error("Not found the page container.") }
-    return el && MZMath.getOffset4Fixed(el as HTMLDivElement)
+    return el && MZMath.getOffset4Fixed(el as HTMLDivElement);
   }
   /**
    * Returns the element of the mouse event zone on the viewer's left top.
@@ -415,6 +418,16 @@ export class FlipView implements IBookView {
     this.detachBook(); 
   }
   /**
+   * 
+   * @param zoomLevel 
+   */
+  zoom(zoomLevel:number){
+    this.zoomLevel = zoomLevel;
+    this.bookContainerEl.style.transform = `scale(${this.zoomLevel})`;
+    this.setViewer();
+    // this.updateDimension();
+  }
+  /**
    * Gets pages from book.
    * @param isForward 
    * @returns 
@@ -639,10 +652,11 @@ export class FlipView implements IBookView {
   ){
     const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
     const isLeftPageActive = this.isLeftPageFlipping;
+    const zoomLevel = this.zoomLevel;
     // Mask
-    page1Mask.setAttribute('points', flipData.printPage1MaskShape() );
-    page2Mask.setAttribute('points', flipData.printPage2MaskShape() );
-    shadow3Shape?.setAttribute('points', flipData.printPage2MaskShape() );
+    page1Mask.setAttribute('points', flipData.printPage1MaskShape(zoomLevel) );
+    page2Mask.setAttribute('points', flipData.printPage2MaskShape(zoomLevel) );
+    shadow3Shape?.setAttribute('points', flipData.printPage2MaskShape(zoomLevel) );
     shadow6Shape?.setAttribute('points', flipData.printShadow6(this.book!.size.opened) );
     //
     // Shadow
@@ -673,7 +687,7 @@ export class FlipView implements IBookView {
         sh1P1EndPx = k.x;
         sh1CtlPx1 += k.x*.1;
       }
-      sh1Path1?.setAttribute('d', `M ${sh1P1EndPx} 0 C ${sh1CtlPx1} ${sh1CtlPy}, ${pageWH.width*5/6} ${sh1CtlPy}, ${pageWH.width} 0`);
+      sh1Path1?.setAttribute('d', `M ${sh1P1EndPx/zoomLevel} 0 C ${sh1CtlPx1/zoomLevel} ${sh1CtlPy/zoomLevel}, ${pageWH.width*5/6/zoomLevel} ${sh1CtlPy/zoomLevel}, ${pageWH.width/zoomLevel} 0`);
     } else if(this.isLastPageClosing){
       let sh1CtlPx2 = pageWH.width*2/15;
       if(k.x < sh1P2EndPx){
@@ -681,7 +695,7 @@ export class FlipView implements IBookView {
         sh1P2EndPx = k.x;
         sh1CtlPx2 -= (pageWH.width-k.x)*.1;
       }
-      sh1Path2?.setAttribute('d', `M 0 0 C ${pageWH.width/6} ${sh1CtlPy}, ${sh1CtlPx2} ${sh1CtlPy}, ${sh1P2EndPx} 0`);
+      sh1Path2?.setAttribute('d', `M 0 0 C ${pageWH.width/6/zoomLevel} ${sh1CtlPy/zoomLevel}, ${sh1CtlPx2/zoomLevel} ${sh1CtlPy/zoomLevel}, ${sh1P2EndPx/zoomLevel} 0`);
     }
     //
     // Shadow 5
@@ -792,14 +806,14 @@ export class FlipView implements IBookView {
     const p2 = MZMath.findPerpendicularFoot( line, endCorner);
     const diagonalL = MZMath.getLength(originP, endCorner);
     const pLength = MZMath.getLength(p2, endCorner);
-    const offset2 = (1-flipData.shadow.closingDistance/diagonalL)*(pLength/diagonalL)*100;
+    const offset2 = (1-flipData.shadow.closingDistance/diagonalL)*(pLength/diagonalL)*3*100;
 
     const shadow6El = document.getElementById('shadow6') as SVGLinearGradientElement|null;
     if(shadow6El){
-      shadow6El.setAttribute('x1', `${p.x}`);
-      shadow6El.setAttribute('y1', `${p.y}`);
-      shadow6El.setAttribute('x2', `${originP.x}`);
-      shadow6El.setAttribute('y2', `${originP.y}`);
+      shadow6El.setAttribute('x1', `${p.x/zoomLevel}`);
+      shadow6El.setAttribute('y1', `${p.y/zoomLevel}`);
+      shadow6El.setAttribute('x2', `${originP.x/zoomLevel}`);
+      shadow6El.setAttribute('y2', `${originP.y/zoomLevel}`);
     }
 
     const sh6stops = shadow6El?.querySelectorAll('stop');
@@ -809,12 +823,12 @@ export class FlipView implements IBookView {
       sh6stops[1].setAttribute('offset', '0%');
       sh6stops[1].setAttribute('stop-color', `rgba(0, 0, 0, ${offset2/100})`);
       sh6stops[2].setAttribute('offset', `${offset2}%`);
-      sh6stops[2].setAttribute('stop-color', `rgba(0, 0, 0, 0`);
+      sh6stops[2].setAttribute('stop-color', `rgba(0, 0, 0, 0)`);
     }
 
     // Page 2
-    cssVar.setProperty('--page2-top', `${flipData.page2.top}px`)
-    cssVar.setProperty('--page2-left', `${flipData.page2.left}px`)
+    cssVar.setProperty('--page2-top', `${flipData.page2.top/zoomLevel}px`)
+    cssVar.setProperty('--page2-left', `${flipData.page2.left/zoomLevel}px`)
     cssVar.setProperty('--page2-rotate', `${flipData.page2.rotate}rad`)
   }
   /**
@@ -836,7 +850,7 @@ export class FlipView implements IBookView {
   private setViewerToFlip(){
     const className = this.isLeftPageFlipping ? "left" : "right";
     this.bookContainerEl.classList.add(`${className}-page-flipping`, "noselect");
-    this.flipManager.curAutoFlipWidth = 0;
+    this.flipManager.curAutoFlipWidth = {x:0, y:0};
   }
   /**
    * Unsets the status of viewer as the status Flipping by dragging.
@@ -858,19 +872,18 @@ export class FlipView implements IBookView {
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
+    const zoomLevel = this.zoomLevel;
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY }
+    const viewport = { x:event.clientX, y:event.clientY }
 
     this.setViewerToAutoFlip();
-    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect);
+    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect, zoomLevel);
     this.flipManager.animateFlipFromCorner(
       viewport,
-      { width: page2El.offsetWidth, height: page2El.offsetHeight },
+      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel },
       (mouseGP:Point, pageWH:ISize) => {
         this.flipPage(
           page2El, 
@@ -897,20 +910,19 @@ export class FlipView implements IBookView {
     this.flipManager.eventStatus = EventStatus.Dragging;
     this.flipManager.eventZone = param.zone;
 
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+    const viewport = { x:event.clientX, y:event.clientY };
     const page2El = this.activePage2El;
 
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     if(!this.pageContainerRect){ return; }
     
+    const zoomLevel = this.zoomLevel;
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
     this.setViewerToFlip();
-    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect)
+    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, zoomLevel);
     this.flipPage(
       page2El, 
       this.maskShapeOnPage1, 
@@ -919,7 +931,7 @@ export class FlipView implements IBookView {
       shadow3Shape,
       shadow6Shape,
       viewport, 
-      { width: page2El.offsetWidth, height: page2El.offsetHeight }
+      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel }
     );
   }
   /**
@@ -931,18 +943,18 @@ export class FlipView implements IBookView {
   private zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
     if(this.flipManager.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
     if(this.flipManager.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
-    if(this.flipManager.eventZone & Zone.Center){ return; }
     this.flipManager.eventZone = param.zone;
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
+    const zoomLevel = this.zoomLevel;
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+    const viewport = { x:event.clientX, y:event.clientY };
+    // If eventZone is Zone.Center, set the y value to the active corner's y value.
+    if(this.flipManager.eventZone & Zone.Center){ viewport.y = this.flipManager.activeCornerGP.y; }
 
     this.flipPage(
       page2El, 
@@ -952,7 +964,7 @@ export class FlipView implements IBookView {
       shadow3Shape,
       shadow6Shape,
       viewport, 
-      { width: page2El.offsetWidth, height: page2El.offsetHeight });
+      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel });
   }
   /**
    * This is the mouseleave event handler on the 6 event zones.
@@ -966,18 +978,17 @@ export class FlipView implements IBookView {
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
+    const zoomLevel = this.zoomLevel;
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY }
+    const viewport = { x:event.clientX, y:event.clientY }
 
     this.flipManager.eventZone = param.zone;
     this.flipManager.animateFlipToCorner(
       viewport,
-      { width: page2El.offsetWidth, height: page2El.offsetHeight },
+      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel },
       (mouseGP:Point, pageWH:ISize) => {
         this.flipPage(
           page2El,
@@ -1004,20 +1015,19 @@ export class FlipView implements IBookView {
    * @param param 
    * @returns 
    */
-  private documentMouseUp(event:Event){
+  private documentMouseUp(event:MouseEvent){
     if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
     
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
 
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+    const viewport = { x:event.clientX, y:event.clientY };
     const dataToFlip = this.flipManager.getInfoToFlip(viewport);
 
     if(dataToFlip.isSnappingBack){ this.flipManager.eventStatus = EventStatus.SnappingBack; }
     else { this.flipManager.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
     
+    const zoomLevel = this.zoomLevel;
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
@@ -1025,7 +1035,7 @@ export class FlipView implements IBookView {
     this.flipManager.animateFlip(
       viewport, 
       dataToFlip.targetCornerGP,
-      { width: page2El.offsetWidth, height: page2El.offsetHeight },
+      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel },
       (mouseGP:Point, pageWH:ISize) => {
         this.flipPage(
           page2El, 
@@ -1053,17 +1063,16 @@ export class FlipView implements IBookView {
    * @param param 
    * @returns 
    */
-  private documentMouseMove(event:Event){
-    const msEvent = event as MouseEvent;
-    const viewport = { x:msEvent.clientX, y:msEvent.clientY };
+  private documentMouseMove(event:MouseEvent){
+    const viewport = { x:event.clientX, y:event.clientY };
     this.flipManager.curMouseGP = viewport;
 
     if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
 
     const page2El = this.activePage2El;
     if(!page2El){ return }
-    // if(!page2El || (this.activePage2 && this.activePage2.type == PageType.Empty) ){ return }
     
+    const zoomLevel = this.zoomLevel;
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
     const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
@@ -1076,7 +1085,7 @@ export class FlipView implements IBookView {
       shadow3Shape,
       shadow6Shape,
       viewport, 
-      { width: page2El.offsetWidth, height: page2El.offsetHeight });
+      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel });
   }
   /**
    * Sets all events for viewer.

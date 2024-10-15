@@ -63,11 +63,24 @@ export class Flipping extends PageWindow {
   /**
    * The current width being used for automatic flipping when the AutoFlipType is FixedWidth.
    */
-  curAutoFlipWidth = 0;
+  curAutoFlipWidth = {x:0, y:0};
   /**
-   * The width for automatic flipping, initialized to 20.
+   * The width for automatic flipping.
    */
-  autoFlipWidth = 20;
+  autoFlipDimension = {
+    top: { width: 0, height: 0 },
+    center: { width: 0, height: 0 },
+    bottom: { width: 0, height: 0 },
+  };
+  /**
+   * The width of the zone.
+   * TODO: Should be setting options.
+   */
+  private zoneDimension = {
+    top: { width: 0, height: 0 },
+    center: { width: 0, height: 0 },
+    bottom: { width: 0, height: 0 },
+  };
   /**
    * Returns and sets current mouse pointer global point.
    */
@@ -89,7 +102,7 @@ export class Flipping extends PageWindow {
    * @param mouseGP The current position of the mouse pointer.
    * @param containerRect The rectangle defining the boundaries of the container element.
    */
-  setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect){
+  setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect, zoomLevel:number){
     this.eventZone = eventZone;
     let flipActionLineGY:number = mouseGP.y;
     // If dragging a corner, the flipActionLineGY will be the top or bottom of the container.
@@ -145,12 +158,27 @@ export class Flipping extends PageWindow {
     // Transform origin
     //
     const originY = this.flipActionLine.y - containerRect.top;
-    // page2El.style.transformOrigin = `${originX}px ${originY}px`;
-    const docEl = document.documentElement;
-    docEl.style.setProperty('--page2-origin', `${originX}px ${originY}px`)
-    //
-    const zoneWidthStr = getComputedStyle(docEl).getPropertyValue('--zone-width').trim();
-    this.autoFlipWidth = parseFloat(zoneWidthStr) * 0.9;
+    const doc = document;
+    const docEl = doc.documentElement;
+    docEl.style.setProperty('--page2-origin', `${originX/zoomLevel}px ${originY/zoomLevel}px`)
+    // Zone Dimension
+    const zoneLT = doc.getElementById('mzZoneLT');
+    const zoneLC = doc.getElementById('mzZoneLC');
+    const zoneLB = doc.getElementById('mzZoneLB');
+    const zoneRT = doc.getElementById('mzZoneRT');
+    const zoneRC = doc.getElementById('mzZoneRC');
+    const zoneRB = doc.getElementById('mzZoneRB');
+    this.zoneDimension = {
+      top: { width: zoneLT?.clientWidth || zoneRT?.clientWidth || 0, height: zoneLT?.clientHeight || zoneRT?.clientHeight || 0 },
+      center: { width: zoneLC?.clientWidth || zoneRC?.clientWidth || 0, height: zoneLC?.clientHeight || zoneRC?.clientHeight || 0 },
+      bottom: { width: zoneLB?.clientWidth || zoneRB?.clientWidth || 0, height: zoneLB?.clientHeight || zoneRB?.clientHeight || 0 },
+    }
+    // TODO: 각 존별 너비가 다를 경우 처리 필요
+    this.autoFlipDimension = {
+      top: { width: this.zoneDimension.top.width * 0.9, height: this.zoneDimension.top.height * 0.9 },
+      center: { width: this.zoneDimension.center.width * 0.9, height: this.zoneDimension.center.height * 0.9 },
+      bottom: { width: this.zoneDimension.bottom.width * 0.9, height: this.zoneDimension.bottom.height * 0.9 },
+    }
   }
   /**
    * Returns the point of the corner that flipping page has to go back.
@@ -196,47 +224,73 @@ export class Flipping extends PageWindow {
   ) {
 
     let currentValue = this.curAutoFlipWidth;
-    const isFlipToMouse = (this.setting.autoFlip.type == AutoFlipType.MouseCursor) && !(this.eventZone & Zone.Center);
-    const targetValue = isAutoFlippingFromCorner ? this.autoFlipWidth : 0;
-    if(isFlipToMouse && !isAutoFlippingFromCorner){ mouseGP = this.activeCornerGP }
-    else if(currentValue == targetValue){ return onComplete(); }
+    const isFlipTypeMouseCursor = (this.setting.autoFlip.type == AutoFlipType.MouseCursor); // && !(this.eventZone & Zone.Center);
+    const targetValue = {x:0, y:0};
+    if(isFlipTypeMouseCursor && !isAutoFlippingFromCorner){ mouseGP = this.activeCornerGP }
 
     const startTime = performance.now();
-    const duration:number = 200; // 2000ms
+    // TODO: Should be setting options.
+    const duration:number = 300; // 2000ms
     let startP:Point = new Point();
     let endP:Point = new Point();
+
     switch(this.eventZone){
-      case Zone.LT: 
-        startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y + currentValue}; 
-        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y + targetValue}; 
+      case Zone.LT:
+        if(isAutoFlippingFromCorner){
+          targetValue.x = this.autoFlipDimension.top.width;
+          targetValue.y = this.autoFlipDimension.top.height;
+        }
+        startP = {x:this.activeCornerGP.x + currentValue.x, y:this.activeCornerGP.y + currentValue.y}; 
+        endP = isFlipTypeMouseCursor ? mouseGP : {x:this.activeCornerGP.x + targetValue.x, y:this.activeCornerGP.y + targetValue.y}; 
         break;
       case Zone.LC: 
-        startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y}; 
-        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y};
+        if(isAutoFlippingFromCorner){
+          targetValue.x = this.autoFlipDimension.center.width;
+        }
+        startP = {x:this.activeCornerGP.x + currentValue.x, y:this.activeCornerGP.y}; 
+        endP = isFlipTypeMouseCursor ? mouseGP : {x:this.activeCornerGP.x + targetValue.x, y:this.activeCornerGP.y};
         break;
-      case Zone.LB: 
-        startP = {x:this.activeCornerGP.x + currentValue, y:this.activeCornerGP.y - currentValue}; 
-        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x + targetValue, y:this.activeCornerGP.y - targetValue}; 
+      case Zone.LB:
+        if(isAutoFlippingFromCorner){
+          targetValue.x = this.autoFlipDimension.bottom.width;
+          targetValue.y = this.autoFlipDimension.bottom.height;
+        }
+        startP = {x:this.activeCornerGP.x + currentValue.x, y:this.activeCornerGP.y - currentValue.y}; 
+        endP = isFlipTypeMouseCursor ? mouseGP : {x:this.activeCornerGP.x + targetValue.x, y:this.activeCornerGP.y - targetValue.y}; 
         break;
       case Zone.RT:
-        startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y + currentValue}; 
-        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y + targetValue}; 
+        if(isAutoFlippingFromCorner){
+          targetValue.x = this.autoFlipDimension.top.width;
+          targetValue.y = this.autoFlipDimension.top.height;
+        }
+        startP = {x:this.activeCornerGP.x - currentValue.x, y:this.activeCornerGP.y + currentValue.y}; 
+        endP = isFlipTypeMouseCursor ? mouseGP : {x:this.activeCornerGP.x - targetValue.x, y:this.activeCornerGP.y + targetValue.y}; 
         break;
       case Zone.RC:
-        startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y}; 
-        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y}; 
+        if(isAutoFlippingFromCorner){
+          targetValue.x = this.autoFlipDimension.center.width;
+        }
+        startP = {x:this.activeCornerGP.x - currentValue.x, y:this.activeCornerGP.y}; 
+        endP = isFlipTypeMouseCursor ? mouseGP : {x:this.activeCornerGP.x - targetValue.x, y:this.activeCornerGP.y}; 
         break;
       case Zone.RB:
-        startP = {x:this.activeCornerGP.x - currentValue, y:this.activeCornerGP.y - currentValue}; 
-        endP = isFlipToMouse ? mouseGP : {x:this.activeCornerGP.x - targetValue, y:this.activeCornerGP.y - targetValue}; 
+        if(isAutoFlippingFromCorner){
+          targetValue.x = this.autoFlipDimension.bottom.width;
+          targetValue.y = this.autoFlipDimension.bottom.height;
+        }
+        startP = {x:this.activeCornerGP.x - currentValue.x, y:this.activeCornerGP.y - currentValue.y}; 
+        endP = isFlipTypeMouseCursor ? mouseGP : {x:this.activeCornerGP.x - targetValue.x, y:this.activeCornerGP.y - targetValue.y}; 
         break;
     }
+
+    if(!isFlipTypeMouseCursor && (currentValue == targetValue)){ return onComplete(); }
+
     const animationFrame = (currentTime:number) => {
       const eventStatus = this.eventStatus;
 
-      if(isFlipToMouse){
-        if(isAutoFlippingFromCorner){ endP = this.curMouseGP; }
-        else { startP = this.curMouseGP; }
+      if(isFlipTypeMouseCursor){
+        if(isAutoFlippingFromCorner){ endP = this.adjustPointerToZone(this.eventZone, this.curMouseGP); }
+        else { startP = this.adjustPointerToZone(this.eventZone, this.curMouseGP); }
       }
 
       if( ( eventStatus != EventStatus.AutoFlipToCorner && eventStatus != EventStatus.AutoFlipFromCorner )
@@ -246,15 +300,23 @@ export class Flipping extends PageWindow {
         return onComplete(); 
       }
 
-      const elapsed = (currentTime - startTime) / duration; // 0 ~ 1 사이 값
-      const progress = Math.min(elapsed, 1); // 진행률 계산 (최대 1)
-      const easingProgress = this.easeInOutQuad(progress); // easing 함수 적용
+      const elapsed = (currentTime - startTime) / duration; // 0 ~ 1
+      const progress = Math.min(elapsed, 1);  // Calculate progress (maximum 1)
+      const easingProgress = this.easeInOutQuad(progress);
       const currentX = startP.x + (endP.x - startP.x) * easingProgress;
       const currentY = startP.y + (endP.y - startP.y) * easingProgress;
 
-      if(isAutoFlippingFromCorner){ currentValue = progress * targetValue; }
-      else { currentValue = currentValue - progress * currentValue; }
-      this.curAutoFlipWidth = currentValue;
+      if(!isFlipTypeMouseCursor){
+        if(isAutoFlippingFromCorner){ 
+          currentValue.x = progress * targetValue.x; 
+          currentValue.y = progress * targetValue.y; 
+        }
+        else { 
+          currentValue.x = currentValue.x - progress * currentValue.x; 
+          currentValue.y = currentValue.y - progress * currentValue.y; 
+        }
+        this.curAutoFlipWidth = currentValue;
+      }
 
       onFlip( {x:currentX, y:currentY}, pageWH );
 
@@ -265,6 +327,49 @@ export class Flipping extends PageWindow {
     requestAnimationFrame(animationFrame); // 애니메이션 시작
   }
   /**
+   * Adjusts the mouse pointer position to the edge of the specified zone.
+   * @param zone The zone to adjust the mouse pointer to.
+   * @param mouseGP The current position of the mouse pointer.
+   * @returns The adjusted mouse pointer position.
+   */
+  private adjustPointerToZone(zone:Zone, mouseGP:Point){
+    let x = mouseGP.x;
+    let y = mouseGP.y;
+    // Set the x position of the mouse pointer to the edge of the zone.
+    switch(zone){
+      case Zone.LT:
+        if(mouseGP.x > this.flipGRect.left + this.zoneDimension.top.width){ x = this.flipGRect.left + this.zoneDimension.top.width; }
+        break;
+      case Zone.LC:
+        if(mouseGP.x > this.flipGRect.left + this.zoneDimension.center.width){ x = this.flipGRect.left + this.zoneDimension.center.width; }
+        break;
+      case Zone.LB:
+        if(mouseGP.x > this.flipGRect.left + this.zoneDimension.bottom.width){ x = this.flipGRect.left + this.zoneDimension.bottom.width; }
+        break;
+      case Zone.RT:
+        if(mouseGP.x < this.flipGRect.right - this.zoneDimension.top.width){ x = this.flipGRect.right - this.zoneDimension.top.width; }
+        break;
+      case Zone.RC:
+        if(mouseGP.x < this.flipGRect.right - this.zoneDimension.center.width){ x = this.flipGRect.right - this.zoneDimension.center.width; }
+        break;
+      case Zone.RB:
+        if(mouseGP.x < this.flipGRect.right - this.zoneDimension.bottom.width){ x = this.flipGRect.right - this.zoneDimension.bottom.width; }
+        break;
+    }
+    // Set the y position of the mouse pointer to the edge of the zone.
+    if(zone & Zone.Top){
+      if(mouseGP.y < this.flipGRect.top){ y = this.flipGRect.top; }
+      else if(mouseGP.y > this.flipGRect.top + this.zoneDimension.top.height){ y = this.flipGRect.top + this.zoneDimension.top.height; }
+    } else if(zone & Zone.Center){
+      y = this.activeCornerGP.y;
+    } else if(zone & Zone.Bottom){
+      if(mouseGP.y > this.flipGRect.bottom){ y = this.flipGRect.bottom; }
+      else if(mouseGP.y < this.flipGRect.bottom - this.zoneDimension.bottom.height){ y = this.flipGRect.bottom - this.zoneDimension.bottom.height; }
+    }
+
+    return {x, y};
+  }
+  /**
    * Starts the animation for flipping the page from the corner.
    * @param mouseGP The current position of the mouse pointer.
    * @param pageWH The width and height of the page.
@@ -272,7 +377,7 @@ export class Flipping extends PageWindow {
    * @param onComplete A callback executed when the flip is complete.
    */
   animateFlipFromCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
-    if(this.oldEventZone != this.eventZone){ this.curAutoFlipWidth = 0; }
+    if(this.oldEventZone != this.eventZone){ this.curAutoFlipWidth = {x:0, y:0}; }
     this.oldEventZone = this.eventZone;
     this.animateReadyToFlip(true, mouseGP, pageWH, onFlip, onComplete);
   }
@@ -309,7 +414,8 @@ export class Flipping extends PageWindow {
     onComplete:()=>void 
   ){
     const startTime = performance.now();
-    const duration:number = 500; // 2000ms
+    // TODO: Should be setting options.
+    const duration:number = 400; // 2000ms
 
     const animationFrame = (currentTime:number) => {
       if(this.eventStatus == EventStatus.Flipping){ return; }

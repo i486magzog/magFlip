@@ -3,7 +3,7 @@
 /**/dist
 /**/types
 
-/packages/minjs/magflip.min.js
+/packages/minjs/magflip.min.*
 /packages/*/index.d.ts
 /packages/*/index.js
 /packages/*/index.css

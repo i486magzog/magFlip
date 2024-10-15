@@ -176,4 +176,5 @@ export interface IBookView {
   getBookContainerEl():HTMLElement;
   view(book:IBookData, openPageIndex?:number):HTMLElement;
   closeViewer():void;
+  zoom(zoomLevel:number):void;
 }
