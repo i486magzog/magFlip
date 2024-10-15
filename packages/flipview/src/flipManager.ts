@@ -218,8 +218,7 @@ export class Flipping extends PageWindow {
   private animateReadyToFlip(
     isAutoFlippingFromCorner:boolean,
     mouseGP:Point,
-    pageWH:ISize,
-    onFlip:(mouseGP:Point, pageWH:ISize)=>void,
+    onFlip:(mouseGP:Point)=>void,
     onComplete:()=>void
   ) {
 
@@ -318,7 +317,7 @@ export class Flipping extends PageWindow {
         this.curAutoFlipWidth = currentValue;
       }
 
-      onFlip( {x:currentX, y:currentY}, pageWH );
+      onFlip( {x:currentX, y:currentY} );
 
       if (progress < 1) { requestAnimationFrame(animationFrame); }
       else { onComplete(); }
@@ -372,25 +371,23 @@ export class Flipping extends PageWindow {
   /**
    * Starts the animation for flipping the page from the corner.
    * @param mouseGP The current position of the mouse pointer.
-   * @param pageWH The width and height of the page.
    * @param onFlip A callback executed during the flip, receiving the mouse position and page size.
    * @param onComplete A callback executed when the flip is complete.
    */
-  animateFlipFromCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
+  animateFlipFromCorner(mouseGP:Point, onFlip:(mouseGP:Point)=>void, onComplete:()=>void) {
     if(this.oldEventZone != this.eventZone){ this.curAutoFlipWidth = {x:0, y:0}; }
     this.oldEventZone = this.eventZone;
-    this.animateReadyToFlip(true, mouseGP, pageWH, onFlip, onComplete);
+    this.animateReadyToFlip(true, mouseGP, onFlip, onComplete);
   }
   /**
    * Starts the animation for flipping the page to the corner.
    * @param mouseGP The current position of the mouse pointer.
-   * @param pageWH The width and height of the page.
    * @param onFlip A callback executed during the flip, receiving the mouse position and page size.
    * @param onComplete A callback executed when the flip is complete.
    */
-  animateFlipToCorner(mouseGP:Point, pageWH:ISize, onFlip:(mouseGP:Point, pageWH:ISize)=>void, onComplete:()=>void) {
+  animateFlipToCorner(mouseGP:Point, onFlip:(mouseGP:Point)=>void, onComplete:()=>void) {
     this.oldEventZone = this.eventZone;
-    this.animateReadyToFlip(false, mouseGP, pageWH, onFlip, onComplete);
+    this.animateReadyToFlip(false, mouseGP, onFlip, onComplete);
   }
   /**
    * Easing function for smooth transition during the flip animation.
@@ -409,8 +406,7 @@ export class Flipping extends PageWindow {
   animateFlip(
     startP:Point, 
     endP:Point,
-    pageWH:ISize,
-    onFlip:(mouseGP:Point, pageWH:ISize)=>void,
+    onFlip:(mouseGP:Point)=>void,
     onComplete:()=>void 
   ){
     const startTime = performance.now();
@@ -426,7 +422,7 @@ export class Flipping extends PageWindow {
       const currentX = startP.x + (endP.x - startP.x) * easingProgress;
       const currentY = startP.y + (endP.y - startP.y) * easingProgress;
 
-      onFlip( {x:currentX, y:currentY}, pageWH );
+      onFlip( {x:currentX, y:currentY} );
 
 
       if (progress < 1) { requestAnimationFrame(animationFrame); }

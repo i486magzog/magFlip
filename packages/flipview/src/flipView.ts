@@ -1,6 +1,7 @@
 import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage, Book, BookEvent } from '@magflip/core';
 import { Flipping as FlipManager } from './flipManager'
 import { Gutter } from './gutter';
+import { FlipData } from './flipData';
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -136,6 +137,28 @@ export class FlipView implements IBookView {
    * Returns the element of the active page 2.
    */
   private get activePage2El():HTMLElement|undefined { return this.getActivePage(2)?.element; }
+  /**
+   * The shadow3 element.
+   */
+  private _shadow3El:SVGLinearGradientElement|null = null;
+  /**
+   * The shadow6 element.
+   */
+  private _shadow6El:SVGLinearGradientElement|null = null;
+  /**
+   * Returns the shadow3 element.
+   */
+  private get shadow3El():SVGLinearGradientElement|null { 
+    return this._shadow3El 
+      || (this._shadow3El = document.getElementById('shadow3') as SVGLinearGradientElement|null); 
+  }
+  /**
+   * Returns the shadow6 element.
+   */
+  private get shadow6El():SVGLinearGradientElement|null { 
+    return this._shadow6El 
+      || (this._shadow6El = document.getElementById('shadow6') as SVGLinearGradientElement|null); 
+  }
   /**
    * 
    */
@@ -633,42 +656,14 @@ export class FlipView implements IBookView {
       }
     }
   }
-
-  private flipPage(
-    page2El:HTMLElement, 
-    page1Mask:SVGPolygonElement, 
-    page2Mask:SVGPolygonElement, 
-    shadow1Paths:NodeListOf<SVGPathElement> | undefined,
-    shadow3Shape:SVGPolygonElement|null, 
-    shadow6Shape:SVGPolygonElement|null, 
-    mouseGP:Point, 
-    pageWH:ISize
-  ){
-    const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
-    const isLeftPageActive = this.isLeftPageFlipping;
-    const zoomLevel = this.zoomLevel;
-    // Mask
-    page1Mask.setAttribute('points', flipData.printPage1MaskShape(zoomLevel) );
-    page2Mask.setAttribute('points', flipData.printPage2MaskShape(zoomLevel) );
-    shadow3Shape?.setAttribute('points', flipData.printPage2MaskShape(zoomLevel) );
-    shadow6Shape?.setAttribute('points', flipData.printShadow6(this.book!.size.opened) );
-    //
-    // Shadow
-    //
-    // The stop shadow becomes increasingly transparent 
-    // from one-third of the way toward the closing corner as it gets closer to the corner.
-    let opacityScale = flipData.shadow.closingDistance/(pageWH.width/3);
-    const cssVar = document.documentElement.style;
-    const f = flipData.mask.page2.p1;
-    const g = flipData.mask.page2.p2;
-    const h = flipData.mask.page2.p3;
-    const j = flipData.mask.page1.p1;
-    const k = flipData.mask.page1.p2;
-    const l = flipData.mask.page1.p3;
-    const c = flipData.c;
-    //
-    // Shadow 1
-    //
+  /**
+   * Set the shadow1.
+   * @param shadow1Paths 
+   * @param pageWH 
+   * @param k 
+   * @param zoomLevel 
+   */
+  private setShadow1(shadow1Paths:NodeListOf<SVGPathElement> | undefined, pageWH:ISize, k:Point, zoomLevel:number){
     const sh1Path1 = shadow1Paths && shadow1Paths[0];
     const sh1Path2 = shadow1Paths && shadow1Paths[1];
     let sh1CtlPy = pageWH.width/20;
@@ -691,26 +686,26 @@ export class FlipView implements IBookView {
       }
       sh1Path2?.setAttribute('d', `M 0 0 C ${pageWH.width/6/zoomLevel} ${sh1CtlPy/zoomLevel}, ${sh1CtlPx2/zoomLevel} ${sh1CtlPy/zoomLevel}, ${sh1P2EndPx/zoomLevel} 0`);
     }
-    //
-    // Shadow 5
-    //
-    const p2Rotate = flipData.page2.rotate;
-    const defaultOpacity = isLeftPageActive ? 0.3: 0.5;
-    const tempValue = defaultOpacity/Math.PI;
-    const opacity = p2Rotate <= Math.PI 
-      ? defaultOpacity - tempValue*p2Rotate 
-      : defaultOpacity + tempValue*(2*Math.PI - p2Rotate);
-    cssVar.setProperty('--shadow5-opacity', `${opacity*opacityScale}`)
-    //
-    // Shadow 3
-    //
-    const shadow3El = document.getElementById('shadow3') as SVGLinearGradientElement|null;
+  }
+  /**
+   * Set the shadow3.
+   * @param f 
+   * @param g 
+   * @param h 
+   * @param j 
+   * @param k 
+   * @param l 
+   * @param c 
+   * @param opacityScale 
+   */
+  private setShadow3(f:Point, g:Point, h:Point, j:Point, k:Point, l:Point, c:number, opacityScale:number){
+    const shadow3El = this.shadow3El;
     let x1, y1, x2, y2 = 100;
     const isTopOrCenterZone = (this.flipManager.eventZone & Zone.Top) || (this.flipManager.eventZone & Zone.Center);
     // Points are located on the gradient objectBoundingBox
     let longLineLength = 1;
     let p:Point = new Point({x:.5,y:.5});
-    if(isLeftPageActive){
+    if(this.isLeftPageFlipping){
       // Shape is triangle and dragging point is top corner.
       if(c < 0){ y2 = 0; }
       // Shape is triangle and dragging point is bottom corner.
@@ -765,14 +760,40 @@ export class FlipView implements IBookView {
       stops[4].setAttribute('offset', '100%');
       stops[4].setAttribute('stop-color', 'rgba(255, 255, 255, 0)');
     }
-    //
-    // Shadow 6
-    //
+  }
+  /**
+   * Set the shadow5.
+   * @param flipData 
+   * @param opacityScale 
+   */
+  private setShadow5(flipData:FlipData, opacityScale:number){
+    const p2Rotate = flipData.page2.rotate;
+    const defaultOpacity = this.isLeftPageFlipping ? 0.3: 0.5;
+    const tempValue = defaultOpacity/Math.PI;
+    const opacity = p2Rotate <= Math.PI 
+      ? defaultOpacity - tempValue*p2Rotate 
+      : defaultOpacity + tempValue*(2*Math.PI - p2Rotate);
+    document.documentElement.style.setProperty('--shadow5-opacity', `${opacity*opacityScale}`)
+  }
+  /**
+   * Set the shadow6.
+   * @param f 
+   * @param g 
+   * @param h 
+   * @param j 
+   * @param k 
+   * @param l 
+   * @param c 
+   * @param closingDistance 
+   * @param pageWH 
+   * @param zoomLevel 
+   */
+  private setShadow6(f:Point, g:Point, h:Point, j:Point, k:Point, l:Point, c:number, closingDistance:number, pageWH:ISize, zoomLevel:number){
     const originP = new Point();
     const endCorner = new Point();
     const line = new Line(new Point(), new Point());
 
-    if(isLeftPageActive){
+    if(this.isLeftPageFlipping){
       originP.x = pageWH.width*2;
       endCorner.x = 0;
       line.p1.x = k.x;
@@ -796,13 +817,13 @@ export class FlipView implements IBookView {
       endCorner.y = pageWH.height;
     }
 
-    p = MZMath.findPerpendicularFoot( line, originP );
+    const p = MZMath.findPerpendicularFoot( line, originP );
     const p2 = MZMath.findPerpendicularFoot( line, endCorner);
     const diagonalL = MZMath.getLength(originP, endCorner);
     const pLength = MZMath.getLength(p2, endCorner);
-    const offset2 = (1-flipData.shadow.closingDistance/diagonalL)*(pLength/diagonalL)*3*100;
+    const offset2 = (1-closingDistance/diagonalL)*(pLength/diagonalL)*3*100;
 
-    const shadow6El = document.getElementById('shadow6') as SVGLinearGradientElement|null;
+    const shadow6El = this.shadow6El;
     if(shadow6El){
       shadow6El.setAttribute('x1', `${p.x/zoomLevel}`);
       shadow6El.setAttribute('y1', `${p.y/zoomLevel}`);
@@ -819,8 +840,49 @@ export class FlipView implements IBookView {
       sh6stops[2].setAttribute('offset', `${offset2}%`);
       sh6stops[2].setAttribute('stop-color', `rgba(0, 0, 0, 0)`);
     }
+  }
+  /**
+   * Flip the page.
+   * @param mouseGP 
+   */
+  private flipPage( mouseGP:Point ){
+    const zoomLevel = this.zoomLevel;
+    const page2El = this.activePage2El;
+    if(!page2El){ return; }
+    const pageWH = { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel }
+    const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
 
+    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
+    const shadow3Shape = this.activePage2El?.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
+    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
+    //
+    // Mask
+    //
+    this.maskShapeOnPage1.setAttribute('points', flipData.printPage1MaskShape(zoomLevel) );
+    this.maskShapeOnPage2.setAttribute('points', flipData.printPage2MaskShape(zoomLevel) );
+    shadow3Shape?.setAttribute('points', flipData.printPage2MaskShape(zoomLevel) );
+    shadow6Shape?.setAttribute('points', flipData.printShadow6(this.book!.size.opened) );
+    //
+    // Shadow
+    //
+    // The stop shadow becomes increasingly transparent 
+    // from one-third of the way toward the closing corner as it gets closer to the corner.
+    let opacityScale = flipData.shadow.closingDistance/(pageWH.width/3);
+    const cssVar = document.documentElement.style;
+    const f = flipData.mask.page2.p1;
+    const g = flipData.mask.page2.p2;
+    const h = flipData.mask.page2.p3;
+    const j = flipData.mask.page1.p1;
+    const k = flipData.mask.page1.p2;
+    const l = flipData.mask.page1.p3;
+    const c = flipData.c;
+    this.setShadow1(shadow1Paths, pageWH, k, zoomLevel);
+    this.setShadow3(f, g, h, j, k, l, c, opacityScale);
+    this.setShadow5(flipData, opacityScale);
+    this.setShadow6(f, g, h, j, k, l, c, flipData.shadow.closingDistance, pageWH, zoomLevel);
+    //
     // Page 2
+    //
     cssVar.setProperty('--page2-top', `${flipData.page2.top/zoomLevel}px`)
     cssVar.setProperty('--page2-left', `${flipData.page2.left/zoomLevel}px`)
     cssVar.setProperty('--page2-rotate', `${flipData.page2.rotate}rad`)
@@ -861,35 +923,17 @@ export class FlipView implements IBookView {
   private zoneMouseEntered(event:MouseEvent, param:IZoneEventParams) {
     if(this.flipManager.eventStatus & EventStatus.Flipping
       || this.flipManager.eventStatus & EventStatus.Dragging){ return; }
+    if(!this.activePage2El){ return }
+
     this.flipManager.eventStatus = EventStatus.AutoFlipFromCorner;
     this.flipManager.eventZone = param.zone;
-
-    const page2El = this.activePage2El;
-    if(!page2El){ return }
     
-    const zoomLevel = this.zoomLevel;
-    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
-    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
     const viewport = { x:event.clientX, y:event.clientY }
-
     this.setViewerToAutoFlip();
-    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect, zoomLevel);
+    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect as Rect, this.zoomLevel);
     this.flipManager.animateFlipFromCorner(
       viewport,
-      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel },
-      (mouseGP:Point, pageWH:ISize) => {
-        this.flipPage(
-          page2El, 
-          this.maskShapeOnPage1, 
-          this.maskShapeOnPage2,
-          shadow1Paths,
-          shadow3Shape,
-          shadow6Shape,
-          mouseGP, 
-          pageWH
-        );
-      }, 
+      (mouseGP:Point) => { this.flipPage( mouseGP ); }, 
       () =>{}
     );
   }
@@ -901,32 +945,16 @@ export class FlipView implements IBookView {
    */
   private zoneMouseDowned(event:MouseEvent, param:IZoneEventParams){
     if(this.flipManager.eventStatus & EventStatus.Flipping){ return; }
+    if(!this.activePage2El){ return }
+    if(!this.pageContainerRect){ return; }
+
     this.flipManager.eventStatus = EventStatus.Dragging;
     this.flipManager.eventZone = param.zone;
-
-    const viewport = { x:event.clientX, y:event.clientY };
-    const page2El = this.activePage2El;
-
-    if(!page2El){ return }
-    if(!this.pageContainerRect){ return; }
     
-    const zoomLevel = this.zoomLevel;
-    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
-    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
-
+    const viewport = { x:event.clientX, y:event.clientY };
     this.setViewerToFlip();
-    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, zoomLevel);
-    this.flipPage(
-      page2El, 
-      this.maskShapeOnPage1, 
-      this.maskShapeOnPage2, 
-      shadow1Paths,
-      shadow3Shape,
-      shadow6Shape,
-      viewport, 
-      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel }
-    );
+    this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, this.zoomLevel);
+    this.flipPage( viewport );
   }
   /**
    * This is the mousemove event handler on the 6 event zones.
@@ -937,28 +965,13 @@ export class FlipView implements IBookView {
   private zoneMouseMoved(event:MouseEvent, param:IZoneEventParams) {
     if(this.flipManager.eventStatus === EventStatus.None){ this.zoneMouseEntered(event, param); return; }
     if(this.flipManager.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
+    if(!this.activePage2El){ return }
+
     this.flipManager.eventZone = param.zone;
-
-    const page2El = this.activePage2El;
-    if(!page2El){ return }
-
-    const zoomLevel = this.zoomLevel;
-    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
-    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
     const viewport = { x:event.clientX, y:event.clientY };
     // If eventZone is Zone.Center, set the y value to the active corner's y value.
     if(this.flipManager.eventZone & Zone.Center){ viewport.y = this.flipManager.activeCornerGP.y; }
-
-    this.flipPage(
-      page2El, 
-      this.maskShapeOnPage1, 
-      this.maskShapeOnPage2, 
-      shadow1Paths,
-      shadow3Shape,
-      shadow6Shape,
-      viewport, 
-      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel });
+    this.flipPage( viewport );
   }
   /**
    * This is the mouseleave event handler on the 6 event zones.
@@ -968,33 +981,15 @@ export class FlipView implements IBookView {
    */
   private zoneMouseLeaved(event:MouseEvent, param:IZoneEventParams){
     if(this.flipManager.eventStatus !== EventStatus.AutoFlipFromCorner){ return; }
+    if(!this.activePage2El){ return }
+
     this.flipManager.eventStatus = EventStatus.AutoFlipToCorner;
-
-    const page2El = this.activePage2El;
-    if(!page2El){ return }
-
-    const zoomLevel = this.zoomLevel;
-    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
-    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
-    const viewport = { x:event.clientX, y:event.clientY }
-
     this.flipManager.eventZone = param.zone;
+    
+    const viewport = { x:event.clientX, y:event.clientY }
     this.flipManager.animateFlipToCorner(
       viewport,
-      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel },
-      (mouseGP:Point, pageWH:ISize) => {
-        this.flipPage(
-          page2El,
-          this.maskShapeOnPage1, 
-          this.maskShapeOnPage2, 
-          shadow1Paths,
-          shadow3Shape,
-          shadow6Shape,
-          mouseGP, 
-          pageWH
-        );
-      },
+      (mouseGP:Point) => { this.flipPage(mouseGP); },
       () => { 
         if(this.flipManager.eventStatus == EventStatus.AutoFlipToCorner){ 
           this.unsetViewerToAutoFlip();
@@ -1011,9 +1006,7 @@ export class FlipView implements IBookView {
    */
   private documentMouseUp(event:MouseEvent){
     if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
-    
-    const page2El = this.activePage2El;
-    if(!page2El){ return }
+    if(!this.activePage2El){ return }
 
     const viewport = { x:event.clientX, y:event.clientY };
     const dataToFlip = this.flipManager.getInfoToFlip(viewport);
@@ -1022,26 +1015,11 @@ export class FlipView implements IBookView {
     else { this.flipManager.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
     
     const zoomLevel = this.zoomLevel;
-    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
-    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
 
     this.flipManager.animateFlip(
       viewport, 
       dataToFlip.targetCornerGP,
-      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel },
-      (mouseGP:Point, pageWH:ISize) => {
-        this.flipPage(
-          page2El, 
-          this.maskShapeOnPage1, 
-          this.maskShapeOnPage2, 
-          shadow1Paths,
-          shadow3Shape,
-          shadow6Shape,
-          mouseGP, 
-          pageWH
-        );
-      },
+      (mouseGP:Point) => { this.flipPage(mouseGP); },
       () => {
         if(!dataToFlip.isSnappingBack){
           this.shiftPages(dataToFlip.isFlippingForward)
@@ -1062,24 +1040,9 @@ export class FlipView implements IBookView {
     this.flipManager.curMouseGP = viewport;
 
     if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
+    if(!this.activePage2El){ return }
 
-    const page2El = this.activePage2El;
-    if(!page2El){ return }
-    
-    const zoomLevel = this.zoomLevel;
-    const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
-    const shadow3Shape = page2El.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
-    const shadow6Shape = this.activePage1El?.querySelector('.shadow6 > polygon.shape') as SVGPolygonElement | null;
-
-    this.flipPage(
-      page2El, 
-      this.maskShapeOnPage1, 
-      this.maskShapeOnPage2, 
-      shadow1Paths,
-      shadow3Shape,
-      shadow6Shape,
-      viewport, 
-      { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel });
+    this.flipPage(viewport);
   }
   /**
    * Sets all events for viewer.
