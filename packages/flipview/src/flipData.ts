@@ -78,14 +78,14 @@ export class FlipData implements IFlipData {
     this.shadow = flipData.shadow;
   }
 
-  printPage1MaskShape(){
+  printPage1MaskShape(zoomLevel:number){
     const pg = this.mask.page1;
-    return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
+    return `${pg.p1.x/zoomLevel},${pg.p1.y/zoomLevel} ${pg.p2.x/zoomLevel},${pg.p2.y/zoomLevel} ${pg.p3.x/zoomLevel},${pg.p3.y/zoomLevel} ${pg.p4.x/zoomLevel},${pg.p4.y/zoomLevel}`;
   }
 
-  printPage2MaskShape(){
+  printPage2MaskShape(zoomLevel:number){
     const pg = this.mask.page2;
-    return `${pg.p1.x},${pg.p1.y} ${pg.p2.x},${pg.p2.y} ${pg.p3.x},${pg.p3.y} ${pg.p4.x},${pg.p4.y}`;
+    return `${pg.p1.x/zoomLevel},${pg.p1.y/zoomLevel} ${pg.p2.x/zoomLevel},${pg.p2.y/zoomLevel} ${pg.p3.x/zoomLevel},${pg.p3.y/zoomLevel} ${pg.p4.x/zoomLevel},${pg.p4.y/zoomLevel}`;
   }
 
   printShadow6(bookSize:ISize){

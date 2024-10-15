@@ -102,7 +102,7 @@ export class Flipping extends PageWindow {
    * @param mouseGP The current position of the mouse pointer.
    * @param containerRect The rectangle defining the boundaries of the container element.
    */
-  setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect){
+  setInitFlipping(eventZone:Zone, mouseGP:Point, containerRect:Rect, zoomLevel:number){
     this.eventZone = eventZone;
     let flipActionLineGY:number = mouseGP.y;
     // If dragging a corner, the flipActionLineGY will be the top or bottom of the container.
@@ -160,7 +160,7 @@ export class Flipping extends PageWindow {
     const originY = this.flipActionLine.y - containerRect.top;
     const doc = document;
     const docEl = doc.documentElement;
-    docEl.style.setProperty('--page2-origin', `${originX}px ${originY}px`)
+    docEl.style.setProperty('--page2-origin', `${originX/zoomLevel}px ${originY/zoomLevel}px`)
     // Zone Dimension
     const zoneLT = doc.getElementById('mzZoneLT');
     const zoneLC = doc.getElementById('mzZoneLC');

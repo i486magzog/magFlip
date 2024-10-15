@@ -16,21 +16,13 @@ export type BookViewerElements = {
  */
 export class BookViewer extends Base {
   /**
+   * Zoom level of the viewer.
+   */
+  private zoomLevel:number = 1;
+  /**
    * 
    */
   private registeredViews: { [n:string] : IBookView } = {};
-  /**
-   * 
-   * @param id 
-   * @param view 
-   */
-  registerView(view: IBookView) { this.registeredViews[view.id] = view; }
-  /**
-   * 
-   * @param id 
-   * @returns 
-   */
-  private getView(id:string){ return this.registeredViews[id]; }
   /**
    * Book object.
    * This contains the most information of a book loaded to this viewer.
@@ -48,11 +40,20 @@ export class BookViewer extends Base {
   /**
    * Returns the DOM element of the book viewer with id 'bookViewer'.
    */
-  private readonly element: HTMLElement;
+  readonly element: HTMLElement;
   /**
-   * Returns the DOM element of the book container with id 'bookContainer'.
+   * The DOM element of the book container with id 'bookContainer'.
    */
-  private bookContainerEl: HTMLElement|undefined;
+  private _bookContainerEl: HTMLElement|undefined;
+  /**
+   * Getter of the bookContainerEl.
+   */
+  get bookContainerEl(){ return this._bookContainerEl; }
+  /**
+   * Setter of the bookContainerEl.
+   * @param el 
+   */
+  private set bookContainerEl(el:HTMLElement|undefined){ this._bookContainerEl = el; }
   /**
    * Returns the instance of current Viewer.
    */
@@ -91,6 +92,29 @@ export class BookViewer extends Base {
 
     return { bookViewerEl: viewerEl } 
   };
+  /**
+   * 
+   * @param id 
+   * @returns 
+   */
+  private getView(id:string){ return this.registeredViews[id]; }
+  /**
+   * 
+   * @param id 
+   * @param view 
+   */
+  registerView(view: IBookView) { 
+    this.registeredViews[view.id] = view; 
+    if(!this.curView){ this.curView = view; }
+  }
+  /**
+   * Sets the zoom level of the viewer.
+   * @param zoomLevel 
+   */
+  setZoomLevel(zoomLevel:number){ 
+    this.zoomLevel = zoomLevel; 
+    this.curView?.zoom(zoomLevel);
+  }
   /**
    * Sets the current view.
    * @param viewId 
@@ -134,10 +158,9 @@ export class BookViewer extends Base {
    * @param id 
    */
   changeView(id:string){
-    console.log(this.registeredViews)
     const view = this.getView(id);
     if(view){
-      this.curView = view;
+      this.setCurView(id);
     }
   }
 }

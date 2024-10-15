@@ -1,0 +1,332 @@
+
+:root {
+  --closed-book-width: 0px;
+  --opened-book-width: 0px;
+  --book-height: 0px;
+  --page-width: 0px;
+  --page-height: 0px;
+  --zone-width: 50px;
+  /* Page 2 */
+  --page2-top: 0px;
+  --page2-left: 0px;
+  --page2-rotate: 0rad;
+  --page2-origin: '0px 0px';
+  /* Shadow */
+  --page-diagonal-length: 0px;
+  --shadow-origin-x: 0px;
+  --shadow-origin-y: 0px;
+  --shadow-left: calc(var(--page-width) - var(--page-diagonal-length));
+  --shadow-rotate: 0rad;
+  --shadow5-opacity: 0;
+}
+#bookViewer.flip-view.hidden { display: none; }
+#bookViewer.flip-view #bookContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#bookViewer.flip-view #bookContainer .book {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: content-box;
+  width: 100%;
+  height: 100%;
+}
+
+/* Page container */
+#bookViewer.flip-view .book > .container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* Page */
+#bookViewer.flip-view .book > .container > .page {
+  position:absolute;
+  box-sizing: border-box;
+  border:0px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Book Viewer */
+#bookViewer.flip-view #bookContainer {
+  /* shadow 1 */
+  filter: drop-shadow(0px 0px 50px rgba(0, 0, 0, .4));
+}
+/* Book */
+#bookViewer.flip-view #bookContainer.ready-to-open .book { width: var(--closed-book-width) }
+#bookViewer.flip-view #bookContainer.ready-to-open.front .book { border-radius: 0 20px 20px 0; }
+#bookViewer.flip-view #bookContainer.ready-to-open.end .book { border-radius: 20px 0 0 20px; }
+#bookViewer.flip-view #bookContainer .book {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: content-box;
+  width: var(--opened-book-width);
+  height: var(--book-height);
+}
+
+/* Page container */
+#bookViewer.flip-view .book > .container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* Page */
+#bookViewer.flip-view #bookContainer.ready-to-open .book > .container > .page { width:100%; }
+#bookViewer.flip-view .book > .container > .page.empty:nth-child(3) { opacity: 0; }
+#bookViewer.flip-view #bookContainer.ready-to-open.front .book > .container > .page.empty:nth-child(-n+3),
+#bookViewer.flip-view #bookContainer.ready-to-open.end .book > .container > .page.empty:nth-child(n+4):nth-child(-n+6) { display: none; }
+
+#bookViewer.flip-view .book > .container > .page {
+  position:absolute;
+  box-sizing: border-box;
+  border:0px;
+  width: var(--page-width);
+  height: var(--page-height);
+  /* overflow: hidden; */
+}
+#bookViewer.flip-view .book .page:nth-child(-n+3) { left:0; }
+#bookViewer.flip-view .book .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
+#bookViewer.flip-view .book .page:nth-child(2),
+#bookViewer.flip-view .book .page:nth-child(5) { display: none; }
+#bookViewer.flip-view #bookContainer.ready-to-open .book .page:nth-child(-n+6) { left:0; }
+
+#bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(3),
+#bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(4){ z-index: 9; }
+#bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(2),
+#bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(5) {
+  display: block;
+  z-index: 10;
+  transform-origin: var(--page2-origin);
+  top: var(--page2-top);
+  left: var(--page2-left);
+  transform: rotate(var(--page2-rotate));
+  /* Shadow 5 */
+  filter: drop-shadow(0px 0px 40px rgba(0, 0, 0, var(--shadow5-opacity)));
+}
+
+/* Page Content Container */
+#bookViewer.flip-view .book > .container > .page > .content-container { 
+  position: absolute;
+  box-sizing: border-box;
+  top:0;
+  left:0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(3)  > .content-container,
+#bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(4) > .content-container{
+  mask-size: cover;
+  mask-composite: exclude;
+  mask-image: url(#mask1);
+  -webkit-mask-composite: xor;
+  -webkit-mask-image: url(#mask1);
+}
+
+#bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(2) > .content-container,
+#bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(5) > .content-container {
+  /* z-index: 10; */
+  -webkit-mask-composite: intersect;
+  -webkit-mask-image: url(#mask2);
+  -webkit-mask-mode: alpha;
+  mask-composite: intersect;
+  mask-image: url(#mask2);
+  mask-mode: alpha;
+}
+
+/* Content */
+#bookViewer.flip-view .book > .container > .page > .content-container > .content{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Shadow */
+#bookViewer.flip-view .shadow1 {
+  position: absolute;
+  bottom: -10%;
+  left: 0;
+  width: 100%;
+  height: 10%;
+}
+#bookViewer.flip-view .shadow1 path { display: none; }
+#bookViewer.flip-view .shadow1 path.sh1-path1,
+#bookViewer.flip-view .shadow1 path.sh1-path2 {
+  fill:url(#shadow1);
+  filter:url(#sh1BlurFilter);
+}
+#bookViewer.flip-view .book > .container > .page:nth-child(3) .shadow1 path.sh1-path1 { display: block; }
+#bookViewer.flip-view .book > .container > .page:nth-child(4) .shadow1 path.sh1-path2 { display: block; }
+
+
+#bookViewer.flip-view .shadow6 polygon { fill:url(#shadow6); }
+#bookViewer.flip-view .book .page .shadow6 { display: none; }
+
+#bookViewer.flip-view .book .page .shadow6 { width:100%; height:100%; }
+#bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(3) > .shadow6 {
+  display: block;
+  position: absolute;
+  top:0;
+  left: 0;
+  width: calc(2*var(--page-width));
+  height: 100%;
+}
+#bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(4) > .shadow6 {
+  display: block;
+  position: absolute;
+  top:0;
+  left: calc((-1)*var(--page-width));
+  width: calc(2*var(--page-width));
+  height: 100%;
+}
+#bookViewer.flip-view #bookContainer.ready-to-open.left-page-flipping .book > .container > .page:nth-child(3) > .shadow6,
+#bookViewer.flip-view #bookContainer.ready-to-open.right-page-flipping .book > .container > .page:nth-child(4) > .shadow6 { display: none; }
+
+
+#bookViewer.flip-view .book > .container > .page > .content-container > .content,
+#bookViewer.flip-view .book > .container > .page > .shadow3 {
+  overflow: hidden;
+  box-sizing: border-box;
+}
+#bookViewer.flip-view .book > .container > .page:nth-child(odd) > .content-container,
+#bookViewer.flip-view .book > .container > .page:nth-child(odd) > .content-container > .content,
+#bookViewer.flip-view .book > .container > .page:nth-child(odd) > .shadow3 { 
+  border-right-width: 0 !important; 
+  border-radius: 20px 0 0 20px; 
+}
+#bookViewer.flip-view .book > .container > .page:nth-child(even) > .content-container,
+#bookViewer.flip-view .book > .container > .page:nth-child(even) > .content-container > .content,
+#bookViewer.flip-view .book > .container > .page:nth-child(even) > .shadow3 {
+  border-left-width: 0 !important; 
+  border-radius: 0 20px 20px 0; 
+}
+
+#bookViewer.flip-view .book > .container > .page > .shadow3 { 
+  position: absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height: 100%;
+
+  display: none;
+}
+
+#bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(2) > .shadow3,
+#bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(5) > .shadow3 {  display: block; }
+
+#bookViewer.flip-view .book > .container > .page.empty .shadow2{ display: none; }
+#bookViewer.flip-view .book > .container > .page:nth-child(odd) .shadow2{ 
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 7%;
+  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 210%);
+  border-right: 1px solid rgba(71, 71, 71, 0.1);
+}
+#bookViewer.flip-view .book > .container > .page:nth-child(even) .shadow2{ 
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 7%;
+  background-image: -webkit-linear-gradient(right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 210%);
+  border-left: 1px solid rgba(71, 71, 71, 0.1);
+}
+
+
+/****************
+  Setting
+ ****************/
+
+/* Page Border */
+#bookViewer.flip-view .page.border > .content-container > .content {
+  border: 1px solid white;
+}
+#bookViewer.flip-view .page.border > .shadow3 {
+  /* Must be transparent */
+  border: 1px solid transparent;
+}
+#bookViewer.flip-view .page.border .shadow3 > .shape { 
+  stroke: white;
+  stroke-width: 1px;
+}
+
+
+#bookViewer.flip-view .page:nth-child(1) { z-index: 1; }
+#bookViewer.flip-view .page:nth-child(2) { z-index: 2; }
+#bookViewer.flip-view .page:nth-child(3) { z-index: 3; }
+#bookViewer.flip-view .page:nth-child(4) { z-index: 3; }
+#bookViewer.flip-view .page:nth-child(5) { z-index: 2; }
+#bookViewer.flip-view .page:nth-child(6) { z-index: 1; }
+
+/* Event Zone */
+#bookViewer.flip-view #bookContainer.ready-to-open.front .event-zone.left,
+#bookViewer.flip-view #bookContainer.ready-to-open.end .event-zone.right { display: none;}
+
+#bookViewer.flip-view .event-zone {
+  z-index: 20;
+  position: absolute;
+  background: transparent; 
+}
+#bookViewer.flip-view #mzZoneLT {
+  top: 0px;
+  left: 0px;
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
+}
+#bookViewer.flip-view #mzZoneLC {
+  top: calc(2*var(--zone-width));
+  left: 0px;
+  width: var(--zone-width);
+  height: calc(var(--page-height) - var(--zone-width)*4);
+}
+
+#bookViewer.flip-view #mzZoneLB {
+  bottom: 0px;
+  left: 0px;
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
+}
+
+#bookViewer.flip-view #mzZoneRT {
+  top: 0px;
+  right: 0px;
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
+}
+
+#bookViewer.flip-view #mzZoneRC {
+  top: calc(2*var(--zone-width));
+  right: 0px;
+  width: var(--zone-width);
+  height: calc(var(--page-height) - var(--zone-width)*4);
+}
+
+#bookViewer.flip-view #mzZoneRB {
+  bottom: 0px;
+  right: 0px;
+  width: calc(3*var(--zone-width));
+  height: calc(2*var(--zone-width));
+}
+
+/* Temporary */
+img { width: 100%; height:100%; }
