@@ -99,11 +99,11 @@
   height: var(--page-height);
   /* overflow: hidden; */
 }
-#bookViewer.flip-view .book .page:nth-child(-n+3) { left:0; }
+#bookViewer.flip-view .book .page:nth-child(-n+3) { left:calc(0% - .5px); }
 #bookViewer.flip-view .book .page:nth-child(n+4):nth-child(-n+6) { left:calc(50% - 0.5px); }
 #bookViewer.flip-view .book .page:nth-child(2),
 #bookViewer.flip-view .book .page:nth-child(5) { display: none; }
-#bookViewer.flip-view #bookContainer.ready-to-open .book .page:nth-child(-n+6) { left:0; }
+#bookViewer.flip-view #bookContainer.ready-to-open .book .page:nth-child(-n+6) { left:calc(0% - .5px); }
 
 #bookViewer.flip-view #bookContainer.left-page-flipping .book > .container > .page:nth-child(3),
 #bookViewer.flip-view #bookContainer.right-page-flipping .book > .container > .page:nth-child(4){ z-index: 9; }
