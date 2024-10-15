@@ -100,7 +100,7 @@
   /* overflow: hidden; */
 }
 #bookViewer.flip-view .book .page:nth-child(-n+3) { left:0; }
-#bookViewer.flip-view .book .page:nth-child(n+4):nth-child(-n+6) { left:50%; }
+#bookViewer.flip-view .book .page:nth-child(n+4):nth-child(-n+6) { left:calc(50% - 0.5px); }
 #bookViewer.flip-view .book .page:nth-child(2),
 #bookViewer.flip-view .book .page:nth-child(5) { display: none; }
 #bookViewer.flip-view #bookContainer.ready-to-open .book .page:nth-child(-n+6) { left:0; }
