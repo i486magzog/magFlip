@@ -1,6 +1,6 @@
 {
   "name": "@magflip/flipview",
-  "version": "0.5.10",
+  "version": "0.5.34",
   "title": "MagFlip(Magzog's flip book) view plugin, 'flipview' Package",
   "description": "One of the core view plugins of MagFlip, displaying the book in a flipping format.",
   "type": "module",
@@ -12,6 +12,7 @@
   "license": "MIT",
   "main": "./index.js",
   "types": "./index.d.ts",
+  "css": "./index.css",
   "keywords": [
     "flip",
     "flipbook",
@@ -45,7 +46,6 @@
     "@types/jest": "^29.5.13",
     "jest": "^29.7.0",
     "rollup": "^4.24.0",
-    "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-postcss": "^4.0.2",
     "ts-jest": "^29.2.5",
