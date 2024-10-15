@@ -1,6 +1,6 @@
 {
   "name": "@magflip/flipview",
-  "version": "0.5.7",
+  "version": "0.5.10",
   "title": "MagFlip(Magzog's flip book) view plugin, 'flipview' Package",
   "description": "One of the core view plugins of MagFlip, displaying the book in a flipping format.",
   "type": "module",
