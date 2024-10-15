@@ -40,6 +40,7 @@ export class ScrollView implements IBookView{
     };
   };
   getBookContainerEl(){ return this.bookContainerEl; }
+  zoom(zoomLevel:number){}
   /**
    * 
    * @param book 
