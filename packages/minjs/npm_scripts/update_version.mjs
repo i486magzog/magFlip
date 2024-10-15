@@ -37,29 +37,32 @@ if (!versionPattern.test(version)) {
 //
 // Update version in the example html file.
 //
-const exampleHtml = '../../docs/examples/prebuild/magflip.html'
-fs.readFile(exampleHtml, 'utf8', (err, data) => {
-  if (err) {
-      console.log('-------------------------------------------');
-      console.error('Error reading file:', err);
-      console.log('-------------------------------------------');
-      process.exit(1);
-  }
-  const updatedData = data.replace(/@magflip\/minjs@\d+\.\d+\.\d+/g, `@magflip/minjs@${version}`);
-  fs.writeFile(exampleHtml, updatedData, 'utf8', (err) => {
-      if (err) {
+const exampleHtml = '../../docs/examples/prebuild/magflip.html';
+const readmeFile = '../../README.md';
+const searchPattern = /@magflip\/minjs@\d+\.\d+\.\d+/g;
+const replaceValue = `@magflip/minjs@${version}`;
+updateVersionOnFile(exampleHtml, searchPattern, replaceValue);
+updateVersionOnFile(readmeFile, searchPattern, replaceValue);
+
+function updateVersionOnFile(file, searchPattern, replaceValue){
+  fs.readFile(file, 'utf8', (err, data) => {
+    if (err) {
         console.log('-------------------------------------------');
-        console.error('Error writing file:', err);
+        console.error('Error reading file:', err);
         console.log('-------------------------------------------');
         process.exit(1);
-      }
-      console.log('-------------------------------------------');
-      console.log(`Version updated to ${version} in ${exampleHtml}`);
-      console.log('-------------------------------------------');
+    }
+    const updatedData = data.replace(searchPattern, replaceValue);
+    fs.writeFile(file, updatedData, 'utf8', (err) => {
+        if (err) {
+          console.log('-------------------------------------------');
+          console.error('Error writing file:', err);
+          console.log('-------------------------------------------');
+          process.exit(1);
+        }
+        console.log('-------------------------------------------');
+        console.log(`Version updated to ${version} in ${file}`);
+        console.log('-------------------------------------------');
+    });
   });
-});
-//
-// Publish
-//
-// execSync('cd ' + __dirname + ' && npm publish --access public --otp=' + otp);
-// execSync('npm publish --access public --otp=' + otp);
+}
