@@ -12,3 +12,5 @@ export * from './core/bookShelfManager';
 export * from './core/bookViewer';
 export * from './core/page';
 export * from './core/pageEl';
+
+import './core/core.css';

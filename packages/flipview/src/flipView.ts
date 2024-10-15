@@ -1,7 +1,6 @@
 import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage, Book, BookEvent } from '@magflip/core';
 import { Flipping as FlipManager } from './flipManager'
 import { Gutter } from './gutter';
-import styles from './flipView.css'; 
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -160,11 +159,6 @@ export class FlipView implements IBookView {
    */
   private init(){ 
     this.curOpenLeftPageIndex = -1;
-  }
-  addStyles(css: string):void {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = styles;
-    document.head.appendChild(styleElement);
   }
   /**
    * Creates the viewer related elements.
