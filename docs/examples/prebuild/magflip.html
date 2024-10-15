@@ -10,13 +10,12 @@
         width: 200px !important;
       }
     </style>
-      <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.26/magflip.min.js"></script> 
-      <!-- Use for local test
-        <script src="../../../packages/minjs/magflip.min.js"></script> 
-      -->
+      <!-- <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.26/magflip.min.js"></script>  -->
+      <!-- Use for local test -->
+      <script src="../../../packages/minjs/magflip.min.js"></script> 
     <script>
     <!--
-    var bookManager;
+    var shelfManager;
     var bookViewer;
     document.addEventListener('DOMContentLoaded', function () {
       const pages = [
@@ -67,23 +66,41 @@
       })
       book.importPages(pages, { width: 700, height: 700 });
       // Import Book
-      bookManager = new BookShelfManager();
-      bookViewer = bookManager.getBookViewer();
+      shelfManager = new BookShelfManager();
+      bookViewer = shelfManager.getBookViewer();
+      shelfManager.importBookToShelf(book);
+      shelfManager.importBookToShelf(getSampleBook(2, 10));
+      shelfManager.importBookToShelf(getSampleBook(3, 16));
+
       const view = new FlipView();
       bookViewer.registerView(new FlipView());
       bookViewer.setCurView(view.id)
       // bookManager.loadAndAddBooks();
-      bookManager.importBookToShelf(book);
-      bookManager.importBookToShelf(getSampleBook(2, 10));
-      bookManager.importBookToShelf(getSampleBook(3, 16));
 
-      window.bookManager = bookManager;
+      // Optional
+      window.shelfManager = shelfManager;
       window.bookViewer = bookViewer;
+      addZoomRange(bookViewer);
     });
 
     window.onload = function () {
       console.log('All resources including images are loaded');
     };
+
+    function addZoomRange(bookViewer){
+      const viewerEl = bookViewer.element;
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.id = 'zoomRange';
+      input.min = '0.5';
+      input.max = '2';
+      input.value = '1';
+      input.step = '0.01';
+      viewerEl.appendChild(input);
+      input.addEventListener('input', (event) => {
+        bookViewer.setZoomLevel(Number(input.value));
+      });
+    }
 
     function getSampleBook(bookNum, pageCnt){
       const pages = [];
@@ -112,6 +129,14 @@
     }
     -->
   </script>
+
+  <style>
+    #zoomRange {
+      position: absolute;
+      top: 10px;
+      right: 100px;
+    }
+  </style>
 </head>
 
 <body>
