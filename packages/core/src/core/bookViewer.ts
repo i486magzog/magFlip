@@ -85,7 +85,7 @@ export class BookViewer extends Base {
   private createViewerElements():BookViewerElements {    
     let viewerEl = document.getElementById(this.bookViewerDocId);
 
-    if(viewerEl){ viewerEl.innerHTML = ""; } 
+    if(viewerEl){ this.resetBookEls(viewerEl); } 
     else { 
       viewerEl = document.createElement('div');
       viewerEl.id = this.bookViewerDocId;
@@ -175,5 +175,16 @@ export class BookViewer extends Base {
     if(view){
       this.setCurView(id);
     }
+  }
+
+  private resetBookEls(viewerEl:HTMLElement){ 
+    const children = Array.from(viewerEl.children);
+    children.forEach(child => {
+      if(child !== this.bookContainerEl
+        && !child.classList.contains('do-not-remove')
+      ){ 
+        viewerEl.removeChild(child); 
+      }
+    });
   }
 }

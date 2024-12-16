@@ -5,3 +5,4 @@ types
 package-lock.json
 rollup.config.js
 dist
+__tests__

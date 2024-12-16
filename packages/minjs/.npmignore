@@ -4,4 +4,4 @@ tsconfig.json
 types
 package-lock.json
 rollup.config.js
-dist
+npm_scripts

@@ -8,7 +8,7 @@ See [demo](https://i486magzog.github.io/magFlip/examples/prebuild/magflip.html).
 ## Usage
 
 ### JavaScript module
-The first step is to install the Event Calendar `core` package:
+The first step is to install the `core` and `flipview` packages:
 ```bash
 npm install --save-dev @magflip/core @magflip/flipview
 ```
@@ -22,7 +22,7 @@ npm install --save-dev @magflip/scrollview
 Include the following lines of code in the `<head>` section of your page:<br>
 Please refer to the [sample code](./docs/examples/prebuild) for more details.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.44/magflip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.48/magflip.min.js"></script>
 ```
 
 <br>

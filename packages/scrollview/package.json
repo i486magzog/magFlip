@@ -1,6 +1,6 @@
 {
   "name": "@magflip/scrollview",
-  "version": "0.5.19",
+  "version": "0.5.21",
   "title": "MagFlip(Magzog's flip book) view plugin, 'scrollview' Package",
   "description": "One of the core view plugins of MagFlip, displaying the book in a scrolling format.",
   "type": "module",
