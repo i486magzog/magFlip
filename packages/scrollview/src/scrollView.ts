@@ -117,4 +117,8 @@ export class ScrollView implements IBookView{
       }
     }
   }
+
+  nextPage(offsetY?:number){}
+  prevPage(offsetY?:number){}
+  moveTo(pageIndex:number, offsetY?:number){}
 }

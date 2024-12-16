@@ -9,6 +9,23 @@ export default [
   {
     input: './src/index.ts',
     output: {
+      file: './index.d.ts',
+      format: 'es',
+    },
+    external: [/\.css$/],
+    plugins: [dts()],
+    watch: {
+      include: [
+        'src/**',
+        '../../packages/core/src/**',
+      ],
+      exclude: 'node_modules/**',
+      clearScreen: false,
+    }
+  },
+  {
+    input: './src/index.ts',
+    output: {
       file: './index.js',
       format: 'es',
     },
@@ -17,18 +34,17 @@ export default [
       commonjs(),
       typescript(),
       postcss({
-        extract: true,
+        extract: false,
         minimize: true,
       })
     ],
+    watch: {
+      include: [
+        'src/**',
+        '../../packages/core/**',
+      ],
+      exclude: 'node_modules/**',
+      clearScreen: false,
+    }
   },
-  {
-    input: './types/index.d.ts',
-    output: {
-      file: './index.d.ts',
-      format: 'es',
-    },
-    external: [/\.css$/],
-    plugins: [dts()],
-  }
 ];
