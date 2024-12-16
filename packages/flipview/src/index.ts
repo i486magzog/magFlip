@@ -7,4 +7,5 @@ export * from './flipView';
 export * from './gutter';
 export * from './pageWindow';
 
-import  './flipView.css'; 
+import '@magflip/core/index.css';
+import './flipView.css';

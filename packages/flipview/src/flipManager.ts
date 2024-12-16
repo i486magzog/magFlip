@@ -47,6 +47,14 @@ export class Flipping extends PageWindow {
    */
   activeCornerGP:Point = new Point();
   /**
+   * The point representing the left corner of book.
+   */
+  // leftCornerGP:Point = new Point();
+  /**
+   * The point representing the right corner of book.
+   */
+  // rightCornerGP:Point = new Point();
+  /**
    * The opposite corner to the active corner during the flip.
    */
   activeCornerOppositeGP:Point = new Point();
@@ -135,6 +143,8 @@ export class Flipping extends PageWindow {
     this.flipActionLine = new FlipActionLine(left, right, flipActionLineGY);
     this.diagonals = new FlipDiagonals(this.flipGRect, this.flipActionLine.centerP);
     this.activeCenterGP = this.flipActionLine.centerP;
+    // this.leftCornerGP = this.flipActionLine.leftP;
+    // this.rightCornerGP = this.flipActionLine.rightP;
     //
     // ActiveCornerGP
     //

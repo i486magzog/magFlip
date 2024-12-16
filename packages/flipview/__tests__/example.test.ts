@@ -45,5 +45,5 @@ import { Gutter } from '../src/gutter';
 
 //     // Shadow
 //     expect(result.shadow.closingDistance).toBeCloseTo(353.55, 2);
-//   });
+//   });  
 // });

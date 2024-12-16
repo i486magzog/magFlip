@@ -1,7 +1,7 @@
-import { EventStatus, IPageData, Zone, IZoneEventParams, PageType, IBookView, MZMath, ISize, Line, Point, Rect, IPage, Book, BookEvent } from '@magflip/core';
-import { Flipping as FlipManager } from './flipManager'
-import { Gutter } from './gutter';
+import { Book, BookEvent, deepMerge, DeepRequired, EventStatus, IBookView, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
 import { FlipData } from './flipData';
+import { Flipping as FlipManager } from './flipManager';
+import { Gutter } from './gutter';
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -16,12 +16,36 @@ type FlipViewerElements = {
   mask1Shape: SVGPolygonElement;
   mask2Shape: SVGPolygonElement;
 }
+export interface IFlipViewConfig {
+  autoFlip?: {
+    duration?: number;
+    forward?: {
+      offsetY?: number;
+    }
+    backward?: {
+      offsetY?: number;
+    }
+  }
+}
+// RequiredFlipViewConfig 생성
+export type RequiredFlipViewConfig = DeepRequired<IFlipViewConfig>;
 /**
  * BookViewer class
  * Gutter:
  * 
  */
 export class FlipView implements IBookView {
+  private config:RequiredFlipViewConfig = {
+    autoFlip: {
+      duration: 500,
+      forward: {
+        offsetY: 100
+      },
+      backward: {
+        offsetY: -100
+      }
+    }
+  };
   /**
    * Zoom level of the viewer.
    */
@@ -49,6 +73,7 @@ export class FlipView implements IBookView {
     if(!el){ throw new Error("Not found the page container.") }
     return el && MZMath.getOffset4Fixed(el as HTMLDivElement);
   }
+  private bookLastPageIndex = 0;
   /**
    * Returns the element of the mouse event zone on the viewer's left top.
    */
@@ -90,6 +115,14 @@ export class FlipView implements IBookView {
    */
   private isSpreadOpen:boolean = false;
   /**
+   * Gets whether the book is ready to open.
+   */
+  private get isReadyToOpen(){ return this.curOpenLeftPageIndex < 0; }
+  /**
+   * Gets whether the book is closed.
+   */
+  private get isClosed(){ return this.curOpenLeftPageIndex >= this.bookLastPageIndex; }
+  /**
    * Gets whether the page is flipping. (Includes auto-filp and draggring).
    */
   private get isFlipping(){ return ( this.flipManager.eventStatus & EventStatus.AutoFlip
@@ -115,11 +148,11 @@ export class FlipView implements IBookView {
   /**
    * Gets whether the last page is Opening.
    */
-  private get isLastPageOpening(){ return this.isLeftPageFlipping && this.getActivePage(1)?.index == this.book?.lastPageIndex; }
+  private get isLastPageOpening(){ return this.isLeftPageFlipping && this.getActivePage(1)?.index == this.bookLastPageIndex; }
   /**
    * Gets whether the last page is closing.
    */
-  private get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.book?.lastPageIndex; }
+  private get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.bookLastPageIndex; }
   /**
    * Returns the instance of Page with sequence of active page.
    * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
@@ -164,7 +197,7 @@ export class FlipView implements IBookView {
    */
   private flipManager = new FlipManager();
 
-  constructor() {
+  constructor(config?: IFlipViewConfig) {
     ({ bookContainerEl: this.bookContainerEl,
       zoneLT: this.zoneLT,
       zoneLC: this.zoneLC,
@@ -176,12 +209,14 @@ export class FlipView implements IBookView {
       mask2Shape: this.maskShapeOnPage2 } = this.createElements());
     
     this.setEvents();
+    this.config = deepMerge(this.config, config);
   }
   /**
    * Inits variables and properties when a new book opens.
    */
   private init(){ 
     this.curOpenLeftPageIndex = -1;
+    this.bookLastPageIndex = 0;
   }
   /**
    * Creates the viewer related elements.
@@ -416,6 +451,7 @@ export class FlipView implements IBookView {
   view(book: Book, openRightPageIndex: number = 0) {
     this.init();
     this.attachBook(book);
+    // this.attachLabes();
     this.setBookEventListener();
     this.setViewer();
     const newIndexRange = this.getStartPageIndexToLoad(openRightPageIndex);
@@ -449,17 +485,20 @@ export class FlipView implements IBookView {
    * @param isForward 
    * @returns 
    */
-  private getNewPages(isForward:boolean){
+  private getNewPages(isForward:boolean, newHiddenLeftPageIndex?:number){
     // TODO: Exception
     if(!this.book){ throw new Error("No book loaded.") }
     const book = this.book;
-    const newPage1Index = isForward ? this.curOpenLeftPageIndex + 4 : this.curOpenLeftPageIndex - 4;
-    const removedPage1Index = isForward ? this.curOpenLeftPageIndex -2: this.curOpenLeftPageIndex + 2;
+    // const newPage1Index = isForward ? this.curOpenLeftPageIndex + 4 : this.curOpenLeftPageIndex - 4;
+    // const removedPage1Index = isForward ? this.curOpenLeftPageIndex -2: this.curOpenLeftPageIndex + 2;
+    const curOpenLeftPageIndex = this.curOpenLeftPageIndex;
+    const newPage1Index = newHiddenLeftPageIndex !== undefined ? newHiddenLeftPageIndex : (isForward ? curOpenLeftPageIndex + 4 : curOpenLeftPageIndex - 4);
+    const removedPage1Index = isForward ? curOpenLeftPageIndex -2: curOpenLeftPageIndex + 2;
     return { 
-      newPage1: book.getPage(newPage1Index) || book.createEmptyPage(newPage1Index), 
-      newPage2: book.getPage(newPage1Index+1) || book.createEmptyPage(newPage1Index+1),
-      removedPage1: book.getPage(removedPage1Index) || book.createEmptyPage(removedPage1Index), 
-      removedPage2: book.getPage(removedPage1Index+1) || book.createEmptyPage(removedPage1Index+1),
+      newPage1: book.getPage(newPage1Index, true), 
+      newPage2: book.getPage(newPage1Index+1, true),
+      removedPage1: book.getPage(removedPage1Index, true), 
+      removedPage2: book.getPage(removedPage1Index+1, true),
     }
   }
   /**
@@ -472,16 +511,37 @@ export class FlipView implements IBookView {
   }
   /**
    * Shifts pages related the flip effect directly.
-   * @param isFoward the direction of the flipping.
+   * @param isForward the direction of the flipping.
    */
-  private shiftPages(isFoward:boolean){
-    const { newPage1, newPage2, removedPage1, removedPage2 } = this.getNewPages(isFoward);
+  private shiftPages(isForward:boolean, targetLeftPageIndex?:number){
+    const newHiddenLeftPageIndex = targetLeftPageIndex !== undefined ? (isForward ? targetLeftPageIndex + 2 : targetLeftPageIndex - 2) : undefined;
+    const { newPage1, newPage2, removedPage1, removedPage2 } = this.getNewPages(isForward, newHiddenLeftPageIndex);
     const book = this.book;
 
-    // Global Var
-    this.curOpenLeftPageIndex = isFoward ? this.curOpenLeftPageIndex + 2 : this.curOpenLeftPageIndex - 2;
+    if(targetLeftPageIndex){
+      book?.removePageEl(book?.getPage(this.curOpenLeftPageIndex)?.element);
+      book?.removePageEl(book?.getPage(this.curOpenLeftPageIndex+1)?.element);
+      if(isForward){
+        const page1 = book?.getPage(targetLeftPageIndex-1, true)!;
+        const page0 = book?.getPage(targetLeftPageIndex-2, true)!;
+        this.flipManager.loadPageToWindow(2, page0);
+        this.flipManager.loadPageToWindow(3, page1);
+        book?.prependPageEl(page1.element);
+        book?.prependPageEl(page0.element);
+      } else {
+        const page4 = book?.getPage(targetLeftPageIndex+2, true)!;
+        const page5 = book?.getPage(targetLeftPageIndex+3, true)!;
+        this.flipManager.loadPageToWindow(2, page4);
+        this.flipManager.loadPageToWindow(3, page5);
+        book?.appendPageEl(page4.element);
+        book?.appendPageEl(page5.element);
+      }
+    }
 
-    if(isFoward){
+    // Global Var
+    this.curOpenLeftPageIndex = targetLeftPageIndex ?? (isForward ? this.curOpenLeftPageIndex + 2 : this.curOpenLeftPageIndex - 2);
+
+    if(isForward){
       this.flipManager.moveRight(newPage1, newPage2);
       book?.appendPageEl(newPage1.element);
       book?.appendPageEl(newPage2.element);
@@ -497,6 +557,42 @@ export class FlipView implements IBookView {
 
     this.updateDimension();
     this.resetShadow1Paths();
+  }
+  
+  private updateHiddenPages(isForward:boolean, leftHiddenPageIndex:number){
+    if(!this.book){ throw new Error("No book loaded."); }
+    const book = this.book;
+    
+    const newPage1 = book?.getPage(leftHiddenPageIndex, true);
+    const newPage2 = book?.getPage(leftHiddenPageIndex+1, true);
+    
+
+    if(isForward){
+      const removedPage1 = book?.getPage(this.curOpenLeftPageIndex+2);
+      const removedPage2 = book?.getPage(this.curOpenLeftPageIndex+3);
+      book?.removePageEl(removedPage1.element);
+      book?.removePageEl(removedPage2.element);
+      book?.appendPageEl(newPage1.element);
+      book?.appendPageEl(newPage2.element);
+      this.flipManager.loadPageToWindow(4, newPage1);
+      this.flipManager.loadPageToWindow(5, newPage2);
+    }
+    else {
+      const removedPage1 = book?.getPage(this.curOpenLeftPageIndex-2, true);
+      const removedPage2 = book?.getPage(this.curOpenLeftPageIndex-1, true);
+      book?.removePageEl(removedPage1.element);
+      book?.removePageEl(removedPage2.element);
+      book?.prependPageEl(newPage2.element);
+      book?.prependPageEl(newPage1.element);
+      this.flipManager.loadPageToWindow(1, newPage2);
+      this.flipManager.loadPageToWindow(0, newPage1);
+    }
+
+    // Global Var
+    // this.curOpenLeftPageIndex = isForward ? leftHiddenPageIndex - 2 : leftHiddenPageIndex + 2;
+
+    // this.updateDimension();
+    // this.resetShadow1Paths();
   }
   /**
    * Attach a book to this book viewer.
@@ -579,6 +675,8 @@ export class FlipView implements IBookView {
   private setViewer(){
     if(!this.book){ throw new Error("Book object does not exist."); }
     const { closed, opened } = this.book.size;
+
+    this.bookLastPageIndex = this.book.lastPageIndex;
 
     // Mask
     const mask1Rect = document.getElementById('mask1-rect');
@@ -1044,6 +1142,107 @@ export class FlipView implements IBookView {
 
     this.flipPage(viewport);
   }
+
+  /**
+   * 
+   * @param offsetY 
+   */
+  nextPage(offsetY?:number){ 
+    this.moveForward(offsetY); 
+  }
+  /**
+   * 
+   * @param offsetY 
+   */
+  prevPage(offsetY?:number){ 
+    this.moveBackward(offsetY); 
+  }
+  /**
+   * 
+   * @param endGP 
+   */
+  moveTo(pageIndex:number, offsetY?:number){
+    const targetLeftPageIndex = pageIndex%2 === 0 ? pageIndex -1 : pageIndex;
+    if(this.curOpenLeftPageIndex === targetLeftPageIndex){ return }
+    else if(this.curOpenLeftPageIndex < targetLeftPageIndex){
+      this.updateHiddenPages(true, targetLeftPageIndex);
+      this.moveForward(offsetY, targetLeftPageIndex); 
+    }
+    else { 
+      this.updateHiddenPages(false, targetLeftPageIndex); 
+      this.moveBackward(offsetY, targetLeftPageIndex); 
+    }
+  }
+  private moveForward(offsetY?:number, targetLeftPageIndex?:number){
+    if(this.isClosed){ return; }
+    if(offsetY === undefined){ offsetY = this.config.autoFlip.forward.offsetY; }
+
+    const containerRight = this.pageContainerRect.right;
+    const containerLeft = this.pageContainerRect.left;
+    const containerBottom = this.pageContainerRect.bottom;
+    let startGP = { x:containerRight, y:containerBottom };
+    let endGP = { x:this.isSpreadOpen ? containerLeft : containerLeft - this.pageContainerRect.width, y:containerBottom };
+
+    this.autoFlip(true, offsetY, Zone.RB, startGP, endGP, targetLeftPageIndex); 
+  }
+  private moveBackward(offsetY?:number, targetLeftPageIndex?:number){
+    if(this.isReadyToOpen){ return; }
+    if(offsetY === undefined){ offsetY = this.config.autoFlip.backward.offsetY; }
+
+    const containerRight = this.pageContainerRect.right;
+    const containerLeft = this.pageContainerRect.left;
+    const containerBottom = this.pageContainerRect.bottom;
+    let startGP = { x:containerLeft, y:containerBottom };
+    let endGP = { x: this.isSpreadOpen ? containerRight : containerRight + this.pageContainerRect.width, y:containerBottom };
+
+    this.autoFlip(false, offsetY, Zone.LB, startGP, endGP, targetLeftPageIndex);
+  }
+  /**
+   * 
+   * @param isMovingForward 
+   * @param offsetY 
+   * @param startZone 
+   * @param startGP 
+   * @param endGP 
+   */
+  private autoFlip(isMovingForward:boolean, offsetY:number, startZone:Zone, startGP:Point, endGP:Point, targetLeftPageIndex?:number){
+    //
+    // Mouse Down on Zone
+    //
+    if(this.flipManager.eventStatus & EventStatus.Flipping){ return; }
+    if(!this.activePage2El){ return }
+    if(!this.pageContainerRect){ return; }
+
+    this.flipManager.eventStatus = EventStatus.Flipping;
+    this.flipManager.curMouseGP = startGP;
+    this.flipManager.eventZone = startZone;
+    this.setViewerToFlip();
+    this.flipManager.setInitFlipping(startZone, startGP, this.pageContainerRect, this.zoomLevel);
+
+    const startTime = performance.now(); // 애니메이션 시작 시간
+    const duration = 500; // 애니메이션 지속 시간 (밀리초)
+
+    const animate = (currentTime:number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1); // 진행 비율 (0에서 1 사이)
+      const x = startGP.x + (endGP.x - startGP.x) * progress;
+      const y = startGP.y + offsetY * Math.sin(progress * Math.PI);
+      this.flipPage({x, y}); // 좌표 이동
+  
+      if (progress < 1) {
+        requestAnimationFrame(animate); // 다음 프레임 요청
+      } else {
+        // if(!(this.flipManager.eventStatus & EventStatus.Dragging)){ return; }
+        // if(!this.activePage2El){ return }
+        this.shiftPages(isMovingForward, targetLeftPageIndex);
+        this.unsetViewerToFlip();
+        this.flipManager.eventStatus = EventStatus.None;
+      }
+    }
+  
+    requestAnimationFrame(animate);
+  }
+
   /**
    * Sets all events for viewer.
    */

@@ -328,5 +328,134 @@
   height: calc(2*var(--zone-width));
 }
 
+
+/* 
+ Label
+*/
+
+:root {
+  --mz-label-bg: rgba(48, 171, 237, 0.5);
+  --mz-label-width: 400px;
+  --mz-label-height: 30px;
+  /* --mz-label-padding: 10px; */
+  --mz-label-font-size: 12px;
+  --mz-label-line-height: 16px;
+  --mz-label-color: #FFFFFF;
+  --mz-label-font-family: 'Geologica', sans-serif;
+  --mz-label-border-radius-right: 0 5px 5px 0;
+  --mz-label-border-radius-left: 5px 0 0 5px;
+  --mz-label-padding: 5px 10px 5px 10px;
+  --mz-label-offset-x: 30px;
+}
+
+#bookViewer .label-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: 10px;
+}
+
+/* #bookViewer .label-left-sub-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#bookViewer .label-right-sub-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: end;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+} */
+
+#bookViewer .page-label {
+  position: absolute;
+  /* width: var(--mz-label-width); */
+  /* display: flex;
+  justify-content: start;
+  align-items: center; */
+  /* height: var(--mz-label-height); */
+  /* width: var(--mz-label-width); */
+  height: 0;
+  width: 0;
+
+  top: 0;
+  right: var(--mz-label-offset-x);
+}
+
+#bookViewer #bookContainer.ready-to-open.front .page-label {
+  top: 0;
+  right: var(--mz-label-offset-x);
+}
+
+#bookViewer #bookContainer.ready-to-open.end .page-label {
+  top: 0;
+  left: var(--mz-label-offset-x);
+}
+
+#bookViewer .page-label::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--mz-label-bg);
+}
+
+#bookViewer .page-label-content {
+  position: absolute;
+  display: inline-block;
+  white-space: nowrap;
+  padding: var(--mz-label-padding);
+  color: var(--mz-label-color);
+  font-size: var(--mz-label-font-size);
+  line-height: var(--mz-label-line-height);
+  font-family: var(--mz-label-font-family);
+  line-height: var(--mz-label-line-height);
+  cursor: pointer;
+
+  left: 0;
+  padding-left: calc(var(--mz-label-offset-x) + 5px);
+  border-radius: var(--mz-label-border-radius-right);
+}
+
+#bookViewer #bookContainer.ready-to-open.front .page-label-content {
+  padding-left: calc(var(--mz-label-offset-x) + 5px);
+  border-radius: var(--mz-label-border-radius-right);
+}
+
+#bookViewer #bookContainer.ready-to-open.end .page-label-content {
+  left: unset;
+  right: 0;
+  padding: var(--mz-label-padding);
+  padding-right: calc(var(--mz-label-offset-x) + 5px);
+  border-radius: var(--mz-label-border-radius-left);
+}
+
+#bookViewer .page-label-content:hover {
+  opacity: 1 !important;
+  transform: translateX(10px);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+#bookViewer #bookContainer.ready-to-open.end .page-label-content:hover {
+  opacity: 1 !important;
+  transform: translateX(-10px);
+}
+
 /* Temporary */
 img { width: 100%; height:100%; }

@@ -1,18 +1,17 @@
 {
   "name": "@magflip/flipview",
-  "version": "0.5.37",
+  "version": "0.5.41",
   "title": "MagFlip(Magzog's flip book) view plugin, 'flipview' Package",
   "description": "One of the core view plugins of MagFlip, displaying the book in a flipping format.",
   "type": "module",
   "author": {
-    "name": "Sing Graajae Cho",
+    "name": "Shinkee Cho",
     "email": "sing@magzog.com",
     "url": "https://github.com/i486magzog"
   },
   "license": "MIT",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "css": "./index.css",
   "keywords": [
     "flip",
     "flipbook",
@@ -27,7 +26,7 @@
   "homepage": "https://github.com/i486magzog/magFlip",
   "repository": {
     "type": "git",
-    "url": "https://github.com/i486magzog/magFlip.git",
+    "url": "git+https://github.com/i486magzog/magFlip.git",
     "directory": "packages/flipview"
   },
   "scripts": {
@@ -39,7 +38,7 @@
     "pub": "npm publish --access public --otp=$npm_config_otp"
   },
   "devDependencies": {
-    "@magflip/core": "^0.5.2",
+    "@magflip/core": "^0.5.42",
     "@rollup/plugin-commonjs": "^28.0.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-typescript": "^12.1.0",

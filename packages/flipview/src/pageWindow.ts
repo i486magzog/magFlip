@@ -1,4 +1,4 @@
-import { IPage } from '@magflip/core';
+import { MZEvent, IPage } from '@magflip/core';
 /**
  * Page Window Interface
  */
@@ -8,7 +8,7 @@ interface IPageWindow {
 /**
  * PageWindow class
  */
-export class PageWindow {
+export class PageWindow extends MZEvent {
   /**
    * Window array that contains active pages regarding flipping.
    */
@@ -19,6 +19,7 @@ export class PageWindow {
   readonly windowSize: number = 6;
 
   constructor(){
+    super();
     this.windows = [];
     for(let i=0; i<this.windowSize; i++){
       this.windows[i] = ({ page: undefined });
