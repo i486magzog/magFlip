@@ -3,10 +3,20 @@ import { BookSize } from '../common/dimension';
 import { BookShelf } from './bookShelf';
 import { Book } from './book';
 import { BookViewer } from './bookViewer';
+import { deepMerge } from 'src/common/helper';
+
+export interface IBookShelfManagerConfig {
+  hideBookShelf?: boolean;
+  onViewerClose?: () => void;
+  onViewerOpen?: () => void;
+}
 /**
  * BookManager class
  */
 export class BookShelfManager {
+  config:IBookShelfManagerConfig = {
+    hideBookShelf: false
+  };
   /**
    * Returns the BookShelf instance.
    */
@@ -20,7 +30,8 @@ export class BookShelfManager {
    * @param bookShelfDocId 
    * @param bookViewerId 
    */
-  constructor() {
+  constructor(config?:IBookShelfManagerConfig) {
+    this.config = deepMerge(this.config, config);
     this.bookShelf = new BookShelf(this);
     this.bookViewer = new BookViewer(this);
   }

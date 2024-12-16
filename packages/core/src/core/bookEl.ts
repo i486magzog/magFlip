@@ -1,6 +1,15 @@
-import { IBookData } from "../common/models";
+import { IBookData, IPageLabelData } from "../common/models";
 import { Base } from "./base";
+import { PageLabelEl } from "./pageLabelEl";
 
+interface IBookElElements {
+  bookOnShelfEl: HTMLElement;
+  bookEl: HTMLElement;
+  containerEl: HTMLElement;
+  labelContainerEl: HTMLElement;
+  // labelLeftSubContainerEl: HTMLElement;
+  // labelRightSubContainerEl: HTMLElement;
+}
 /**
  * Book element management class
  */
@@ -29,6 +38,18 @@ export class BookEl extends Base {
    * Returns the page container element.
    */
   readonly pageContainerEl: HTMLElement;
+  /**
+   * Returns the label container element.
+   */
+  readonly labelContainerEl: HTMLElement;
+  /**
+   * Returns the left sub container element.
+   */
+  // readonly labelLeftSubContainerEl: HTMLElement;
+  /**
+   * Returns the right sub container element.
+   */
+  // readonly labelRightSubContainerEl: HTMLElement;
 
   constructor(book:IBookData) {
     super();
@@ -49,6 +70,8 @@ export class BookEl extends Base {
     this.elementOnShelf = elements.bookOnShelfEl;
     this.element = elements.bookEl;
     this.pageContainerEl = elements.containerEl;
+    this.labelContainerEl = elements.labelContainerEl;
+    this.createLabels(book.labels || {});
   }
   /**
    * Appends a page element into the page container element.
@@ -69,7 +92,7 @@ export class BookEl extends Base {
    * Creates the book element and child elements
    * @returns 
    */
-  private createBookElement(): { bookOnShelfEl: HTMLElement, bookEl: HTMLElement, containerEl: HTMLElement } {
+  private createBookElement(): IBookElElements {
     const bookOnShelfEl = document.createElement('div');
     bookOnShelfEl.className = "book-on-shelf";
     const coverEl = document.createElement('img');
@@ -77,11 +100,35 @@ export class BookEl extends Base {
     bookOnShelfEl.appendChild(coverEl);
     const bookEl = document.createElement('div');
     const containerEl = document.createElement('div');
+    // const labelContainerEls = this.createLabelContainerEl();
+    const labelContainerEl = document.createElement('div');
+    labelContainerEl.className = "label-container";
     bookEl.className = "book";
     containerEl.className = "container";
+    bookEl.appendChild(labelContainerEl);
     bookEl.appendChild(containerEl);
 
-    return { bookOnShelfEl: bookOnShelfEl, bookEl: bookEl, containerEl: containerEl };
+    return { 
+      bookOnShelfEl: bookOnShelfEl, 
+      bookEl: bookEl, 
+      containerEl: containerEl, 
+      labelContainerEl: labelContainerEl, 
+    };
+  }
+  /**
+   * Creates and adds the page labels to the book.
+   * @param labels 
+   */
+  private createLabels(labels:{ [key:number|string]: IPageLabelData }){
+    Object.keys(labels).forEach(label => { this.addLabelEl(labels[label]); })
+  }
+  /**
+   * Adds the page label to the book.
+   * @param label 
+   */
+  private addLabelEl(label:IPageLabelData){ 
+    const labelEl = new PageLabelEl(label);
+    this.labelContainerEl.appendChild(labelEl.element);
   }
   /**
    * Clears the children elements of the page container's element.

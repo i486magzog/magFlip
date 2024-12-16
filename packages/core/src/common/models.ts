@@ -5,6 +5,10 @@ import { IBookSize, ISize } from "./dimension";
 import { Rect } from "./shape";
 
 
+export type DeepRequired<T> = Required<{
+  [K in keyof T]: T[K] extends Required<T[K]> ? T[K] : DeepRequired<T[K]>
+}>
+
 export interface IPublication {
   name: string;
   location: string;
@@ -17,6 +21,12 @@ export enum PageType {
   Empty = "Empty",
   Blank = "Blank",
 }
+
+export enum PageLabelType {
+  Default = "Default",
+  Empty = "Empty",
+}
+
 
 export enum DefaultSize {
   bookWidth = 600,
@@ -106,6 +116,7 @@ export interface IBookData {
   type?: BookType;
   publication?: IPublication;
   lastPageIndex: number;
+  labels?:{ [n:number|string]: IPageLabelData };
   /**
    * The book size when it is close.
    */
@@ -146,6 +157,30 @@ export interface IBookEl {
   removePageEl(pageEl:HTMLElement):void;
 }
 
+export interface IPageLabel extends IPageLabelData, IPageLabelEl {
+  setEvents():void;
+}
+export interface IPageLabelData {
+  index: number;    // index of the label
+  pageIndex: number; // index of the page in the book
+  type?: PageLabelType;
+  size?: ISize;     // size of the label sub container
+  top?: number;
+  ignore?: boolean; // ignore the page when displaying the book
+  content?: any;
+  backgroundColor?: string;
+  opacity?: number | string;
+  onClick?: (pageIndex: number) => void;
+}
+
+export interface IPageLabelEl {
+  readonly element: HTMLElement;
+  // readonly contentContainerEl: HTMLElement;
+  readonly contentEl: HTMLElement;
+  resetLabelEls():void;
+}
+
+
 export interface IPage extends IPageData, IPageEl {
   size: ISize;
   setEvents():void;
@@ -162,9 +197,9 @@ export interface IPageData {
   id: string;
   type?: PageType;
   size?: ISize;
-  index: number;      // index of the page in the book
+  index: number; // index of the page in the book
   number?: number | undefined;  // displayed number of the page in the book
-  ignore?: boolean;    // ignore the page when displaying the book
+  ignore?: boolean; // ignore the page when displaying the book
   content?: any;
   image?: string;
 }
@@ -177,4 +212,7 @@ export interface IBookView {
   view(book:IBookData, openPageIndex?:number):HTMLElement;
   closeViewer():void;
   zoom(zoomLevel:number):void;
+  nextPage(offsetY?:number):void;
+  prevPage(offsetY?:number):void;
+  moveTo(pageIndex:number, offsetY?:number):void;
 }

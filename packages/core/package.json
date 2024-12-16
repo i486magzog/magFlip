@@ -1,18 +1,17 @@
 {
   "name": "@magflip/core",
-  "version": "0.5.38",
+  "version": "0.5.44",
   "title": "MagFlip(Magzog's flip book) Core Package",
   "description": "Contains core MagFlip objects such as Book, Page, BookShelf, and BookViewer.",
   "type": "module",
   "author": {
-    "name": "Sing Graajae Cho",
+    "name": "Shinkee Cho",
     "email": "sing@magzog.com",
     "url": "https://github.com/i486magzog"
   },
   "license": "MIT",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "css": "./index.css",
   "keywords": [
     "flip",
     "flipbook",
@@ -29,7 +28,7 @@
   "homepage": "https://github.com/i486magzog/magFlip",
   "repository": {
     "type": "git",
-    "url": "https://github.com/i486magzog/magFlip.git",
+    "url": "git+https://github.com/i486magzog/magFlip.git",
     "directory": "packages/core"
   },
   "scripts": {

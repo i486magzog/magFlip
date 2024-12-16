@@ -23,6 +23,12 @@ export class BookViewer extends Base {
    * 
    */
   private registeredViews: { [n:string] : IBookView } = {};
+  private registeredEventHandlers: { [n:string] : (event?:Event) => void } = {};
+  private callbackEventHandler = (handlerName: string, event?: Event) => {
+    if(this.registeredEventHandlers[handlerName]){
+      this.registeredEventHandlers[handlerName](event);
+    }
+  };
   /**
    * Book object.
    * This contains the most information of a book loaded to this viewer.
@@ -59,10 +65,16 @@ export class BookViewer extends Base {
    */
   private curView:IBookView|undefined;
 
+
+
   constructor(bookManager:BookShelfManager) {
     super();
     this.bookViewerDocId = "bookViewer";
     this.bookShelfManager = bookManager;
+
+    if(bookManager.config.onViewerClose) {
+      this.registeredEventHandlers['close'] = bookManager.config.onViewerClose;
+    }
 
     ({ bookViewerEl: this.element } = this.createViewerElements());
   }
@@ -75,7 +87,7 @@ export class BookViewer extends Base {
 
     if(viewerEl){ viewerEl.innerHTML = ""; } 
     else { 
-      viewerEl = document.createElement('div'); 
+      viewerEl = document.createElement('div');
       viewerEl.id = this.bookViewerDocId;
       document.body.appendChild(viewerEl);
     }
@@ -152,6 +164,7 @@ export class BookViewer extends Base {
       }
       this.book = undefined;
     }
+    this.callbackEventHandler('close');
   }
   /**
    * 

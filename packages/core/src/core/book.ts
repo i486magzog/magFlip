@@ -1,8 +1,12 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, IBook, IPage } from "../common/models";
+import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, IBook, IPage, IPageLabel, IPageLabelData, DeepRequired } from "../common/models";
 import { BookSize, ISize, SizeExt } from "../common/dimension";
 import { BookEl } from "./bookEl";
 import { Page } from "./page";
+import { PageLabel } from "./pageLabel";
+import { deepMerge } from "src/common/helper";
 
+
+export type TRequiredBookData = DeepRequired<IBookData>;
 export enum BookEvent {
   pageAdded = 'pageAdded',
 }
@@ -10,6 +14,33 @@ export enum BookEvent {
  * Book class
  */
 export class Book extends BookEl implements IBook {
+  private bookData:TRequiredBookData = {
+    id: "book1",
+    status: BookStatus.Close,
+    type: BookType.Book,
+    title: "",
+    author: "",
+    publication: {
+      name: "",
+      location: "",
+      publishedDate: ""
+    },
+    lastPageIndex: 0,
+    labels: {},
+    size: {
+      closed: new SizeExt(DefaultSize.bookWidth, DefaultSize.bookHeight),
+      opened: new SizeExt(DefaultSize.bookWidth*2, DefaultSize.bookHeight)
+    },
+    thumbnails: {
+      spine: "",
+      small: "",
+      medium: "",
+      cover: {
+        front: "",
+        back: "",
+      }
+    }
+  }
   /**
    * Returns the book id.
    */
@@ -47,6 +78,10 @@ export class Book extends BookEl implements IBook {
    */
   private pages: { [n:number|string]: IPage };
   /**
+   * Returns and sets the page labels.
+   */
+  private pageLabels: { [n:number|string]: PageLabel };
+  /**
    * 
    */
   thumbnails: {
@@ -61,24 +96,29 @@ export class Book extends BookEl implements IBook {
 
   constructor(book:IBookData) {
     super(book);
+    const bookdata = deepMerge(this.bookData, book) as TRequiredBookData;
     // TODO: id should be unique and exist.
-    this.id = book.id;
+    this.id = bookdata.id;
     this.status = BookStatus.Close;
-    this.type = book.type || BookType.Book;
-    this.title = book.title || "Title";
-    this.author = book.author || "Author";
-    this.publication = book.publication || {
+    this.type = bookdata.type || BookType.Book;
+    this.title = bookdata.title || "Title";
+    this.author = bookdata.author || "Author";
+    this.publication = bookdata.publication || {
       name: "Publisher",
       location: "Location",
       publishedDate: "Published Date"
     };
-    this.size = new BookSize(book.size|| {
+    this.size = new BookSize(bookdata.size|| {
       closed: new SizeExt(DefaultSize.bookWidth, DefaultSize.bookHeight),
       opened: new SizeExt(DefaultSize.bookWidth*2, DefaultSize.bookHeight)
     });
-    this.lastPageIndex = book.lastPageIndex%2 == 0 ? book.lastPageIndex+1: book.lastPageIndex ;
+    this.lastPageIndex = bookdata.lastPageIndex%2 == 0 ? bookdata.lastPageIndex+1: bookdata.lastPageIndex ;
     this.pages = {};
-    this.thumbnails = book.thumbnails || {
+    this.pageLabels = {};
+    Object.keys(bookdata.labels || {}).forEach(pageIndex => {
+      this.pageLabels[pageIndex] = new PageLabel(bookdata.labels[pageIndex]);
+    });
+    this.thumbnails = bookdata.thumbnails || {
       spine: "resources/default_spine.webp",
       small: "resources/default_small.webp",
       medium: "resources/default_medium.webp",
@@ -181,7 +221,7 @@ export class Book extends BookEl implements IBook {
    * @param index 
    * @returns 
    */
-  getPage(index: number){ return this.pages[index]; }
+  getPage(index: number, emptyPage:boolean = false){ return this.pages[index] || (emptyPage ? this.createEmptyPage(index) : undefined); }
   /**
    * Returns the pages object.
    * @returns 
@@ -208,7 +248,11 @@ export class Book extends BookEl implements IBook {
     this.addPage(page, index);
     return page;
   }
-
+  /**
+   * Sets the events for the book.
+   * @param event 
+   * @param handler 
+   */
   setEvents(event:BookEvent, handler:(event:Event)=>void){
 
   }

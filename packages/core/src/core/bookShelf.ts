@@ -46,6 +46,7 @@ export class BookShelf {
       bookShelfEl.id = this.bookShelfDocId;
       document.body.appendChild(bookShelfEl);
     }
+    bookShelfEl.classList.toggle('hidden', this.bookManager.config.hideBookShelf);
 
     return bookShelfEl;
   }

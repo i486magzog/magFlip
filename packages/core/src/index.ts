@@ -3,6 +3,7 @@ export * from './common/event';
 export * from './common/models';
 export * from './common/mzMath';
 export * from './common/shape';
+export * from './common/helper';
 
 export * from './core/base';
 export * from './core/book';
