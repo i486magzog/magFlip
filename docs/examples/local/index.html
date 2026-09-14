@@ -87,7 +87,10 @@
      * Its pages are drawn by @magflip/render instead of being plain images.
      */
     async function createPublishedBook(flipViewRef) {
-      const source = await PublishedBookSource.load('./sample-book/book.json', {
+      // `?book=<manifest url>` points the viewer at another published book,
+      // for example one served by a local magFlipServer.
+      const manifestUrl = new URLSearchParams(location.search).get('book') ?? './sample-book/book.json';
+      const source = await PublishedBookSource.load(manifestUrl, {
         // A link inside a page points at a surface, so look up its page index.
         onPageLink: (link) => {
           const page = source.manifest.pages.find((candidate) => candidate.surfaceId === link.surfaceId);
