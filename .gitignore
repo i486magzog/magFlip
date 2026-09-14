@@ -7,3 +7,6 @@
 /packages/*/index.d.ts
 /packages/*/index.js
 /packages/*/index.css
+/packages/doc/yjs.js
+/packages/doc/yjs.d.ts
+/packages/doc/chunks

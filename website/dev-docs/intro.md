@@ -29,12 +29,15 @@ flowchart LR
 | 마우스 이벤트 → 애니메이션 흐름은? | [이벤트 흐름](./flipview/event-flow.md) |
 | 접힘 모양/그림자 계산은? | [Flip 기하 계산](./flipview/flip-geometry.md) |
 | 코드 스타일 규칙은? | [코딩 컨벤션](./development/coding-conventions.md) |
+| 에디터가 만드는 책 데이터 형식은? | [문서 모델 개요](./doc-model/overview.md) |
+| 펼침 2페이지·확장 페이지는 어떻게 표현하나? | [Surface 와 페이지](./doc-model/surface-and-pages.md) |
+| 동시 편집은 어떻게 합쳐지나? | [동시 편집](./doc-model/collaboration.md) |
 | npm 배포는? | [빌드와 배포](./development/build-and-release.md) |
 | 알려진 문제는? | [알려진 이슈](./known-issues.md) |
 
 ## 30초 요약
 
-- **npm workspaces 모노레포**: `packages/core`, `flipview`, `scrollview`, `minjs`
+- **npm workspaces 모노레포**: `packages/doc`, `core`, `flipview`, `scrollview`, `minjs`
 - **TypeScript + Rollup** 으로 각 패키지를 ESM(`index.js`) + 타입(`index.d.ts`)으로 빌드
 - `minjs` 는 모든 패키지를 IIFE 번들(`magflip.min.js`)로 묶어 전역에 노출
 - UI 프레임워크 없이 **DOM을 직접 생성**하고, Flip 효과는 **SVG mask + CSS 변수 + transform** 으로 구현
