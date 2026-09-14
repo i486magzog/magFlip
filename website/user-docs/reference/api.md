@@ -41,6 +41,7 @@ classDiagram
     +nextPage(offsetY?)
     +prevPage(offsetY?)
     +moveTo(pageIndex, offsetY?)
+    +openPageIndexes: number[]
   }
 ```
 
@@ -108,6 +109,37 @@ new FlipView(config?: IFlipViewConfig)
 | `nextPage(offsetY?)` | 다음 펼침으로 넘깁니다. 마지막이면 무시합니다. |
 | `prevPage(offsetY?)` | 이전 펼침으로 넘깁니다. 처음이면 무시합니다. |
 | `moveTo(pageIndex, offsetY?)` | 해당 페이지가 보이는 펼침으로 이동합니다. |
+| `openPageIndexes` | 지금 보고 있는 페이지 index 배열. 펼침이면 2개, 표지면 1개, 책이 없으면 빈 배열입니다. |
+
+## PublishedBookSource
+
+`@magflip/render`
+
+게시된 책(`@magflip/doc` 로 만든 JSON)을 불러와 뷰어가 쓸 페이지로 바꿉니다.
+
+```ts
+const source = await PublishedBookSource.load('/books/sample/book.json');
+const book = new Book({ id: source.manifest.bookId, lastPageIndex: source.pageCount - 1 });
+book.importPages(await source.createAllPageData(), source.manifest.pageSize);
+```
+
+| 멤버 | 설명 |
+| --- | --- |
+| `PublishedBookSource.load(manifestUrl, options?)` | 매니페스트(`book.json`)를 읽습니다. |
+| `manifest` | 게시본 매니페스트(`IPublishedBook`). |
+| `pageCount` / `getPage(index)` | 페이지 수 / 해당 페이지 정보. |
+| `loadPages(startIndex, count)` | 그 페이지들이 쓰는 surface 를 미리 받습니다. |
+| `createAllPageData()` | 모든 페이지를 `Book.importPages` 에 넣을 수 있는 형태로 반환합니다(작은 책용). |
+| `createPageData(index)` | 이미 로드된 surface 의 페이지 하나를 반환합니다. |
+| `isExpandable(index)` | 독자가 확장해서 볼 수 있는 페이지인지 여부. |
+| `renderExpanded(hostEl, index)` | 페이지의 확장 영역 전체를 그립니다. |
+
+| options | 설명 |
+| --- | --- |
+| `onPageLink(link)` | 페이지 안의 링크를 눌렀을 때 호출됩니다. `link.surfaceId` 로 이동할 페이지를 찾습니다. |
+| `isInteractive` | `false` 면 링크·미디어가 반응하지 않습니다(에디터 캔버스용). |
+| `resolveWidgetUrl(element)` | 위젯 iframe 의 URL 을 반환합니다. |
+| `resolveSurfaceUrl(surfaceId)` | surface JSON 의 위치. 기본값은 `<매니페스트 폴더>/surfaces/<id>.json` 입니다. |
 
 ## Enum
 

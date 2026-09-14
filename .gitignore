@@ -9,4 +9,6 @@
 /packages/*/index.css
 /packages/doc/yjs.js
 /packages/doc/yjs.d.ts
+/packages/doc/authoring.js
+/packages/doc/authoring.d.ts
 /packages/doc/chunks

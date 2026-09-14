@@ -31,6 +31,26 @@
       font-family: monospace;
       color: #b00020;
     }
+    /* Expanded view of a page that was designed wider than it is shown. */
+    #expandedOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.8);
+    }
+    #expandedStage {
+      position: relative;
+      width: 90%;
+      height: 80%;
+    }
+    #expandedClose {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
   </style>
 </head>
 <body>
@@ -62,8 +82,53 @@
       return book;
     }
 
-    /** Adds prev/next/move buttons and a zoom slider to the viewer. */
-    function addToolbar(bookViewer, flipView) {
+    /**
+     * Creates a Book from a book published with @magflip/doc.
+     * Its pages are drawn by @magflip/render instead of being plain images.
+     */
+    async function createPublishedBook(flipViewRef) {
+      const source = await PublishedBookSource.load('./sample-book/book.json', {
+        // A link inside a page points at a surface, so look up its page index.
+        onPageLink: (link) => {
+          const page = source.manifest.pages.find((candidate) => candidate.surfaceId === link.surfaceId);
+          if (page) { flipViewRef.view.moveTo(page.index); }
+        },
+      });
+      const pages = await source.createAllPageData();
+      const cover = `${RESOURCE_DIR}/book1/page0.jpg`;
+      const book = new Book({
+        id: source.manifest.bookId,
+        title: source.manifest.meta.title,
+        lastPageIndex: source.pageCount - 1,
+        thumbnails: { spine: cover, small: cover, medium: cover, cover: { front: cover, back: cover } },
+      });
+      book.importPages(pages, source.manifest.pageSize);
+      return { book, source };
+    }
+
+    /** Shows the whole surface of an expandable page over the viewer. */
+    function showExpanded(bookViewer, source, pageIndex) {
+      const overlay = document.createElement('div');
+      overlay.id = 'expandedOverlay';
+      const stage = document.createElement('div');
+      stage.id = 'expandedStage';
+      const close = document.createElement('button');
+      close.id = 'expandedClose';
+      close.textContent = 'Close';
+      overlay.append(stage, close);
+      bookViewer.element.appendChild(overlay);
+
+      const renderer = source.renderExpanded(stage, pageIndex);
+      const remove = () => {
+        renderer?.destroy();
+        overlay.remove();
+      };
+      close.addEventListener('click', remove);
+      overlay.addEventListener('click', (event) => { if (event.target === overlay) { remove(); } });
+    }
+
+    /** Adds prev/next/move buttons, a zoom slider and the expand button to the viewer. */
+    function addToolbar(bookViewer, flipView, getPublishedSource) {
       const toolbar = document.createElement('div');
       toolbar.id = 'toolbar';
       toolbar.className = 'do-not-remove';
@@ -73,12 +138,19 @@
         <input id="pageIndex" type="number" min="0" value="4" style="width:50px" />
         <button data-action="move">Move</button>
         <input id="zoomRange" type="range" min="0.5" max="2" step="0.01" value="1" />
+        <button data-action="expand">Expand</button>
       `;
       toolbar.addEventListener('click', (event) => {
         const action = event.target.dataset.action;
         if (action === 'prev') { flipView.prevPage(); }
         if (action === 'next') { flipView.nextPage(); }
         if (action === 'move') { flipView.moveTo(Number(document.getElementById('pageIndex').value)); }
+        if (action === 'expand') {
+          const source = getPublishedSource();
+          const pageIndex = flipView.openPageIndexes.find((index) => source?.isExpandable(index));
+          if (pageIndex === undefined) { alert('This page has nothing more to show.'); return; }
+          showExpanded(bookViewer, source, pageIndex);
+        }
       });
       toolbar.querySelector('#zoomRange').addEventListener('input', (event) => {
         bookViewer.setZoomLevel(Number(event.target.value));
@@ -86,7 +158,7 @@
       bookViewer.element.appendChild(toolbar);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       if (typeof window.Book === 'undefined') {
         showBuildGuide();
         return;
@@ -95,6 +167,9 @@
       const shelfManager = new BookShelfManager();
       const bookViewer = shelfManager.getBookViewer();
       const flipView = new FlipView();
+      // The published book links to its own pages, so it needs the view it is shown in.
+      const flipViewRef = { view: flipView };
+      let publishedSource;
 
       bookViewer.registerView(flipView);
       bookViewer.setCurView(flipView.id);
@@ -103,7 +178,16 @@
       shelfManager.importBookToShelf(createSampleBook(2, 10));
       shelfManager.importBookToShelf(createSampleBook(3, 16));
 
-      addToolbar(bookViewer, flipView);
+      addToolbar(bookViewer, flipView, () => publishedSource);
+
+      try {
+        const published = await createPublishedBook(flipViewRef);
+        publishedSource = published.source;
+        shelfManager.importBookToShelf(published.book);
+        window.publishedSource = published.source;
+      } catch (error) {
+        console.error('The published sample book could not be loaded.', error);
+      }
 
       // Exposed for debugging in the browser console.
       window.shelfManager = shelfManager;

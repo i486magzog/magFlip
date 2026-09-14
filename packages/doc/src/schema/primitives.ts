@@ -1,21 +1,6 @@
 import { z } from 'zod';
 import { DOC_LIMITS } from '../common/constants';
-
-/**
- * Protocols a link may use. Everything else (`javascript:`, `data:` …) is rejected.
- */
-const SAFE_URL_PROTOCOLS: ReadonlySet<string> = new Set(['http:', 'https:', 'mailto:', 'tel:']);
-
-/**
- * Returns true when the URL is absolute and uses a safe protocol.
- */
-export function isSafeUrl(value: string): boolean {
-  try {
-    return SAFE_URL_PROTOCOLS.has(new URL(value).protocol);
-  } catch {
-    return false;
-  }
-}
+import { isSafeUrl } from '../common/url';
 
 /**
  * Id of a surface, an element, an asset or a font.

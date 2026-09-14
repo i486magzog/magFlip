@@ -27,7 +27,7 @@ export interface IGradientStop {
  */
 export interface ILinearGradientFill {
   kind: FillKind.LinearGradient;
-  /** Clockwise angle in degrees; 0 points down, as in CSS `linear-gradient`. */
+  /** Direction in degrees, as in CSS `linear-gradient`: 0 runs to the top, 90 to the right. */
   angle: number;
   stops: IGradientStop[];
 }

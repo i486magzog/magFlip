@@ -314,6 +314,12 @@ export interface IPageData {
   ignore?: boolean; // ignore the page when displaying the book
   content?: any;
   image?: string;
+  /**
+   * Draws the page into the content element of the page.
+   * Takes the place of `content` and `image` when it is set, which is how
+   * `@magflip/render` shows a published book without core knowing its format.
+   */
+  render?: (contentEl: HTMLElement) => void;
 }
 
 export interface IBookView {

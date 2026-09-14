@@ -3,11 +3,12 @@ import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
 
 /**
- * Two public entries share one chunk so that `@magflip/doc/yjs` does not
- * duplicate the schemas and helpers of `@magflip/doc`.
+ * The public entries share chunks, so that `@magflip/doc/authoring` and
+ * `@magflip/doc/yjs` do not duplicate the model of `@magflip/doc`.
  */
 const input = {
   index: './src/index.ts',
+  authoring: './src/authoring.ts',
   yjs: './src/yjs.ts',
 };
 const external = [/^zod/, /^yjs/, /^fractional-indexing/];

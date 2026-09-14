@@ -115,6 +115,15 @@ export class FlipView implements IBookView {
    */
   private isSpreadOpen:boolean = false;
   /**
+   * Returns the indexes of the pages the reader is looking at: two when the
+   * book is open, one while it shows a cover, none without a book.
+   */
+  get openPageIndexes():number[] {
+    if(!this.book){ return []; }
+    return [this.curOpenLeftPageIndex, this.curOpenLeftPageIndex+1]
+      .filter(index => index >= 0 && index <= this.bookLastPageIndex);
+  }
+  /**
    * Gets whether the book is ready to open.
    */
   private get isReadyToOpen(){ return this.curOpenLeftPageIndex < 0; }

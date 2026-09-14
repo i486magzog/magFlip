@@ -17,6 +17,10 @@
       "types": "./index.d.ts",
       "import": "./index.js"
     },
+    "./authoring": {
+      "types": "./authoring.d.ts",
+      "import": "./authoring.js"
+    },
     "./yjs": {
       "types": "./yjs.d.ts",
       "import": "./yjs.js"
