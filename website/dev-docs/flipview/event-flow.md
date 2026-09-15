@@ -59,6 +59,35 @@ stateDiagram-v2
 
 `status & EventStatus.Flipping` 이 참이면 "어떤 종류든 자동으로 넘어가는 중" 이므로 새 입력을 무시합니다.
 
+### 넘김 끝 알림
+
+`Flipping`/`SnappingBack`/`FlippingForward`/`FlippingBackward` 에서 `None` 으로 돌아가는 곳은 상태를 직접 쓰지 않고 `Flipping.finishFlip()` 을 부릅니다.
+`finishFlip()` 은 상태를 `None` 으로 되돌린 **다음** `onFlipEnd` 리스너를 호출하므로, 리스너 안에서 곧바로 `nextPage()` 를 불러도 무시되지 않습니다.
+모서리 복귀(`AutoFlipToCorner → None`)는 페이지가 넘어간 것이 아니므로 알리지 않습니다.
+
+| 공개 멤버 | 참인 상태 |
+| --- | --- |
+| `FlipView.isFlipping` (= `Flipping.isTurningPage`) | `Flipping` 또는 `Dragging` 비트 |
+| 내부 `isPageLifted` (좌/우 판정용) | 위 두 비트 + `AutoFlip` 비트 |
+
+`autoFlip()` 은 `isFlipping` 을 검사하므로 마우스로 드래그하는 중에 `nextPage()` 를 불러도 무시됩니다.
+
+```mermaid
+sequenceDiagram
+  participant App as 앱 (입력 처리)
+  participant FV as FlipView
+  participant FM as Flipping
+  App->>FV: nextPage()
+  FV->>FM: eventStatus = Flipping
+  App->>FV: nextPage() (넘기는 중)
+  FV-->>App: 무시 (isFlipping)
+  FV->>FV: autoFlip 완료 · shiftPages · unsetViewerToFlip
+  FV->>FM: finishFlip()
+  FM->>FM: eventStatus = None
+  FM-->>App: onFlipEnd 리스너
+  App->>FV: nextPage() (대기하던 요청)
+```
+
 ## 드래그로 넘기기 시퀀스
 
 ```mermaid

@@ -42,6 +42,8 @@ classDiagram
     +prevPage(offsetY?)
     +moveTo(pageIndex, offsetY?)
     +openPageIndexes: number[]
+    +isFlipping: boolean
+    +onFlipEnd(listener)
   }
 ```
 
@@ -101,6 +103,7 @@ new FlipView(config?: IFlipViewConfig)
 
 | config | 기본값 | 설명 |
 | --- | --- | --- |
+| `autoFlip.duration` | `500` | `nextPage` / `prevPage` / `moveTo` 가 한 번 넘기는 시간(ms) |
 | `autoFlip.forward.offsetY` | `100` | `nextPage` 곡선 높이(px) |
 | `autoFlip.backward.offsetY` | `-100` | `prevPage` 곡선 높이(px) |
 
@@ -110,6 +113,8 @@ new FlipView(config?: IFlipViewConfig)
 | `prevPage(offsetY?)` | 이전 펼침으로 넘깁니다. 처음이면 무시합니다. |
 | `moveTo(pageIndex, offsetY?)` | 해당 페이지가 보이는 펼침으로 이동합니다. |
 | `openPageIndexes` | 지금 보고 있는 페이지 index 배열. 펼침이면 2개, 표지면 1개, 책이 없으면 빈 배열입니다. |
+| `isFlipping` | 페이지를 드래그하거나 넘기는 중이면 `true`. 이때 `nextPage` / `prevPage` / `moveTo` 는 무시됩니다. 마우스를 올려 모서리만 들린 상태는 포함하지 않습니다. |
+| `onFlipEnd(listener)` | 넘김이나 드래그가 끝나 페이지가 자리 잡을 때마다 `listener` 를 호출합니다. 제자리로 돌아간 드래그도 포함합니다. 리스너를 제거하는 함수를 반환합니다. |
 
 ## PublishedBookSource
 

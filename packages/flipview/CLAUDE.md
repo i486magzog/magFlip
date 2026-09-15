@@ -21,6 +21,7 @@
 - 오른쪽 넘김: page1=`[3]`, page2=`[4]`, page3=`[5]`. 왼쪽 넘김: page1=`[2]`, page2=`[1]`, page3=`[0]`.
 - 책 상태: `ready-to-open front`(cur<0) / spread open / `ready-to-open end`(cur>=lastPageIndex). `updateDimension()` 이 Gutter 를 재계산.
 - `EventStatus` 는 비트 플래그: `None → AutoFlipFromCorner ⇄ AutoFlipToCorner`, `Dragging → SnappingBack|FlippingForward|FlippingBackward → None`, `Flipping`(버튼) `→ None`. `status & EventStatus.Flipping` 이면 입력 무시.
+- 넘김/드래그가 끝나 `None` 으로 돌아갈 때는 `eventStatus = None` 을 직접 쓰지 말고 `flipManager.finishFlip()` 을 부른다 → 공개 `onFlipEnd` 리스너가 불린다. 공개 `isFlipping` 은 `Flipping|Dragging` 비트, 내부 `isPageLifted` 는 여기에 `AutoFlip`(호버)까지 포함.
 - `Zone` 도 비트 플래그 (`zone & Zone.Left`, `zone & Zone.Top`).
 - 좌표는 뷰포트 기준(`...GP`). SVG/CSS 에 쓸 때 `/ zoomLevel`.
 - `pivot` = 오른쪽 +1 / 왼쪽 -1 로 공식을 좌우 재사용.

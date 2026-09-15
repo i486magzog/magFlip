@@ -42,6 +42,18 @@ export class ScrollView implements IBookView{
   getBookContainerEl(){ return this.bookContainerEl; }
   zoom(zoomLevel:number){}
   /**
+   * Not tracked yet: the scroll view does not know which pages are on screen.
+   */
+  get openPageIndexes():number[] { return []; }
+  /**
+   * Always false. The scroll view has no page turn.
+   */
+  get isFlipping():boolean { return false; }
+  /**
+   * The listener is never called, because the scroll view has no page turn.
+   */
+  onFlipEnd(listener:() => void):() => void { return () => {}; }
+  /**
    * 
    * @param book 
    * @param openPageIndex 

@@ -5,6 +5,10 @@ import { PageWindow } from './pageWindow';
 import { FlipDiagonals } from './flipDiagonals';
 import { FlipActionLine } from './flipActionLine';
 /**
+ * Name of the event `Flipping.finishFlip` emits.
+ */
+const FLIP_END_EVENT = 'flipEnd';
+/**
  * Flipping class
  */
 export class Flipping extends PageWindow {
@@ -21,7 +25,30 @@ export class Flipping extends PageWindow {
    */
   get eventStatus(){ return this._eventStatus; }
   /**
-   * The area representing the flipping region. 
+   * True while a page is being dragged or is turning.
+   * A corner that only follows the mouse (`EventStatus.AutoFlip`) does not count.
+   */
+  get isTurningPage():boolean {
+    return (this._eventStatus & (EventStatus.Flipping | EventStatus.Dragging)) !== 0;
+  }
+  /**
+   * Ends a page turn or a drag: resets the status and tells the flip-end listeners.
+   * Call it after the pages have settled, so that a listener can start the next turn.
+   */
+  finishFlip(){
+    this.eventStatus = EventStatus.None;
+    this.emitEvent(FLIP_END_EVENT);
+  }
+  /**
+   * Adds a listener that `finishFlip` calls.
+   * @returns A function that removes the listener.
+   */
+  onFlipEnd(listener:() => void):() => void {
+    this.addEventListener(FLIP_END_EVENT, listener);
+    return () => { this.removeEventListener(FLIP_END_EVENT, listener); };
+  }
+  /**
+   * The area representing the flipping region.
    * The width is the same as the opened book width.
    */
   flipGRect:Rect = new Rect();

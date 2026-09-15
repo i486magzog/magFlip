@@ -98,6 +98,8 @@ classDiagram
     -isSpreadOpen
     +view() closeViewer() zoom()
     +nextPage() prevPage() moveTo()
+    +openPageIndexes isFlipping
+    +onFlipEnd(listener)
     -flipPage(mouseGP)
     -shiftPages() updateHiddenPages()
     -setShadow1/3/5/6()
@@ -110,6 +112,8 @@ classDiagram
   }
   class Flipping {
     +eventStatus: EventStatus
+    +isTurningPage
+    +finishFlip() onFlipEnd(listener)
     +eventZone: Zone
     +gutter: Gutter
     +flipActionLine

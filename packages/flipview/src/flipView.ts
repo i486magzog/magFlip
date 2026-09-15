@@ -132,20 +132,33 @@ export class FlipView implements IBookView {
    */
   private get isClosed(){ return this.curOpenLeftPageIndex >= this.bookLastPageIndex; }
   /**
-   * Gets whether the page is flipping. (Includes auto-filp and draggring).
+   * True while a page is being dragged or is turning.
+   * `nextPage`, `prevPage` and `moveTo` do nothing while this is true.
+   * A corner that only follows the mouse does not count.
    */
-  private get isFlipping(){ return ( this.flipManager.eventStatus & EventStatus.AutoFlip
+  get isFlipping():boolean { return this.flipManager.isTurningPage; }
+  /**
+   * Calls the listener each time a page turn or a drag finishes and the pages
+   * have settled, including a drag that snaps back without turning the page.
+   * @param listener Called with no arguments. Read `openPageIndexes` for the new pages.
+   * @returns A function that removes the listener.
+   */
+  onFlipEnd(listener:() => void):() => void { return this.flipManager.onFlipEnd(listener); }
+  /**
+   * Gets whether a page is off its resting place. (Includes a corner following the mouse, dragging and turning).
+   */
+  private get isPageLifted(){ return ( this.flipManager.eventStatus & EventStatus.AutoFlip
     || this.flipManager.eventStatus & EventStatus.Flipping
-    || this.flipManager.eventStatus & EventStatus.Dragging ); 
+    || this.flipManager.eventStatus & EventStatus.Dragging );
   };
   /**
    * Gets whether the left page is flipping.
    */
-  private get isLeftPageFlipping(){ return this.isFlipping && this.flipManager.eventZone & Zone.Left; };
+  private get isLeftPageFlipping(){ return this.isPageLifted && this.flipManager.eventZone & Zone.Left; };
   /**
    * Gets whether the right page is flipping.
    */
-  private get isRightPageFlipping(){ return this.isFlipping && this.flipManager.eventZone & Zone.Right; };
+  private get isRightPageFlipping(){ return this.isPageLifted && this.flipManager.eventZone & Zone.Right; };
   /**
    * Gets whether the first page(index is 0) is Opening.
    */
@@ -1153,7 +1166,7 @@ export class FlipView implements IBookView {
           this.shiftPages(dataToFlip.isFlippingForward)
         }
         this.unsetViewerToFlip();
-        this.flipManager.eventStatus = EventStatus.None;
+        this.flipManager.finishFlip();
       }
     );
   }
@@ -1239,7 +1252,7 @@ export class FlipView implements IBookView {
     //
     // Mouse Down on Zone
     //
-    if(this.flipManager.eventStatus & EventStatus.Flipping){ return; }
+    if(this.isFlipping){ return; }
     if(!this.activePage2El){ return }
     if(!this.pageContainerRect){ return; }
 
@@ -1249,8 +1262,8 @@ export class FlipView implements IBookView {
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(startZone, startGP, this.pageContainerRect, this.zoomLevel);
 
-    const startTime = performance.now(); // 애니메이션 시작 시간
-    const duration = 500; // 애니메이션 지속 시간 (밀리초)
+    const startTime = performance.now();
+    const duration = this.config.autoFlip.duration;
 
     const animate = (currentTime:number) => {
       const elapsed = currentTime - startTime;
@@ -1266,7 +1279,7 @@ export class FlipView implements IBookView {
         // if(!this.activePage2El){ return }
         this.shiftPages(isMovingForward, targetLeftPageIndex);
         this.unsetViewerToFlip();
-        this.flipManager.eventStatus = EventStatus.None;
+        this.flipManager.finishFlip();
       }
     }
   

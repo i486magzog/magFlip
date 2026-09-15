@@ -55,10 +55,40 @@ xychart-beta
 ```js
 const flipView = new FlipView({
   autoFlip: {
+    duration: 300,             // 한 번 넘기는 시간(ms), 기본 500
     forward:  { offsetY: -100 },
     backward: { offsetY: 100 },
   },
 });
+```
+
+## 넘김이 끝났을 때
+
+넘기는 동안(`isFlipping` 이 `true`)에는 `nextPage` / `prevPage` / `moveTo` 가 **무시**됩니다.
+버튼을 빠르게 여러 번 눌러도 한 장씩 넘기려면 넘김이 끝난 뒤 다음 호출을 하세요.
+
+```js
+let pendingTurns = 0;
+
+flipView.onFlipEnd(() => {
+  console.log('지금 보는 페이지', flipView.openPageIndexes);
+  if (pendingTurns > 0) {
+    pendingTurns--;
+    flipView.nextPage();
+  }
+});
+
+function onNextButton() {
+  if (flipView.isFlipping) { pendingTurns++; return; }
+  flipView.nextPage();
+}
+```
+
+`onFlipEnd` 는 리스너를 제거하는 함수를 반환합니다. 뷰어를 닫을 때 호출하세요.
+
+```js
+const removeListener = flipView.onFlipEnd(update);
+removeListener();
 ```
 
 ## 줌

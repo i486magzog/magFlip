@@ -342,4 +342,18 @@ export interface IBookView {
   nextPage(offsetY?:number):void;
   prevPage(offsetY?:number):void;
   moveTo(pageIndex:number, offsetY?:number):void;
+  /**
+   * Indexes of the pages the reader is looking at. Empty without a book.
+   */
+  readonly openPageIndexes: number[];
+  /**
+   * True while a page is moving to another place. `nextPage`, `prevPage` and
+   * `moveTo` do nothing while this is true.
+   */
+  readonly isFlipping: boolean;
+  /**
+   * Calls the listener each time a page move finishes and the pages have settled.
+   * @returns A function that removes the listener.
+   */
+  onFlipEnd(listener:() => void):() => void;
 }

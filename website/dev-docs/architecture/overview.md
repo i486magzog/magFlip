@@ -124,6 +124,9 @@ export interface IBookView {
   nextPage(offsetY?: number): void;
   prevPage(offsetY?: number): void;
   moveTo(pageIndex: number, offsetY?: number): void;
+  readonly openPageIndexes: number[];  // 지금 보이는 페이지 index
+  readonly isFlipping: boolean;        // true 인 동안 nextPage/prevPage/moveTo 무시
+  onFlipEnd(listener: () => void): () => void;  // 넘김이 끝날 때마다 호출, 제거 함수 반환
 }
 ```
 
