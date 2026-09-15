@@ -6,6 +6,8 @@ import {
   rotatedRectIntersectsRect,
   unionRects,
 } from '../src/common/geometry';
+import { getEditRect, getVisibleRect, SurfaceKind } from '../src/model/surface';
+import { makeSurface, PAGE_SIZE } from './helpers';
 
 describe('getRotatedBounds', () => {
   it('keeps the box when the rotation is a multiple of 360', () => {
@@ -85,5 +87,27 @@ describe('unionRects', () => {
       { x: 0, y: 0, width: 10, height: 10 },
       { x: -5, y: 20, width: 10, height: 10 },
     ])).toEqual({ x: -5, y: 0, width: 15, height: 30 });
+  });
+});
+
+describe('getEditRect', () => {
+  const surface = makeSurface('s0');
+
+  it('is the pages when the surface has no extent', () => {
+    expect(getEditRect(surface, SurfaceKind.Single, PAGE_SIZE)).toEqual({ x: 0, y: 0, ...PAGE_SIZE });
+  });
+
+  it('keeps the whole design after readers were shut out of it', () => {
+    const wide = { ...surface, extent: { rect: { x: 0, y: 0, width: 1200, height: 900 }, isViewerVisible: false } };
+
+    // The reader sees one page; the author keeps designing on all of it.
+    expect(getVisibleRect(wide, SurfaceKind.Single, PAGE_SIZE)).toEqual({ x: 0, y: 0, ...PAGE_SIZE });
+    expect(getEditRect(wide, SurfaceKind.Single, PAGE_SIZE)).toEqual({ x: 0, y: 0, width: 1200, height: 900 });
+  });
+
+  it('adds the pages back to an extent that lost them', () => {
+    const wrong = { ...surface, extent: { rect: { x: 700, y: 0, width: 300, height: 900 }, isViewerVisible: true } };
+
+    expect(getEditRect(wrong, SurfaceKind.Single, PAGE_SIZE)).toEqual({ x: 0, y: 0, width: 1000, height: 900 });
   });
 });

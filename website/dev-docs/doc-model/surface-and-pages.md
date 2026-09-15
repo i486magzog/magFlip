@@ -67,6 +67,15 @@ flowchart TB
 - **`isViewerVisible: false`** 면 독자는 확장할 수 없고, 게시할 때 trim 밖 요소가 **파일에서 제거**됩니다. CSS 로 숨기는 것이 아니므로 개발자 도구로도 볼 수 없습니다.
 - `isViewerVisible: true` 면 게시본에 `isExpandable: true` 와 `visibleRect` 가 담기고, 뷰어는 확장 버튼을 띄울 수 있습니다.
 
+독자에게 막아도 **작가는 계속 그 영역에서 편집합니다**. 그래서 영역을 묻는 함수가 둘입니다.
+
+| 묻는 것 | 함수 | `isViewerVisible: false` 일 때 |
+| --- | --- | --- |
+| 독자가 보는 영역 | `getVisibleRect` | trim |
+| 작가가 그리는 영역 | `getEditRect` | extent 그대로 |
+
+에디터 캔버스는 `getEditRect` 를, 게시는 `publishSurface` 안의 규칙(= `getVisibleRect` 와 같은 판단)을 씁니다.
+
 extent 를 명시적인 사각형으로 둔 이유는, 요소 위치에서 자동 계산하면 "잠깐 옆에 빼둔 이미지" 때문에 확장 영역이 멋대로 커지기 때문입니다. 그런 임시 요소를 두는 자리가 pasteboard 입니다.
 
 ## 관련 코드
@@ -76,5 +85,5 @@ extent 를 명시적인 사각형으로 둔 이유는, 요소 위치에서 자�
 | 순서 → 페이지 | `computeBookLayout(book)` |
 | 페이지의 좌우 | `getPageSide(index, direction)` |
 | 마주보는 페이지 | `getFacingPageIndex(index, pageCount)` |
-| surface·페이지 사각형 | `getSurfaceTrimRect`, `getPageTrimRect`, `getVisibleRect` |
+| surface·페이지 사각형 | `getSurfaceTrimRect`, `getPageTrimRect`, `getVisibleRect`, `getEditRect` |
 | 펼침 시작 가능 여부 | `canSpreadStartAt(index)` |

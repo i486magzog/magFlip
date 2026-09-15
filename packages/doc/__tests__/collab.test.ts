@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 import { createOrderBetween } from '../src/common/order';
 import { moveSurface, readBookDoc, writeBookDoc, writeSurfaceRef } from '../src/collab/bookYDoc';
-import { getTextFragment, patchElement, readSurfaceDoc, removeElement, writeElement, writeSurfaceDoc } from '../src/collab/surfaceYDoc';
+import { getTextFragment, patchElement, readSurfaceDoc, removeElement, setSurfaceSetting, writeElement, writeSurfaceDoc } from '../src/collab/surfaceYDoc';
 import { computeBookLayout } from '../src/layout/bookLayout';
 import { createElement } from '../src/model/defaults';
 import { ElementType, IShapeElement } from '../src/model/element';
@@ -170,5 +170,34 @@ describe('book room', () => {
     // Same order key: the id decides, and no page is lost.
     expect(computeBookLayout(readBookDoc(a)).pages.map(page => page.surfaceId)).toEqual(['s0', 'fromA', 'fromB']);
     expect(computeBookLayout(readBookDoc(b)).pages.map(page => page.surfaceId)).toEqual(['s0', 'fromA', 'fromB']);
+  });
+});
+
+describe('surface settings', () => {
+  it('writes one field without touching the others', () => {
+    const doc = new Y.Doc();
+    writeSurfaceDoc(doc, makeSurface('s0', [createElement(ElementType.Shape, { id: 'a' })]));
+
+    setSurfaceSetting(doc, 'extent', { rect: { x: 0, y: 0, width: 1200, height: 900 }, isViewerVisible: true });
+    setSurfaceSetting(doc, 'masterId', 'm0');
+
+    const read = readSurfaceDoc(doc);
+    expect(read.extent).toEqual({ rect: { x: 0, y: 0, width: 1200, height: 900 }, isViewerVisible: true });
+    expect(read.masterId).toBe('m0');
+    expect(Object.keys(read.elements)).toEqual(['a']);
+  });
+
+  it('keeps both changes when two editors set different fields', () => {
+    const one = new Y.Doc();
+    writeSurfaceDoc(one, makeSurface('s0'));
+    const two = new Y.Doc();
+    Y.applyUpdate(two, Y.encodeStateAsUpdate(one));
+
+    setSurfaceSetting(one, 'extent', { rect: { x: 0, y: 0, width: 1200, height: 900 }, isViewerVisible: false });
+    setSurfaceSetting(two, 'masterId', 'm0');
+    Y.applyUpdate(one, Y.encodeStateAsUpdate(two));
+
+    expect(readSurfaceDoc(one).extent?.rect.width).toBe(1200);
+    expect(readSurfaceDoc(one).masterId).toBe('m0');
   });
 });

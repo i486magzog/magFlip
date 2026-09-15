@@ -117,6 +117,21 @@ export function getTextFragment(ydoc: Y.Doc, elementId: string): Y.XmlFragment |
   return content instanceof Y.XmlFragment ? content : undefined;
 }
 /**
+ * The fields of the surface itself, the ones that are not elements.
+ */
+export type ISurfaceSettings = Pick<ISurfaceDoc, 'background' | 'extent' | 'masterId'>;
+
+/**
+ * Writes one setting of the surface: its background, the area it is designed
+ * on, or the master it follows.
+ *
+ * One entry per field, like the fields of an element: an editor widening the
+ * extent and another one picking a master do not overwrite each other.
+ */
+export function setSurfaceSetting<K extends keyof ISurfaceSettings>(ydoc: Y.Doc, key: K, value: ISurfaceSettings[K]): void {
+  ydoc.getMap(SURFACE_KEYS.surface).set(key, value);
+}
+/**
  * Sets or removes the override of one master element.
  */
 export function setMasterOverride(ydoc: Y.Doc, key: string, override: IMasterOverride | null): void {

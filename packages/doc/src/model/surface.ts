@@ -1,4 +1,4 @@
-import { IRect, ISize } from '../common/geometry';
+import { containsRect, IRect, ISize, unionRects } from '../common/geometry';
 import { JsonValue } from '../common/json';
 import { IElement } from './element';
 import { IFill } from './paint';
@@ -87,4 +87,19 @@ export function getVisibleRect(surface: ISurfaceDoc, kind: SurfaceKind, pageSize
   const trimRect = getSurfaceTrimRect(kind, pageSize);
   if (!surface.extent || !surface.extent.isViewerVisible) { return trimRect; }
   return surface.extent.rect;
+}
+/**
+ * Returns the rect the author designs on: the extent when there is one, the
+ * trim otherwise.
+ *
+ * This is deliberately not `getVisibleRect`: deciding that readers may not
+ * expand a page does not take the wider design away from the author, it only
+ * keeps it out of what is published. An extent that does not contain the pages
+ * is a broken document, so the trim is added back rather than cutting content.
+ */
+export function getEditRect(surface: ISurfaceDoc, kind: SurfaceKind, pageSize: ISize): IRect {
+  const trimRect = getSurfaceTrimRect(kind, pageSize);
+  if (!surface.extent) { return trimRect; }
+  if (containsRect(surface.extent.rect, trimRect)) { return surface.extent.rect; }
+  return unionRects([surface.extent.rect, trimRect]) as IRect;
 }
