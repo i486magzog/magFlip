@@ -14,7 +14,7 @@ src/
 │  └─ types.ts              PublishedElementOf<T>
 ├─ nodes/                   요소 타입별 DOM 생성
 │  ├─ imageNode.ts          crop + fit 계산
-│  ├─ textNode.ts           문단·런·마크 (textContent 만 사용)
+│  ├─ textNode.ts           문단·목록 기호·런·마크 (textContent 만 사용)
 │  ├─ shapeNode.ts          SVG rect/ellipse/line/path, 그라디언트 defs
 │  ├─ mediaNode.ts          video/audio
 │  ├─ widgetNode.ts         sandbox iframe + postMessage(props)
@@ -28,6 +28,7 @@ src/
 ## 핵심 규칙
 
 - **텍스트는 `textContent` 로만** 넣는다. `innerHTML` 은 절대 쓰지 않는다(문서 내용은 신뢰할 수 없다).
+- 목록 기호는 글자가 아니라 `.mf-text-li::before { content: attr(data-mf-marker) }` 로 그린다 → 독자가 복사해도 기호가 딸려 가지 않는다. 편집기도 같은 클래스를 쓰므로 이 CSS 를 바꾸면 양쪽이 함께 바뀐다.
 - 링크 URL 은 그릴 때 `isSafeUrl` 로 다시 확인한다. 페이지 링크는 직접 이동하지 않고 `onPageLink` 로 넘긴다.
 - 위젯 iframe 에 `allow-same-origin` 을 주지 않는다. props 는 로드 후 위젯 URL 의 origin 으로만 `postMessage`.
 - 층의 좌표 = surface 좌표 − `visibleRect` 원점. 페이지 잘라내기와 배율은 `PageRenderer` 만 담당한다.

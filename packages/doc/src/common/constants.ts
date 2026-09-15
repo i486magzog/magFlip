@@ -18,6 +18,8 @@ export const DOC_LIMITS = {
   maxGroupDepth: 32,
   /** Maximum number of characters in one text element. */
   maxTextLength: 100_000,
+  /** Deepest level of a list item. Levels count from 0, so this allows nine. */
+  maxListLevel: 8,
   /** Maximum size of the JSON-serialized props of one widget, in characters. */
   maxWidgetPropsLength: 64 * 1024,
   /** Maximum length of SVG path data of one shape. */

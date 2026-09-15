@@ -25,3 +25,4 @@ export * from './model/text';
 export * from './layout/bookLayout';
 export * from './tree/elementTree';
 export * from './text/textContent';
+export * from './text/textList';

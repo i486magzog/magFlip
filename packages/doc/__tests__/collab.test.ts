@@ -1,15 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
+import { DOC_LIMITS } from '../src/common/constants';
 import { createOrderBetween } from '../src/common/order';
 import { moveSurface, readBookDoc, writeBookDoc, writeSurfaceRef } from '../src/collab/bookYDoc';
 import { getTextFragment, patchElement, readSurfaceDoc, removeElement, setSurfaceSetting, writeElement, writeSurfaceDoc } from '../src/collab/surfaceYDoc';
-import { toMarkAttributes, toTextMarks } from '../src/collab/textYXml';
+import { LIST_KIND_ATTRIBUTE, LIST_LEVEL_ATTRIBUTE, toMarkAttributes, toTextList, toTextMarks } from '../src/collab/textYXml';
 import { computeBookLayout } from '../src/layout/bookLayout';
 import { createElement } from '../src/model/defaults';
 import { ElementType, IShapeElement, ITextElement } from '../src/model/element';
 import { LinkKind } from '../src/model/link';
 import { SurfaceKind } from '../src/model/surface';
-import { TextAlign, TextBlockType, TextFieldKind } from '../src/model/text';
+import { ListKind, TextAlign, TextBlockType, TextFieldKind } from '../src/model/text';
 import { getPlainText } from '../src/text/textContent';
 import { makeBook, makeShape, makeSurface } from './helpers';
 
@@ -258,6 +259,52 @@ describe('rich text marks', () => {
 
   it('ignores attributes that are not marks', () => {
     expect(toTextMarks({ field: 'pageNumber', align: 'center' })).toBeUndefined();
+  });
+
+  it('keeps a list through a round trip, as two plain attributes', () => {
+    const list = {
+      blocks: [
+        { type: TextBlockType.Paragraph, align: TextAlign.Start, list: { kind: ListKind.Ordered, level: 1 }, inlines: [{ text: 'item' }] },
+        { type: TextBlockType.Paragraph, align: TextAlign.Start, inlines: [{ text: 'after' }] },
+      ],
+    };
+    const doc = new Y.Doc();
+    writeSurfaceDoc(doc, makeSurface('s0', [createElement(ElementType.Text, { id: 't', content: list })]));
+
+    const [item, after] = getTextFragment(doc, 't')?.toArray() as Y.XmlElement[];
+
+    expect(item?.getAttributes()).toEqual({ align: 'start', listKind: 'ordered', listLevel: 1 });
+    expect(after?.getAttributes()).toEqual({ align: 'start' });
+    expect((readSurfaceDoc(doc).elements['t'] as ITextElement).content).toEqual(list);
+  });
+
+  it('reads a list attribute that is out of range without losing the item', () => {
+    expect(toTextList('bullet', 40)).toEqual({ kind: ListKind.Bullet, level: DOC_LIMITS.maxListLevel });
+    expect(toTextList('bullet', undefined)).toEqual({ kind: ListKind.Bullet, level: 0 });
+    expect(toTextList('checkbox', 0)).toBeUndefined();
+  });
+
+  it('keeps what one editor types while another turns the paragraph into a list item', () => {
+    const { a, b, sync } = connect(ydoc => writeSurfaceDoc(ydoc, makeSurface('s0', [
+      createElement(ElementType.Text, {
+        id: 't',
+        content: { blocks: [{ type: TextBlockType.Paragraph, align: TextAlign.Start, inlines: [{ text: 'milk' }] }] },
+      }),
+    ])));
+
+    const paragraphOf = (doc: Y.Doc) => getTextFragment(doc, 't')?.toArray()[0] as Y.XmlElement;
+    paragraphOf(a).setAttribute(LIST_KIND_ATTRIBUTE, ListKind.Bullet);
+    paragraphOf(a).setAttribute(LIST_LEVEL_ATTRIBUTE, 0 as never);
+    (paragraphOf(b).toArray()[0] as Y.XmlText).insert(4, ' and eggs');
+    sync();
+
+    // The paragraph was never replaced, so neither change is lost.
+    expect((readSurfaceDoc(b).elements['t'] as ITextElement).content.blocks).toEqual([{
+      type: TextBlockType.Paragraph,
+      align: TextAlign.Start,
+      list: { kind: ListKind.Bullet, level: 0 },
+      inlines: [{ text: 'milk and eggs' }],
+    }]);
   });
 
   it('lets two editors mark different words of one paragraph', () => {

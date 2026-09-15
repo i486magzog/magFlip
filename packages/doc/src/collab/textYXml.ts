@@ -1,11 +1,24 @@
 import * as Y from 'yjs';
-import { ITextContent, ITextMarks, TextAlign, TextBlock, TextBlockType, TextFieldKind, TextInline } from '../model/text';
+import { DOC_LIMITS } from '../common/constants';
+import { ITextContent, ITextList, ITextMarks, ListKind, TextAlign, TextBlock, TextBlockType, TextFieldKind, TextInline } from '../model/text';
 import { normalizeTextContent } from '../text/textContent';
 
 /**
  * Node name of a paragraph inside the fragment.
  */
 export const PARAGRAPH_NODE_NAME = 'paragraph';
+/**
+ * Attribute of a paragraph holding the `kind` of its `list`.
+ *
+ * A list is two plain attributes rather than one object: an editor bound to
+ * the fragment compares attributes with `!==`, and an object would look
+ * changed on every keystroke and be written again each time.
+ */
+export const LIST_KIND_ATTRIBUTE = 'listKind';
+/**
+ * Attribute of a paragraph holding the `level` of its `list`.
+ */
+export const LIST_LEVEL_ATTRIBUTE = 'listLevel';
 /**
  * Node name of a field placeholder inside a paragraph.
  */
@@ -100,6 +113,10 @@ export function writeTextContent(fragment: Y.XmlFragment, content: ITextContent)
       const paragraph = new Y.XmlElement(PARAGRAPH_NODE_NAME);
       fragment.insert(fragment.length, [paragraph]);
       paragraph.setAttribute('align', block.align);
+      if (block.list) {
+        paragraph.setAttribute(LIST_KIND_ATTRIBUTE, block.list.kind);
+        paragraph.setAttribute(LIST_LEVEL_ATTRIBUTE, block.list.level as never);
+      }
       writeInlines(paragraph, block.inlines);
     }
   };
@@ -112,13 +129,29 @@ export function readTextContent(fragment: Y.XmlFragment): ITextContent {
   const blocks: TextBlock[] = [];
   for (const node of fragment.toArray()) {
     if (!(node instanceof Y.XmlElement) || node.nodeName !== PARAGRAPH_NODE_NAME) { continue; }
+    const attributes = node.getAttributes() as Record<string, unknown>;
+    const list = toTextList(attributes[LIST_KIND_ATTRIBUTE], attributes[LIST_LEVEL_ATTRIBUTE]);
     blocks.push({
       type: TextBlockType.Paragraph,
-      align: toTextAlign(node.getAttribute('align')),
+      align: toTextAlign(attributes['align']),
+      ...(list ? { list } : {}),
       inlines: readInlines(node),
     });
   }
   return normalizeTextContent({ blocks });
+}
+
+/**
+ * Reads the list of a paragraph from its two attributes, or `undefined` when
+ * it is not a list item. A missing level is the first one, and a level out of
+ * range is brought back into it rather than dropping the item.
+ */
+export function toTextList(kind: unknown, level: unknown): ITextList | undefined {
+  const kinds = Object.values(ListKind) as unknown[];
+  if (!kinds.includes(kind)) { return undefined; }
+
+  const depth = typeof level === 'number' && Number.isFinite(level) ? Math.trunc(level) : 0;
+  return { kind: kind as ListKind, level: Math.min(Math.max(depth, 0), DOC_LIMITS.maxListLevel) };
 }
 
 function writeInlines(paragraph: Y.XmlElement, inlines: TextInline[]): void {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DOC_LIMITS } from '../common/constants';
-import { TextAlign, TextBlockType, TextFieldKind } from '../model/text';
+import { ListKind, TextAlign, TextBlockType, TextFieldKind } from '../model/text';
 import { LinkSchema } from './paintSchema';
 import { ColorSchema, CoordinateSchema, FontWeightSchema, LengthSchema } from './primitives';
 
@@ -49,11 +49,19 @@ export const TextFieldRunSchema = z.object({
  */
 export const TextInlineSchema = z.union([TextRunSchema, TextFieldRunSchema]);
 /**
+ * What makes a paragraph a list item.
+ */
+export const TextListSchema = z.object({
+  kind: z.enum(ListKind),
+  level: z.number().int().min(0).max(DOC_LIMITS.maxListLevel),
+});
+/**
  * One paragraph.
  */
 export const TextParagraphSchema = z.object({
   type: z.literal(TextBlockType.Paragraph),
   align: z.enum(TextAlign),
+  list: TextListSchema.optional(),
   inlines: z.array(TextInlineSchema),
 });
 /**

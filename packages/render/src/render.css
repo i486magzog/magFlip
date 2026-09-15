@@ -49,6 +49,24 @@
 .mf-text-p {
   margin: 0;
 }
+/*
+ * A list item: each level indents by one marker width, and the marker hangs in
+ * the last one, so wrapped lines line up with the text rather than the marker.
+ * The editor draws its paragraphs with the same classes.
+ */
+.mf-text-li {
+  padding-inline-start: calc((var(--mf-list-level, 0) + 1) * 1.6em);
+}
+.mf-text-li::before {
+  content: attr(data-mf-marker);
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1.6em;
+  margin-inline-start: -1.6em;
+  padding-inline-end: 0.4em;
+  text-align: end;
+  white-space: nowrap;
+}
 .mf-link {
   color: inherit;
   text-decoration: inherit;

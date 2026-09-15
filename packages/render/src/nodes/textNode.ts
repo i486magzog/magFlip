@@ -1,5 +1,6 @@
 import {
   ElementType,
+  getListMarkers,
   isTextFieldRun,
   ITextMarks,
   ITextStyle,
@@ -39,7 +40,9 @@ export function createTextNode(element: PublishedText, options: IRenderOptions):
   applyTextStyle(box, element.style);
 
   const body = createDiv('text-body');
-  for (const block of element.content.blocks) { body.appendChild(createBlock(block, options)); }
+  const { blocks } = element.content;
+  const markers = getListMarkers(blocks.map(block => block.list));
+  blocks.forEach((block, index) => body.appendChild(createBlock(block, markers[index], options)));
   box.appendChild(body);
   return box;
 }
@@ -54,10 +57,17 @@ function applyTextStyle(element: HTMLElement, style: ITextStyle): void {
   element.style.letterSpacing = px(style.letterSpacing);
 }
 
-function createBlock(block: TextBlock, options: IRenderOptions): HTMLElement {
+function createBlock(block: TextBlock, marker: string | undefined, options: IRenderOptions): HTMLElement {
   const paragraph = document.createElement('p');
   paragraph.className = 'mf-text-p';
   paragraph.style.textAlign = toCssTextAlign(block.align);
+  if (block.list && marker !== undefined) {
+    // The marker is drawn by `.mf-text-li::before`, so it is never part of the
+    // text a reader selects or copies.
+    paragraph.classList.add('mf-text-li');
+    paragraph.dataset['mfMarker'] = marker;
+    paragraph.style.setProperty('--mf-list-level', String(block.list.level));
+  }
   for (const inline of block.inlines) { paragraph.appendChild(createInline(inline, options)); }
   // An empty paragraph still takes one line.
   if (block.inlines.length === 0) { paragraph.appendChild(document.createElement('br')); }

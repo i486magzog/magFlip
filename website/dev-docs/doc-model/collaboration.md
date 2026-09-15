@@ -69,6 +69,8 @@ patchElement(ydoc, 'box', { width: 400 }); // B
 
 켜고 끄는 마크(`isItalic`, `isUnderlined`, `isStruckThrough`)는 빈 객체, 나머지는 `value` 안에 값을 둡니다. **ProseMirror 마크가 Yjs 문서에 저장되는 모양**이 이것이고(`y-prosemirror`), 그래서 편집기가 이 fragment 에 그대로 붙습니다. 모델의 `ITextMarks`(평평한 `{ fontWeight: 700 }`)와 이 모양 사이의 번역은 `collab/textYXml.ts` 의 `toMarkAttributes` / `toTextMarks` 한 쌍이 맡습니다.
 
+문단의 [목록](./elements-and-text.md#목록)은 문단 요소의 **속성 두 개** `listKind`, `listLevel` 입니다(`LIST_KIND_ATTRIBUTE`, `LIST_LEVEL_ATTRIBUTE`). 목록이 아닌 문단에는 둘 다 없습니다. `{ kind, level }` 객체 하나로 두지 않는 이유는 편집기 쪽 `y-prosemirror` 가 속성을 `!==` 로 비교하기 때문입니다 — 객체는 키를 누를 때마다 바뀐 것으로 보여 매번 다시 쓰입니다.
+
 :::note
 편집기의 스키마는 마크 이름을 `MARK_NAMES` 에서 가져옵니다. 이름이 어긋나면 한쪽이 쓴 서식을 다른 쪽이 다른 마크로 읽습니다.
 :::

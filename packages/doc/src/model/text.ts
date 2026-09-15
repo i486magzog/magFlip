@@ -28,10 +28,20 @@ export enum TextSizing {
 }
 /**
  * Block types. Only paragraphs exist today; the discriminator leaves room
- * for lists and headings without breaking stored documents.
+ * for headings without breaking stored documents. A list is not a block type:
+ * it is a paragraph with `list` set (see `ITextList`).
  */
 export enum TextBlockType {
   Paragraph = 'paragraph',
+}
+/**
+ * The marker a list item is drawn with.
+ */
+export enum ListKind {
+  /** A bullet: •, ◦ or ▪ depending on the level. */
+  Bullet = 'bullet',
+  /** A number: 1., a. or i. depending on the level. */
+  Ordered = 'ordered',
 }
 /**
  * A value that the renderer fills in from the book, such as the page number.
@@ -95,11 +105,27 @@ export interface ITextFieldRun {
  */
 export type TextInline = ITextRun | ITextFieldRun;
 /**
+ * Makes a paragraph an item of a list.
+ *
+ * Lists are flat: an item says how deep it is instead of sitting inside a list
+ * node. Turning a paragraph into an item, or moving it a level in, then only
+ * changes this field, so it never removes and re-inserts the paragraph - which
+ * would drop what someone else is typing in it at the same time.
+ * Consecutive items make one list; `getListMarkers` numbers them.
+ */
+export interface ITextList {
+  kind: ListKind;
+  /** How far the item is indented, from 0 to `DOC_LIMITS.maxListLevel`. */
+  level: number;
+}
+/**
  * One paragraph of a text element.
  */
 export interface ITextParagraph {
   type: TextBlockType.Paragraph;
   align: TextAlign;
+  /** Set when the paragraph is an item of a list. */
+  list?: ITextList;
   inlines: TextInline[];
 }
 /**

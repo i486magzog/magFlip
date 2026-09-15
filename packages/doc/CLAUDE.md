@@ -19,7 +19,7 @@ src/
 │  ├─ book.ts              IBookDoc, ISurfaceRef, IMasterRef, ReadingDirection, PageSide
 │  ├─ surface.ts           ISurfaceDoc, SurfaceKind(single|spread), ISurfaceExtent, trim/visible rect
 │  ├─ element.ts           IElement 유니온 (group/image/text/shape/video/audio/widget)
-│  ├─ text.ts              ITextContent(blocks→inlines), 마크, TextFieldKind
+│  ├─ text.ts              ITextContent(blocks→inlines), 마크, 목록(ITextList), TextFieldKind
 │  ├─ link.ts paint.ts     ILink(url|page), IFill, IStroke
 │  ├─ asset.ts             IAsset(서버 소유), IPublishedAsset
 │  ├─ published.ts         IPublishedBook, IPublishedSurface, IPublishedNode
@@ -30,6 +30,7 @@ src/
 ├─ tree/elementTree.ts     parentId+order → 트리. 고아·순환·과깊이 자동 복구(+problem)
 ├─ master/resolveMaster.ts 마스터를 대상 surface 좌표로 복사 + override 적용
 ├─ text/textContent.ts     정규화, 필드 치환, 평문 추출
+├─ text/textList.ts        목록 번호·기호 계산 (getListMarkers — 편집기·렌더러 공용)
 ├─ publish/                resolveNodes(에디터·게시 공용) → publishSurface → publishBook
 ├─ validate/validateBook.ts 스키마 + 의미 검증 (게시 전 필수)
 ├─ migrate/migrate.ts      schemaVersion 마이그레이션
@@ -46,6 +47,7 @@ src/
 - 요소는 `parentId` + `order`(fractional index)로 트리를 만든다. 배열 순서를 쓰지 않는 이유는 동시 편집에서 중복/손실을 막기 위해서다.
 - 마스터 요소 id 는 `master:` 접두사(+ single→spread 복제 시 `@0`/`@1`). 일반 id 는 `[A-Za-z0-9_-]` 라 절대 충돌하지 않는다.
 - 링크 URL 은 http/https/mailto/tel 만 허용(`isSafeUrl`). `javascript:` 차단은 스키마의 책임이다.
+- **목록은 문단의 속성**(`list: { kind, level }`)이다. 목록 노드로 감싸는 구조로 바꾸지 말 것 — 문단을 지웠다 다시 넣게 되어 그 문단에 동시에 친 글자가 사라진다. 번호는 저장하지 않고 `getListMarkers` 로 계산한다.
 - Yjs 문서는 **필드 단위**로 쓴다(요소 하나 = Y.Map, 필드 하나 = 엔트리). 통째로 JSON 을 넣으면 동시 편집이 LWW 로 무너진다.
 
 ## 명령

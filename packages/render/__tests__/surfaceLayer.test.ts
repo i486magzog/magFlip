@@ -4,6 +4,7 @@ import {
   ElementType,
   IPublishedSurface,
   LinkKind,
+  ListKind,
   ShapeKind,
   SurfaceKind,
   TextAlign,
@@ -92,6 +93,35 @@ describe('createSurfaceLayer', () => {
     expect(box.textContent).toBe('<img src=x onerror="alert(1)">');
     expect((box.querySelector('span') as HTMLElement).style.fontWeight).toBe('700');
     expect((box.querySelector('p') as HTMLElement).style.textAlign).toBe('center');
+  });
+
+  it('marks list items and numbers them the way the document model does', () => {
+    const item = (text: string, list?: { kind: ListKind, level: number }) => ({
+      type: TextBlockType.Paragraph as const,
+      align: TextAlign.Start,
+      ...(list ? { list } : {}),
+      inlines: [{ text }],
+    });
+    const text = createElement(ElementType.Text, {
+      id: 'todo',
+      x: 0, y: 0, width: 300, height: 200, order: 'a0',
+      content: {
+        blocks: [
+          item('Shopping'),
+          item('milk', { kind: ListKind.Ordered, level: 0 }),
+          item('whole', { kind: ListKind.Ordered, level: 1 }),
+          item('eggs', { kind: ListKind.Ordered, level: 0 }),
+        ],
+      },
+    });
+    const paragraphs = [...findElement(layerOf(publishSurfaces([{ kind: Single, elements: [text] }])), 'todo').querySelectorAll('p')];
+
+    expect(paragraphs.map(paragraph => paragraph.dataset['mfMarker'])).toEqual([undefined, '1.', 'a.', '2.']);
+    expect(paragraphs[0]?.classList.contains('mf-text-li')).toBe(false);
+    expect(paragraphs[2]?.classList.contains('mf-text-li')).toBe(true);
+    expect(paragraphs[2]?.style.getPropertyValue('--mf-list-level')).toBe('1');
+    // The marker is not text: a reader copying the item gets the item only.
+    expect(paragraphs[1]?.textContent).toBe('milk');
   });
 
   it('draws a shape as an SVG of the size of its box', () => {
