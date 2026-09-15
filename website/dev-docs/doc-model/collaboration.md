@@ -67,9 +67,28 @@ CRDT 는 "두 변경을 모두 살리는" 것이 목적이라, 의미상 불가�
 
 이런 상태는 **쓰기를 막는 대신 읽을 때 같은 규칙으로 복구**합니다([요소와 텍스트](./elements-and-text.md#z-order-와-그룹)의 표). 모든 클라이언트가 같은 입력에서 같은 트리를 만들기 때문에 화면이 갈라지지 않고, 문제는 `IDocProblem` 으로 보고되어 에디터가 알려줄 수 있습니다.
 
-## 서버가 할 일 (Phase 2)
+## 구현된 모습 (magFlipServer · MagFlipEditor)
 
-- 방 상태를 주기적으로 R2 에 스냅샷으로 저장하고, 방을 열 때 복원한다 (`writeSurfaceDoc` / `readSurfaceDoc`).
-- 스냅샷을 저장하기 전에 `validateSurfaceDoc` 으로 검사한다. 업데이트 하나하나를 검증할 수는 없으므로, 저장 시점과 게시 시점이 검증 지점이다.
-- 권한을 방 단위로 확인한다(읽기 전용 참여자는 업데이트를 브로드캐스트하지 않는다).
-- awareness(커서·선택)는 문서에 저장하지 않고 방 안에서만 주고받는다.
+```mermaid
+sequenceDiagram
+  participant A as 편집자 A
+  participant R as SurfaceRoom (DO)
+  participant B as 편집자 B
+  A->>R: WebSocket 연결 (권한은 워커가 먼저 확인)
+  R-->>A: sync step1 + 지금 방에 있는 커서
+  A->>R: 요소의 x 필드만 변경
+  R-->>B: 같은 업데이트 브로드캐스트
+  R->>R: 3초 뒤 R2 에 스냅샷
+```
+
+- 서버는 `YjsRoom` 하나로 두 방을 만든다. WebSocket 은 hibernation 으로 받고, 마지막 변경 3초 뒤 R2 에 스냅샷을 쓴다.
+- 권한은 워커에서 확인한다. 방은 누가 연결했는지 모르고 문서만 합친다.
+- 편집기는 `applyElements` 로 **바뀐 필드만** 쓴다. 한 명이 옮기고 한 명이 크기를 바꿔도 둘 다 남는 이유다.
+- 실행 취소는 `Y.UndoManager` 에 `trackedOrigins` 를 걸어 **자기 변경만** 되돌린다.
+- awareness(선택·이름·색)는 문서에 저장하지 않는다. 연결이 끊기면 그 사람의 표시는 사라진다.
+
+### 브라우저에서 걸리는 것들
+
+- WebSocket 핸드셰이크에는 헤더를 붙일 수 없다 → 사용자는 쿼리스트링으로 보낸다(개발용 `?devUser=`, 실서비스에서는 짧은 수명의 토큰).
+- 클라이언트는 `binaryType = 'arraybuffer'` 를 설정해야 한다. 기본값(Blob)이면 메시지를 해석하지 못한다.
+- 조용한 방은 잠들어 있어야 하므로, 연결 확인은 텍스트 `ping` 으로 하고 런타임이 `pong` 을 대신 답한다(`setWebSocketAutoResponse`).

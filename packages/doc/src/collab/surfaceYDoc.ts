@@ -80,6 +80,9 @@ export function writeElement(ydoc: Y.Doc, element: IElement): void {
 /**
  * Changes single fields of an element. Fields that are not in the patch stay
  * as they are, including changes other people made at the same time.
+ *
+ * A field set to `undefined` is removed, which is how an optional field such
+ * as `link` goes away.
  */
 export function patchElement(ydoc: Y.Doc, id: string, patch: Partial<IElement>): void {
   const elementMap = getElementsMap(ydoc).get(id);
@@ -87,6 +90,10 @@ export function patchElement(ydoc: Y.Doc, id: string, patch: Partial<IElement>):
 
   ydoc.transact(() => {
     for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined) {
+        elementMap.delete(key);
+        continue;
+      }
       if (key === CONTENT_KEY) {
         setTextContent(elementMap, value as ITextContent);
         continue;

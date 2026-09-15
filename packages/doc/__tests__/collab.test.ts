@@ -6,6 +6,7 @@ import { getTextFragment, patchElement, readSurfaceDoc, removeElement, writeElem
 import { computeBookLayout } from '../src/layout/bookLayout';
 import { createElement } from '../src/model/defaults';
 import { ElementType, IShapeElement } from '../src/model/element';
+import { LinkKind } from '../src/model/link';
 import { SurfaceKind } from '../src/model/surface';
 import { TextAlign, TextBlockType, TextFieldKind } from '../src/model/text';
 import { getPlainText } from '../src/text/textContent';
@@ -91,6 +92,16 @@ describe('surface room', () => {
     const box = readSurfaceDoc(a).elements['box'] as IShapeElement;
     expect({ x: box.x, width: box.width }).toEqual({ x: 250, width: 400 });
     expect(readSurfaceDoc(b).elements['box']).toEqual(box);
+  });
+
+  it('removes an optional field that was patched away', () => {
+    const link = { kind: LinkKind.Url as const, href: 'https://magzog.com', isNewTab: false };
+    const ydoc = new Y.Doc();
+    writeSurfaceDoc(ydoc, makeSurface('s0', [makeShape('box', 0, 0, 10, 10, { link })]));
+
+    patchElement(ydoc, 'box', { link: undefined });
+
+    expect(readSurfaceDoc(ydoc).elements['box']).not.toHaveProperty('link');
   });
 
   it('keeps an element added while another one was deleted', () => {
