@@ -10,6 +10,80 @@ export const PARAGRAPH_NODE_NAME = 'paragraph';
  * Node name of a field placeholder inside a paragraph.
  */
 export const FIELD_NODE_NAME = 'field';
+/**
+ * Every mark of `ITextMarks`, under the name it has in the fragment.
+ *
+ * A rich text editor bound to the fragment declares its marks under these
+ * names, so that what one editor writes another one reads back as the same
+ * mark. See `toMarkAttributes` for the shape of the values.
+ */
+export const MARK_NAMES = [
+  'fontFamily',
+  'fontSize',
+  'fontWeight',
+  'isItalic',
+  'isUnderlined',
+  'isStruckThrough',
+  'color',
+  'letterSpacing',
+  'link',
+] as const;
+/**
+ * The marks that are simply on or off. The rest carry a value.
+ */
+export const FLAG_MARK_NAMES: readonly MarkName[] = ['isItalic', 'isUnderlined', 'isStruckThrough'];
+/**
+ * Attribute that carries the value of a mark that has one.
+ */
+export const MARK_VALUE_ATTRIBUTE = 'value';
+/**
+ * Name of one mark.
+ */
+export type MarkName = typeof MARK_NAMES[number];
+
+/**
+ * Turns marks into the attributes the fragment stores them as.
+ *
+ * Each mark becomes one attribute holding an object, which is the shape a
+ * ProseMirror mark takes in a Yjs document: a mark that is on or off holds an
+ * empty object, and the others hold their value under `value`. Writing them
+ * this way is what lets an editor bind to the fragment directly instead of
+ * rewriting the text on every keystroke.
+ */
+export function toMarkAttributes(marks: ITextMarks | undefined): Record<string, object> {
+  const attributes: Record<string, object> = {};
+  if (!marks) { return attributes; }
+
+  for (const name of MARK_NAMES) {
+    const value = marks[name];
+    if (value === undefined) { continue; }
+    if (FLAG_MARK_NAMES.includes(name)) {
+      // A flag that is off is not a mark at all.
+      if (value === true) { attributes[name] = {}; }
+      continue;
+    }
+    attributes[name] = { [MARK_VALUE_ATTRIBUTE]: value };
+  }
+  return attributes;
+}
+/**
+ * Reads marks back out of the attributes of a text run or a field.
+ * Attributes that are not marks - the kind of a field, for one - are ignored.
+ */
+export function toTextMarks(attributes: Record<string, unknown> | undefined): ITextMarks | undefined {
+  if (!attributes) { return undefined; }
+
+  const marks: Record<string, unknown> = {};
+  for (const name of MARK_NAMES) {
+    const attribute = attributes[name];
+    if (attribute === undefined || attribute === null) { continue; }
+    if (FLAG_MARK_NAMES.includes(name)) { marks[name] = true; continue; }
+
+    const value = (attribute as Record<string, unknown>)[MARK_VALUE_ATTRIBUTE];
+    if (value !== undefined) { marks[name] = value; }
+  }
+  return Object.keys(marks).length === 0 ? undefined : marks as ITextMarks;
+}
 
 /**
  * Writes rich text into a Yjs fragment, replacing what is there.
@@ -54,7 +128,11 @@ function writeInlines(paragraph: Y.XmlElement, inlines: TextInline[]): void {
       const field = new Y.XmlElement(FIELD_NODE_NAME);
       paragraph.insert(paragraph.length, [field]);
       field.setAttribute('field', inline.field);
-      if (inline.marks) { field.setAttribute('marks', inline.marks as never); }
+      // The marks of a node sit beside its own attributes, the way an editor
+      // bound to this fragment writes them.
+      for (const [name, value] of Object.entries(toMarkAttributes(inline.marks))) {
+        field.setAttribute(name, value as never);
+      }
       text = undefined;
       continue;
     }
@@ -62,7 +140,7 @@ function writeInlines(paragraph: Y.XmlElement, inlines: TextInline[]): void {
       text = new Y.XmlText();
       paragraph.insert(paragraph.length, [text]);
     }
-    text.insert(text.length, inline.text, inline.marks ? { ...inline.marks } : undefined);
+    text.insert(text.length, inline.text, toMarkAttributes(inline.marks));
   }
 }
 
@@ -70,16 +148,17 @@ function readInlines(paragraph: Y.XmlElement): TextInline[] {
   const inlines: TextInline[] = [];
   for (const node of paragraph.toArray()) {
     if (node instanceof Y.XmlText) {
-      for (const op of node.toDelta() as { insert?: unknown, attributes?: ITextMarks }[]) {
+      for (const op of node.toDelta() as { insert?: unknown, attributes?: Record<string, unknown> }[]) {
         if (typeof op.insert !== 'string') { continue; }
-        inlines.push({ text: op.insert, ...(op.attributes ? { marks: op.attributes } : {}) });
+        const marks = toTextMarks(op.attributes);
+        inlines.push({ text: op.insert, ...(marks ? { marks } : {}) });
       }
       continue;
     }
     if (node instanceof Y.XmlElement && node.nodeName === FIELD_NODE_NAME) {
       const field = toTextField(node.getAttribute('field'));
       if (!field) { continue; }
-      const marks = node.getAttribute('marks') as ITextMarks | undefined;
+      const marks = toTextMarks(node.getAttributes() as Record<string, unknown>);
       inlines.push({ field, ...(marks ? { marks } : {}) });
     }
   }

@@ -65,6 +65,7 @@ content: {
 - **필드**(`pageNumber`, `pageCount`, `bookTitle`)는 값을 저장하지 않고 자리만 잡습니다. 렌더링·게시 시점에 `resolveTextFields` 가 채웁니다. 마스터에 쪽번호를 한 번만 놓으면 모든 페이지에서 제 번호가 나오는 게 이 덕분입니다.
 - 펼침에서는 요소의 **중심 x** 가 속한 페이지의 번호를 씁니다(`getFieldValuesAt`).
 - `normalizeTextContent` 가 같은 마크의 인접 런을 합칩니다. Yjs 델타가 자동으로 하는 병합과 결과를 맞추기 위해서입니다.
+- 런은 편집기가 직접 나눕니다. 저장될 때의 모양은 [동시 편집](./collaboration.md#리치-텍스트는-yjs-델타로-저장한다)을 보세요.
 
 ## 마스터
 

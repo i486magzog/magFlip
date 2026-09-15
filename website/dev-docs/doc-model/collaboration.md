@@ -59,10 +59,18 @@ patchElement(ydoc, 'box', { width: 400 }); // B
 
 텍스트 요소의 `content` 는 `Y.XmlFragment` 입니다. 문단은 `Y.XmlElement('paragraph')`, 글자는 `Y.XmlText` 이고 마크는 서식 속성으로 붙습니다. 필드는 `Y.XmlElement('field')` 라는 별도 노드입니다.
 
-덕분에 두 사람이 같은 문단에 동시에 입력해도 글자 단위로 병합됩니다. 에디터의 리치 텍스트 편집기는 `getTextFragment(ydoc, elementId)` 로 이 fragment 에 직접 바인딩합니다.
+덕분에 두 사람이 같은 문단에 동시에 입력해도 글자 단위로 병합됩니다. 에디터의 리치 텍스트 편집기는 `getTextFragment(ydoc, elementId)` 로 이 fragment 에 직접 바인딩합니다 — 문서가 곧 편집기의 상태이고, 키를 누를 때마다 텍스트를 통째로 다시 쓰지 않습니다.
+
+마크 하나가 속성 하나이고, 값은 이런 모양입니다.
+
+```
+"loud" → { fontWeight: { value: 700 }, isItalic: {} }
+```
+
+켜고 끄는 마크(`isItalic`, `isUnderlined`, `isStruckThrough`)는 빈 객체, 나머지는 `value` 안에 값을 둡니다. **ProseMirror 마크가 Yjs 문서에 저장되는 모양**이 이것이고(`y-prosemirror`), 그래서 편집기가 이 fragment 에 그대로 붙습니다. 모델의 `ITextMarks`(평평한 `{ fontWeight: 700 }`)와 이 모양 사이의 번역은 `collab/textYXml.ts` 의 `toMarkAttributes` / `toTextMarks` 한 쌍이 맡습니다.
 
 :::note
-Phase 2 에서 리치 텍스트 편집기(Tiptap 등)를 고를 때, 그 라이브러리의 Yjs 바인딩이 쓰는 노드 이름·속성 규약과 `collab/textYXml.ts` 를 맞춰야 합니다. 아직 저장된 데이터가 없는 지금이 바꾸기 가장 싼 시점입니다.
+편집기의 스키마는 마크 이름을 `MARK_NAMES` 에서 가져옵니다. 이름이 어긋나면 한쪽이 쓴 서식을 다른 쪽이 다른 마크로 읽습니다.
 :::
 
 ## 깨진 상태는 읽을 때 고친다

@@ -3,9 +3,10 @@ import * as Y from 'yjs';
 import { createOrderBetween } from '../src/common/order';
 import { moveSurface, readBookDoc, writeBookDoc, writeSurfaceRef } from '../src/collab/bookYDoc';
 import { getTextFragment, patchElement, readSurfaceDoc, removeElement, setSurfaceSetting, writeElement, writeSurfaceDoc } from '../src/collab/surfaceYDoc';
+import { toMarkAttributes, toTextMarks } from '../src/collab/textYXml';
 import { computeBookLayout } from '../src/layout/bookLayout';
 import { createElement } from '../src/model/defaults';
-import { ElementType, IShapeElement } from '../src/model/element';
+import { ElementType, IShapeElement, ITextElement } from '../src/model/element';
 import { LinkKind } from '../src/model/link';
 import { SurfaceKind } from '../src/model/surface';
 import { TextAlign, TextBlockType, TextFieldKind } from '../src/model/text';
@@ -199,5 +200,85 @@ describe('surface settings', () => {
 
     expect(readSurfaceDoc(one).extent?.rect.width).toBe(1200);
     expect(readSurfaceDoc(one).masterId).toBe('m0');
+  });
+});
+
+describe('rich text marks', () => {
+  /** The content a text element starts from, with a mark on part of a line. */
+  const content = {
+    blocks: [{
+      type: TextBlockType.Paragraph,
+      align: TextAlign.Start,
+      inlines: [
+        { text: 'plain ' },
+        { text: 'bold red', marks: { fontWeight: 700, color: '#ff0000', isItalic: true } },
+        { field: TextFieldKind.PageNumber, marks: { fontSize: 9 } },
+      ],
+    }],
+  };
+
+  it('keeps every mark through a round trip', () => {
+    const doc = new Y.Doc();
+    writeSurfaceDoc(doc, makeSurface('s0', [createElement(ElementType.Text, { id: 't', content })]));
+
+    const read = readSurfaceDoc(doc).elements['t'] as ITextElement;
+
+    expect(read.content).toEqual(content);
+  });
+
+  it('stores a mark as its own attribute, the way an editor bound to it does', () => {
+    const doc = new Y.Doc();
+    writeSurfaceDoc(doc, makeSurface('s0', [createElement(ElementType.Text, { id: 't', content })]));
+
+    const fragment = getTextFragment(doc, 't');
+    const paragraph = fragment?.toArray()[0] as Y.XmlElement;
+    const text = paragraph.toArray()[0] as Y.XmlText;
+    const delta = text.toDelta() as { insert: string, attributes?: Record<string, unknown> }[];
+
+    expect(delta[0]).toEqual({ insert: 'plain ' });
+    expect(delta[1]).toEqual({
+      insert: 'bold red',
+      // A value under `value`, and a flag as an empty object.
+      attributes: { fontWeight: { value: 700 }, isItalic: {}, color: { value: '#ff0000' } },
+    });
+    // The field keeps its own attribute beside its marks.
+    const field = paragraph.toArray()[1] as Y.XmlElement;
+    expect(field.getAttributes()).toEqual({ field: 'pageNumber', fontSize: { value: 9 } });
+  });
+
+  it('turns marks into attributes and back', () => {
+    const marks = { fontWeight: 700, isItalic: true, isUnderlined: false, color: '#112233' };
+
+    const attributes = toMarkAttributes(marks);
+
+    expect(attributes).toEqual({ fontWeight: { value: 700 }, isItalic: {}, color: { value: '#112233' } });
+    // A flag that is off is not a mark, so it does not come back as false.
+    expect(toTextMarks(attributes)).toEqual({ fontWeight: 700, isItalic: true, color: '#112233' });
+  });
+
+  it('ignores attributes that are not marks', () => {
+    expect(toTextMarks({ field: 'pageNumber', align: 'center' })).toBeUndefined();
+  });
+
+  it('lets two editors mark different words of one paragraph', () => {
+    const { a, b, sync } = connect(ydoc => writeSurfaceDoc(ydoc, makeSurface('s0', [
+      createElement(ElementType.Text, {
+        id: 't',
+        content: { blocks: [{ type: TextBlockType.Paragraph, align: TextAlign.Start, inlines: [{ text: 'one two' }] }] },
+      }),
+    ])));
+
+    // Both write straight into the fragment, as a bound editor does.
+    const textOf = (doc: Y.Doc) => ((getTextFragment(doc, 't')?.toArray()[0] as Y.XmlElement).toArray()[0] as Y.XmlText);
+    textOf(a).format(0, 3, toMarkAttributes({ fontWeight: 700 }));
+    textOf(b).format(4, 3, toMarkAttributes({ isItalic: true }));
+    sync();
+
+    const inlines = (readSurfaceDoc(a).elements['t'] as ITextElement).content.blocks[0]?.inlines;
+    expect(inlines).toEqual([
+      { text: 'one', marks: { fontWeight: 700 } },
+      { text: ' ' },
+      { text: 'two', marks: { isItalic: true } },
+    ]);
   });
 });
