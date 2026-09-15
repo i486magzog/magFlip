@@ -48,11 +48,17 @@ export class PublishedBookSource {
    * @param manifestUrl URL of `book.json`.
    */
   static async load(manifestUrl: string, options: IPublishedBookSourceOptions = {}): Promise<PublishedBookSource> {
-    const fetchJson = options.fetchJson ?? defaultFetchJson;
-    const manifest = await fetchJson(manifestUrl) as IPublishedBook;
+    // Surfaces are looked for next to the manifest that was actually loaded.
+    // A server may keep every publication under its own folder and send the
+    // stable address there, so the address after the redirect is the one the
+    // rest of the book hangs off.
+    const loaded = options.fetchJson
+      ? { json: await options.fetchJson(manifestUrl), url: manifestUrl }
+      : await fetchJsonAtUrl(manifestUrl);
+    const base = loaded.url.length > 0 ? loaded.url : manifestUrl;
     const resolveSurfaceUrl = options.resolveSurfaceUrl
-      ?? ((surfaceId: string) => `${manifestUrl.replace(/\/[^/]*$/, '')}/surfaces/${surfaceId}.json`);
-    return new PublishedBookSource(manifest, { ...options, resolveSurfaceUrl });
+      ?? ((surfaceId: string) => `${base.replace(/\/[^/]*$/, '')}/surfaces/${surfaceId}.json`);
+    return new PublishedBookSource(loaded.json as IPublishedBook, { ...options, resolveSurfaceUrl });
   }
   /**
    * Number of pages of the book.
@@ -119,31 +125,51 @@ export class PublishedBookSource {
     await Promise.all([...surfaceIds].map(surfaceId => this.loadSurface(surfaceId)));
   }
   /**
-   * Returns the page data of every page, loading every surface.
-   * Use it for small books only; a long book should load pages as it goes.
+   * Returns the page data of every page, loading every surface first.
+   *
+   * Use it when a book is small enough to hold at once, or when every page has
+   * to be drawn the moment the viewer opens. `createPageDataList` is the one to
+   * reach for otherwise.
    */
   async createAllPageData(): Promise<IViewerPageData[]> {
     await this.loadPages(0, this.pageCount);
+    return this.createPageDataList();
+  }
+  /**
+   * Returns the page data of every page without loading anything.
+   *
+   * A page fetches its surface the first time it is drawn, so a book of
+   * thousands of pages opens as fast as one of ten and a reader only ever
+   * downloads the pages they turned to.
+   */
+  createPageDataList(): IViewerPageData[] {
     return this.manifest.pages
       .map(page => this.createPageData(page.index))
       .filter((page): page is IViewerPageData => page !== undefined);
   }
   /**
-   * Returns the page data of one page whose surface is already loaded.
+   * Returns the page data of one page. The surface it needs is loaded when the
+   * page is first drawn, unless it is already there.
    */
   createPageData(index: number): IViewerPageData | undefined {
     const page = this.getPage(index);
-    const surface = page ? this.surfaces.get(page.surfaceId) : undefined;
-    if (!page || !surface) { return undefined; }
+    if (!page) { return undefined; }
 
     const { pageSize } = this.manifest;
     return {
-      id: `${surface.id}@${page.surfaceX}`,
+      id: `${page.surfaceId}@${page.surfaceX}`,
       index: page.index,
       size: pageSize,
       ...(page.number === null ? {} : { number: page.number }),
       render: (contentEl: HTMLElement) => {
-        new PageRenderer(contentEl, this.options).renderPage({ surface, surfaceX: page.surfaceX, pageSize });
+        const draw = (surface: IPublishedSurface) => {
+          new PageRenderer(contentEl, this.options).renderPage({ surface, surfaceX: page.surfaceX, pageSize });
+        };
+        // The element belongs to this page for as long as it exists, so a
+        // surface that arrives late is still drawn in the right place.
+        const loaded = this.surfaces.get(page.surfaceId);
+        if (loaded) { draw(loaded); return; }
+        void this.loadSurface(page.surfaceId).then(draw).catch(() => undefined);
       },
     };
   }
@@ -163,7 +189,14 @@ export class PublishedBookSource {
 }
 
 async function defaultFetchJson(url: string): Promise<unknown> {
+  return (await fetchJsonAtUrl(url)).json;
+}
+/**
+ * Fetches JSON and reports where it came from, which is not the address that
+ * was asked for when the server redirected.
+ */
+async function fetchJsonAtUrl(url: string): Promise<{ json: unknown, url: string }> {
   const response = await fetch(url);
   if (!response.ok) { throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`); }
-  return response.json();
+  return { json: await response.json(), url: response.url ?? url };
 }

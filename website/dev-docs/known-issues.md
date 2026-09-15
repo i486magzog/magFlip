@@ -32,6 +32,12 @@ title: 알려진 이슈 / 기술 부채
 | F | `helper.ts` `deepMerge` | target(기본 config 객체)을 직접 변경 | 복사본에 merge |
 | G | 테스트 | 순수 계산 로직 일부만 테스트 존재 (`flipview/__tests__`) | `Flipping.flip()` 결과 스냅샷 테스트 추가 |
 
+## 긴 책
+
+| # | 위치 | 내용 | 제안 |
+| --- | --- | --- | --- |
+| L | `core/src/core/page.ts` (`Page extends PageEl`) | `Book.importPages` 가 페이지마다 `PageEl` 을 만들고, 그 생성자가 바로 `render(contentEl)` 을 부른다. 그래서 300쪽 책을 열면 300개의 DOM 과 300번의 surface 요청이 한꺼번에 일어난다 | 페이지 요소를 **보이기 직전에** 만들도록 바꾼다(`IPage.element` 를 지연 생성). `@magflip/render` 쪽은 이미 준비되어 있다 — `createPageDataList()` 는 아무것도 받아오지 않고, 각 페이지는 처음 그려질 때 자기 surface 를 가져온다 |
+
 ## 해결됨
 
 | 내용 | 해결 |

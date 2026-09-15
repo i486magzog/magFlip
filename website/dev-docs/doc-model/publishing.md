@@ -15,9 +15,26 @@ flowchart TB
   v -->|에러가 하나라도 있으면| stop["게시 중단"]
 ```
 
-작은 책은 `publishBookBundle(bundle, options)` 한 번으로 끝납니다. 수천 페이지 책은 surface 마다 `publishSurface` 를 큐에 태우고, 마지막에 `publishBookManifest` 를 한 번 호출합니다.
+작은 책은 `publishBookBundle(bundle, options)` 한 번으로 끝납니다. 수천 페이지 책은 한 번에 담을 수 없으므로 나눠서 게시합니다 — magFlipServer 가 실제로 하는 방식입니다.
 
-호출한 쪽은 결과의 `problems` 를 **반드시** `hasError()` 로 확인한 뒤 저장해야 합니다.
+```mermaid
+sequenceDiagram
+  participant W as 워커 (POST /publish)
+  participant Q as 큐
+  participant B as 배치 소비자
+  W->>W: validateBookDoc(book) · 매니페스트만 검증
+  W->>Q: 면 20개씩 메시지 N개
+  loop 메시지마다
+    Q->>B: 면 20개
+    B->>B: validateSurfaceDoc + publishSurface
+    B->>B: v<n>/surfaces/<id>.json 쓰기
+  end
+  B->>B: 마지막 배치 → publishBookManifest → v<n>/book.json
+```
+
+검증도 같은 크기로 나뉩니다: `validateBookDoc` 은 매니페스트만(페이지 순서·키), `validateSurfaceDoc` 은 면 하나만 봅니다. `validateBookBundle` 은 이 둘을 합친 것이라 책 전체를 메모리에 올릴 수 있을 때만 씁니다.
+
+호출한 쪽은 결과의 `problems` 를 **반드시** `hasError()` 로 확인한 뒤 저장해야 합니다. 나눠서 게시할 때는 버전 폴더를 다 채운 뒤에야 그 버전을 독자에게 가리킵니다 — 실패해도 이전 게시본이 그대로 남는 이유입니다.
 
 ## 게시할 때 제거되는 것
 

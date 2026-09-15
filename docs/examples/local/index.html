@@ -97,7 +97,9 @@
           if (page) { flipViewRef.view.moveTo(page.index); }
         },
       });
-      const pages = await source.createAllPageData();
+      // Page data for every page, without downloading any of them: a page
+      // fetches its surface the first time the viewer draws it.
+      const pages = source.createPageDataList();
       const cover = `${RESOURCE_DIR}/book1/page0.jpg`;
       const book = new Book({
         id: source.manifest.bookId,
@@ -152,7 +154,8 @@
           const source = getPublishedSource();
           const pageIndex = flipView.openPageIndexes.find((index) => source?.isExpandable(index));
           if (pageIndex === undefined) { alert('This page has nothing more to show.'); return; }
-          showExpanded(bookViewer, source, pageIndex);
+          // The page may not have been drawn yet, and then its surface is not here.
+          source.loadPages(pageIndex, 1).then(() => showExpanded(bookViewer, source, pageIndex));
         }
       });
       toolbar.querySelector('#zoomRange').addEventListener('input', (event) => {

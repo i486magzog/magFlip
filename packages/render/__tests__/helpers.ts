@@ -9,6 +9,7 @@ import {
   IAsset,
   IBookBundle,
   IElement,
+  IPublishedBook,
   IPublishedSurface,
   ISurfaceDoc,
   ISurfaceRef,
@@ -40,6 +41,15 @@ export function publishSurfaces(
   surfaces: { kind: SurfaceKind, elements?: IElement[], doc?: Partial<ISurfaceDoc> }[],
   masters: { id: string, kind: SurfaceKind, elements: IElement[] }[] = [],
 ): Record<string, IPublishedSurface> {
+  return publishTestBook(surfaces, masters).surfaces;
+}
+/**
+ * Publishes a book and keeps the manifest, which a `PublishedBookSource` needs.
+ */
+export function publishTestBook(
+  surfaces: { kind: SurfaceKind, elements?: IElement[], doc?: Partial<ISurfaceDoc> }[],
+  masters: { id: string, kind: SurfaceKind, elements: IElement[] }[] = [],
+): { book: IPublishedBook, surfaces: Record<string, IPublishedSurface> } {
   const orders = createOrdersBetween(null, null, Math.max(surfaces.length, 1));
   const refs: Record<string, ISurfaceRef> = {};
   const docs: ISurfaceDoc[] = [];
@@ -67,13 +77,15 @@ export function publishSurfaces(
   }
 
   const bundle: IBookBundle = { book, surfaces: Object.fromEntries(docs.map(doc => [doc.id, doc])) };
-  return publishBookBundle(bundle, {
+  const result = publishBookBundle(bundle, {
     assets: { a1: IMAGE_ASSET },
     resolveAssetUrl: asset => `https://cdn.test/${asset.id}.webp`,
     resolveFontUrl: () => 'https://cdn.test/font.woff2',
     version: 1,
     publishedAt: '2026-01-01T00:00:00.000Z',
-  }).surfaces;
+  });
+  if (!result.book) { throw new Error('The test book was not published.'); }
+  return { book: result.book, surfaces: result.surfaces };
 }
 /**
  * An image element with a fixed order key, so the z-order of a test is readable.
