@@ -36,7 +36,7 @@ renderer.renderExpanded(surface);                            // 확장 보기
 
 | 타입 | 만드는 DOM | 주의한 점 |
 | --- | --- | --- |
-| image | `<img>` | crop 이 있으면 `object-fit` 대신 이미지를 확대·이동해서 자른 영역이 박스를 채우게 한다 |
+| image | `<img>` | crop 이 있으면 `object-fit` 대신 `getImagePlacement` 가 계산한 위치로 이미지를 확대·이동한다. 편집기의 자르기 화면과 같은 함수다 |
 | text | `<p>` + `<span>` | **항상 `textContent`**. 문서 내용이 마크업으로 해석되지 않는다. 목록 항목은 `.mf-text-li` 에 `data-mf-marker`(번호·기호)와 `--mf-list-level` 을 달고, 기호는 `::before` 로 그린다 |
 | shape | `<svg>` | 박스 크기의 viewBox. 그라디언트는 SVG `defs` 로 |
 | video / audio | `<video>` / `<audio>` | 에디터 캔버스(`isInteractive: false`)에서는 재생하지 않는다 |

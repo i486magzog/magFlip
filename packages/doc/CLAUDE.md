@@ -27,6 +27,7 @@ src/
 │  └─ defaults.ts          createBookDoc/createSurfaceDoc/createElement, DEFAULT_PAGE_SIZE
 ├─ schema/                 zod 스키마. model 과 1:1, __tests__/schemaTypes.test.ts 가 동기화 보증
 ├─ layout/bookLayout.ts    surfaces → 페이지 index/side/surfaceX/page number, spread 정렬 검사
+├─ media/imagePlacement.ts crop + fit → 박스 안 이미지 위치 (렌더러·편집기 자르기 공용)
 ├─ tree/elementTree.ts     parentId+order → 트리. 고아·순환·과깊이 자동 복구(+problem)
 ├─ master/resolveMaster.ts 마스터를 대상 surface 좌표로 복사 + override 적용
 ├─ text/textContent.ts     정규화, 필드 치환, 평문 추출

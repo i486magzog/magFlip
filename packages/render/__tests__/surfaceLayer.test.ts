@@ -5,6 +5,7 @@ import {
   IPublishedSurface,
   LinkKind,
   ListKind,
+  MediaFit,
   ShapeKind,
   SurfaceKind,
   TextAlign,
@@ -93,6 +94,19 @@ describe('createSurfaceLayer', () => {
     expect(box.textContent).toBe('<img src=x onerror="alert(1)">');
     expect((box.querySelector('span') as HTMLElement).style.fontWeight).toBe('700');
     expect((box.querySelector('p') as HTMLElement).style.textAlign).toBe('center');
+  });
+
+  it('shows the cropped part of an image filling its box', () => {
+    // `fill` stretches the region, which keeps the arithmetic visible here.
+    const image = makeImage('cropped', 0, 200, { fit: MediaFit.Fill, crop: { x: 0.25, y: 0.5, width: 0.5, height: 0.25 } });
+    const img = findElement(layerOf(publishSurfaces([{ kind: Single, elements: [image] }])), 'cropped').querySelector('img') as HTMLImageElement;
+    const { width, height } = image as { width: number, height: number };
+
+    // The region is `crop` of the source, stretched over the whole box.
+    expect(parseFloat(img.style.width)).toBeCloseTo(width / 0.5);
+    expect(parseFloat(img.style.height)).toBeCloseTo(height / 0.25);
+    expect(parseFloat(img.style.left)).toBeCloseTo(-0.25 * width / 0.5);
+    expect(parseFloat(img.style.top)).toBeCloseTo(-0.5 * height / 0.25);
   });
 
   it('marks list items and numbers them the way the document model does', () => {

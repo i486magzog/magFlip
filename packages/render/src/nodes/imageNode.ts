@@ -1,5 +1,5 @@
-import { ElementType, IPublishedAsset, IRect, MediaFit } from '@magflip/doc';
-import { createDiv, px, round } from '../common/style';
+import { ElementType, getImagePlacement, IPublishedAsset } from '@magflip/doc';
+import { createDiv, px } from '../common/style';
 import { PublishedElementOf } from '../common/types';
 
 type PublishedImage = PublishedElementOf<ElementType.Image>;
@@ -26,42 +26,14 @@ export function createImageNode(element: PublishedImage, asset: IPublishedAsset 
     return box;
   }
 
-  applyCrop(image, element, asset);
+  // The same placement the editor crops with, so a crop looks the same there.
+  const source = asset?.width && asset.height ? { width: asset.width, height: asset.height } : undefined;
+  const placement = getImagePlacement(element, element.fit, element.crop, source);
+  image.style.position = 'absolute';
+  image.style.left = px(placement.x);
+  image.style.top = px(placement.y);
+  image.style.width = px(placement.width);
+  image.style.height = px(placement.height);
   box.appendChild(image);
   return box;
-}
-
-/**
- * Places the image so that its cropped region fills the box the way `fit` asks.
- * Without the pixel size of the source, the cropped region is simply stretched.
- */
-function applyCrop(image: HTMLImageElement, element: PublishedImage, asset: IPublishedAsset | undefined): void {
-  const crop = element.crop as IRect;
-  const sourceWidth = asset?.width ?? 0;
-  const sourceHeight = asset?.height ?? 0;
-  const cropWidth = Math.max(crop.width, 1e-6);
-  const cropHeight = Math.max(crop.height, 1e-6);
-
-  if (sourceWidth <= 0 || sourceHeight <= 0 || element.fit === MediaFit.Fill) {
-    image.style.position = 'absolute';
-    image.style.width = `${round(100 / cropWidth)}%`;
-    image.style.height = `${round(100 / cropHeight)}%`;
-    image.style.left = `${round(-crop.x * 100 / cropWidth)}%`;
-    image.style.top = `${round(-crop.y * 100 / cropHeight)}%`;
-    return;
-  }
-
-  const visibleWidth = sourceWidth * cropWidth;
-  const visibleHeight = sourceHeight * cropHeight;
-  const scaleToBox = element.fit === MediaFit.Cover
-    ? Math.max(element.width / visibleWidth, element.height / visibleHeight)
-    : Math.min(element.width / visibleWidth, element.height / visibleHeight);
-
-  const width = sourceWidth * scaleToBox;
-  const height = sourceHeight * scaleToBox;
-  image.style.position = 'absolute';
-  image.style.width = px(width);
-  image.style.height = px(height);
-  image.style.left = px(-crop.x * width + (element.width - visibleWidth * scaleToBox) / 2);
-  image.style.top = px(-crop.y * height + (element.height - visibleHeight * scaleToBox) / 2);
 }

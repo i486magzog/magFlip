@@ -23,6 +23,7 @@ export * from './model/surface';
 export * from './model/text';
 
 export * from './layout/bookLayout';
+export * from './media/imagePlacement';
 export * from './tree/elementTree';
 export * from './text/textContent';
 export * from './text/textList';
