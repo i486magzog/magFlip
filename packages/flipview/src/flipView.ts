@@ -434,8 +434,25 @@ export class FlipView implements IBookView {
   private appendShadowEl4AllPage(){
     const pages = this.book?.getPages();
     for(const index in pages){
-      this.appendShadowElIntoPageEl(pages[index]);
+      // A page that has not been shown yet has no element to decorate, and
+      // building one here would load every page of the book at once.
+      // `pageElOf` gives it its shadows when it is first shown.
+      const page = pages[index];
+      if(page.hasElements){ this.appendShadowElIntoPageEl(page); }
     }
+  }
+  /**
+   * Returns the element of a page, and gives it its shadows the first time.
+   *
+   * A page builds its element when it is first asked for, so this is the
+   * moment it becomes something the reader can see - and the moment its
+   * shadows belong to. Every page element that enters the DOM comes from here.
+   */
+  private pageElOf(page:IPage):HTMLElement {
+    const isFirstTime = !page.hasElements;
+    const pageEl = page.element;
+    if(isFirstTime){ this.appendShadowElIntoPageEl(page); }
+    return pageEl;
   }
   /**
    * 
@@ -514,6 +531,10 @@ export class FlipView implements IBookView {
    * Update dimension of the book viewer element.
    */
   private updateDimension(){
+    // A resize with no book attached has nothing to lay out, and the three
+    // methods below all reach for the book element.
+    if(!this.book){ return; }
+
     if(this.curOpenLeftPageIndex < 0){ this.setReadyToOpenForward(); } 
     else if(this.curOpenLeftPageIndex >= this.book!.lastPageIndex){ this.setReadyToOpenBackward(); }
     else { this.setSpreadOpen(); }
@@ -535,15 +556,15 @@ export class FlipView implements IBookView {
         const page0 = book?.getPage(targetLeftPageIndex-2, true)!;
         this.flipManager.loadPageToWindow(2, page0);
         this.flipManager.loadPageToWindow(3, page1);
-        book?.prependPageEl(page1.element);
-        book?.prependPageEl(page0.element);
+        book?.prependPageEl(this.pageElOf(page1));
+        book?.prependPageEl(this.pageElOf(page0));
       } else {
         const page4 = book?.getPage(targetLeftPageIndex+2, true)!;
         const page5 = book?.getPage(targetLeftPageIndex+3, true)!;
         this.flipManager.loadPageToWindow(2, page4);
         this.flipManager.loadPageToWindow(3, page5);
-        book?.appendPageEl(page4.element);
-        book?.appendPageEl(page5.element);
+        book?.appendPageEl(this.pageElOf(page4));
+        book?.appendPageEl(this.pageElOf(page5));
       }
     }
 
@@ -552,13 +573,13 @@ export class FlipView implements IBookView {
 
     if(isForward){
       this.flipManager.moveRight(newPage1, newPage2);
-      book?.appendPageEl(newPage1.element);
-      book?.appendPageEl(newPage2.element);
+      book?.appendPageEl(this.pageElOf(newPage1));
+      book?.appendPageEl(this.pageElOf(newPage2));
     }
     else {
       this.flipManager.moveLeft(newPage1, newPage2);
-      book?.prependPageEl(newPage2.element);
-      book?.prependPageEl(newPage1.element);
+      book?.prependPageEl(this.pageElOf(newPage2));
+      book?.prependPageEl(this.pageElOf(newPage1));
     }
 
     book?.removePageEl(removedPage1.element);
@@ -581,8 +602,8 @@ export class FlipView implements IBookView {
       const removedPage2 = book?.getPage(this.curOpenLeftPageIndex+3);
       book?.removePageEl(removedPage1.element);
       book?.removePageEl(removedPage2.element);
-      book?.appendPageEl(newPage1.element);
-      book?.appendPageEl(newPage2.element);
+      book?.appendPageEl(this.pageElOf(newPage1));
+      book?.appendPageEl(this.pageElOf(newPage2));
       this.flipManager.loadPageToWindow(4, newPage1);
       this.flipManager.loadPageToWindow(5, newPage2);
     }
@@ -591,8 +612,8 @@ export class FlipView implements IBookView {
       const removedPage2 = book?.getPage(this.curOpenLeftPageIndex-1, true);
       book?.removePageEl(removedPage1.element);
       book?.removePageEl(removedPage2.element);
-      book?.prependPageEl(newPage2.element);
-      book?.prependPageEl(newPage1.element);
+      book?.prependPageEl(this.pageElOf(newPage2));
+      book?.prependPageEl(this.pageElOf(newPage1));
       this.flipManager.loadPageToWindow(1, newPage2);
       this.flipManager.loadPageToWindow(0, newPage1);
     }
@@ -755,11 +776,11 @@ export class FlipView implements IBookView {
       const page = book.getPage(i);
       if(page){
         this.flipManager.loadPageToWindow(winIdx, page);
-        book.appendPageEl(page.element);
+        book.appendPageEl(this.pageElOf(page));
       } else {
         const emptyPage = book.createEmptyPage(i);
         this.flipManager.loadPageToWindow(winIdx, emptyPage);
-        book.appendPageEl(emptyPage.element);
+        book.appendPageEl(this.pageElOf(emptyPage));
       }
     }
   }

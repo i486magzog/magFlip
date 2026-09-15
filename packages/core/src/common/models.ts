@@ -297,9 +297,18 @@ export interface IPage extends IPageData, IPageEl {
  * Element of the page.
  */
 export interface IPageEl {
+  /**
+   * The element of the page. Asking for it builds the page the first time,
+   * which for a published book also downloads what it shows.
+   */
   readonly element: HTMLElement;
   readonly contentContainerEl: HTMLElement;
   readonly contentEl: HTMLElement;
+  /**
+   * True once the elements of this page were built. Code that walks every page
+   * of a book should check this instead of reaching for `element`.
+   */
+  readonly hasElements: boolean;
   resetPageEls():void;
 }
 /**

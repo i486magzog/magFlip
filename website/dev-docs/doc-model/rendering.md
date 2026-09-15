@@ -60,10 +60,12 @@ render?: (contentEl: HTMLElement) => void;
 const source = await PublishedBookSource.load('./sample-book/book.json', {
   onPageLink: link => flipView.moveTo(indexOfSurface(link.surfaceId)),
 });
-book.importPages(await source.createAllPageData(), source.manifest.pageSize);
+book.importPages(source.createPageDataList(), source.manifest.pageSize);
 ```
 
-surface 는 필요한 것만 받아 오고 한 번 받은 것은 캐시합니다. 같은 surface 를 두 페이지가 동시에 요구해도 요청은 한 번만 나갑니다.
+`createPageDataList()` 는 **아무것도 받아 오지 않습니다.** 페이지는 처음 그려질 때 자기 surface 를 가져오고, core 의 페이지 요소도 뷰어가 그 페이지를 보여줄 때 만들어집니다. 그래서 300쪽 책을 열 때 나가는 요청은 매니페스트 하나뿐이고, 한 번 펼치면 그 창(6쪽)만 받아 옵니다.
+
+한 번 받은 surface 는 캐시합니다. 같은 surface 를 두 페이지가 동시에 요구해도 요청은 한 번만 나갑니다. 책 전체를 미리 받아 두고 싶을 때만 `await source.createAllPageData()` 를 씁니다.
 
 ## 확장 보기
 
