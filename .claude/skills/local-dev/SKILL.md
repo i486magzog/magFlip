@@ -21,7 +21,7 @@ description: Build, type-check, test and run the MagFlip demo locally without bu
    - 포트 사용 중이면 `PORT=8081 npm run serve`.
    - 확인 항목: 책 썸네일 클릭 → 열림, 오른쪽/왼쪽 zone 드래그 넘김, Next/Prev, Move(앞/뒤), Zoom 슬라이더, X 닫기, 첫/마지막 페이지에서 닫힌 책 모양.
    - 콘솔: `window.flipView`, `window.bookViewer`. resize 시 `getBoundingClientRect` 에러는 알려진 이슈(known-issues #1).
-6. 문서 사이트가 필요하면: `npm run docs:install`(최초) → `npm run docs:start` 또는 검증용 `npm run docs:build`.
+6. 문서 사이트가 필요하면 옆 저장소 `../magFlipDocs` 에서: `npm install`(최초) → `npm run build:magflip` → `npm start` 또는 검증용 `npm run build`.
 
 ## 수정-확인 반복 (watch)
 

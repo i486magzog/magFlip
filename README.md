@@ -29,16 +29,19 @@ Please refer to the [sample code](./docs/examples/prebuild) for more details.
 <br>
 
 ## Documentation
-Documentation is built with [Docusaurus](https://docusaurus.io/) in [`website/`](./website).
+Documentation lives in the separate [magFlipDocs](https://github.com/i486magzog/magFlipDocs) repository (Docusaurus). It covers MagFlip, MagFlipEditor, MagFlipServer and MagFlipTV.
 
-| Docs | Path | For |
+| Docs | Path in magFlipDocs | For |
 | --- | --- | --- |
-| User Guide | [`website/user-docs`](./website/user-docs) | People who use MagFlip in their web pages |
-| Developer Guide | [`website/dev-docs`](./website/dev-docs) | People who develop MagFlip itself (architecture, flip math, build & release) |
+| User Guide | `docs/magflip/user` | People who use MagFlip in their web pages |
+| Developer Guide | `docs/magflip/dev` | People who develop MagFlip itself (architecture, document model, flip math, build & release) |
 
 ```bash
-npm run docs:install   # first time only
-npm run docs:start     # http://localhost:3000
+# Clone magFlipDocs next to this repository, then:
+cd ../magFlipDocs
+npm install
+npm run build:magflip  # builds this repository for the live demo
+npm start              # http://localhost:3000
 ```
 
 <br>
@@ -56,15 +59,15 @@ npm run serve          # http://localhost:8080/docs/examples/local/
 <br>
 
 ## Flip Effect in math
-![Flip Effect from the corner on right bottom 1](./website/static/img/flip-math/flipEffectRightBottom1.png)
-![Flip Effect from the corner on right bottom 2](./website/static/img/flip-math/flipEffectRightBottom2.png)
-![Flip Effect from the corner on right bottom 3](./website/static/img/flip-math/flipEffectRightBottom3.png)
+![Flip Effect from the corner on right bottom 1](./docs/img/flip-math/flipEffectRightBottom1.png)
+![Flip Effect from the corner on right bottom 2](./docs/img/flip-math/flipEffectRightBottom2.png)
+![Flip Effect from the corner on right bottom 3](./docs/img/flip-math/flipEffectRightBottom3.png)
 
 <br>
 <br>
 
 ## The location of the mouse cursor
-![The Areas of Mouse Cursor Point1](./website/static/img/flip-math/mousePointArea1.png)
-![The Areas of Mouse Cursor Point2](./website/static/img/flip-math/mousePointArea2.png)
-![The Areas of Mouse Cursor Point3](./website/static/img/flip-math/mousePointArea3.png)
-![The Areas of Mouse Cursor Point4](./website/static/img/flip-math/mousePointArea4.png)
+![The Areas of Mouse Cursor Point1](./docs/img/flip-math/mousePointArea1.png)
+![The Areas of Mouse Cursor Point2](./docs/img/flip-math/mousePointArea2.png)
+![The Areas of Mouse Cursor Point3](./docs/img/flip-math/mousePointArea3.png)
+![The Areas of Mouse Cursor Point4](./docs/img/flip-math/mousePointArea4.png)

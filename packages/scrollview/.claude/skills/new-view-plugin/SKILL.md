@@ -35,5 +35,5 @@ description: Create or complete a MagFlip view plugin that implements IBookView 
 
 ## 문서
 
-- 사용자: `website/user-docs/intro.md` 패키지 표, `reference/api.md`
-- 개발자: `website/dev-docs/architecture/overview.md` 의존 그래프, `folder-structure.mdx`
+- 사용자: `../magFlipDocs/docs/magflip/user/intro.md` 패키지 표, `reference/api.md`
+- 개발자: `../magFlipDocs/docs/magflip/dev/architecture/overview.md` 의존 그래프, `folder-structure.mdx`

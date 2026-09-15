@@ -15,9 +15,9 @@ description: Update MagFlip example pages in docs/examples (local test page, CDN
 
 ## 규칙
 
-- 공개 API 만 사용. 사용자 문서(`website/user-docs`)의 코드 예시와 동일한 패턴 유지.
+- 공개 API 만 사용. 사용자 문서(`../magFlipDocs/docs/magflip/user`)의 코드 예시와 동일한 패턴 유지.
 - 새 API 사용 예제는 `local/index.html` 에 먼저 추가해 로컬에서 검증 → 배포 후 `prebuild` 에 반영.
-- `local/index.html` 은 문서 사이트 Live Demo 로도 쓰인다 (`website/scripts/sync-demo.mjs` 가 복사). 상대 경로 구조를 유지.
+- `local/index.html` 은 문서 사이트 Live Demo 로도 쓰인다 (`../magFlipDocs/scripts/sync-demo.mjs` 가 복사). 상대 경로 구조를 유지.
 - 샘플 이미지는 `prebuild/resources/book{1,2,3}/page{n}.jpg` 를 공유한다.
 - 사람이 읽기 쉽게: 함수 단위로 나누고(`createSampleBook`, `addToolbar`) 짧은 주석을 단다.
 

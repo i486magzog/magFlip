@@ -49,4 +49,4 @@ npm run build:local -w packages/render # index.js / index.d.ts / index.css
 2. CSS 클래스는 `.mf-` 접두사. 요소마다 달라지는 값은 CSS 가 아니라 인라인 스타일로.
 3. `npm test -w packages/render && npm run build:local` 후 `docs/examples/local` 네 번째 책에서 확인(펼침 이미지 / 쪽번호 / 링크 / Expand).
 4. 게시 형식을 바꿨다면 `npm run sample:book` 으로 샘플 게시본을 다시 만든다.
-5. 문서: `website/dev-docs/doc-model/rendering.md`, 공개 API 는 `website/user-docs/reference/api.md`.
+5. 문서: `../magFlipDocs/docs/magflip/dev/doc-model/rendering.md`, 공개 API 는 `../magFlipDocs/docs/magflip/user/reference/api.md`.

@@ -8,7 +8,7 @@ description: Change MagFlip core data models or public API (IBookData, IPageData
 ## 1. 영향 범위 파악
 
 ```bash
-grep -rn "<이름>" packages/*/src docs/examples website/user-docs website/dev-docs
+grep -rn "<이름>" packages/*/src docs/examples ../magFlipDocs/docs/magflip
 ```
 
 - `models.ts` 인터페이스 → `book.ts`/`page.ts`/`pageLabel.ts` 구현 → flipview/scrollview 사용처 → 예제 → 문서.
@@ -33,6 +33,6 @@ grep -rn "<이름>" packages/*/src docs/examples website/user-docs website/dev-d
 
 ## 5. 문서
 
-- 공개 API: `website/user-docs/reference/api.md`, 필요 시 `guides/book-and-pages.md`
-- 클래스 관계: `website/dev-docs/architecture/class-model.md`
+- 공개 API: `../magFlipDocs/docs/magflip/user/reference/api.md`, 필요 시 `guides/book-and-pages.md`
+- 클래스 관계: `../magFlipDocs/docs/magflip/dev/architecture/class-model.md`
 - `packages/core/CLAUDE.md` 파일 지도

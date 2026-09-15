@@ -10,8 +10,8 @@ MagFlip 사용 예제. **라이브러리 소스가 아니다.**
 
 ## 규칙
 
-- 예제는 사용자 문서(`website/user-docs`)의 코드와 일치하게 유지.
+- 예제는 사용자 문서(`../magFlipDocs/docs/magflip/user`)의 코드와 일치하게 유지.
 - 공개 API 만 사용한다 (private 멤버 접근 금지).
-- 샘플 이미지 경로를 바꾸면 `website/scripts/sync-demo.mjs` 의 복사 목록도 확인.
+- 샘플 이미지 경로를 바꾸면 `../magFlipDocs/scripts/sync-demo.mjs` 의 복사 목록도 확인.
 - `local/sample-book/` 은 손으로 고치지 않는다. `scripts/make-sample-book.mjs` 가 만들며 `npm run sample:book` 으로 다시 생성한다.
 - 관련 skill: `update-examples`

@@ -66,4 +66,4 @@ npm run build:local -w packages/doc # index.js/.d.ts, yjs.js/.d.ts, chunks/
 1. `model/` 을 고치면 `schema/` 도 같이 고친다. 안 맞으면 `schemaTypes.test.ts` 가 타입 에러로 잡는다.
 2. 필드를 추가하면 `defaults.ts`, `collab/surfaceYDoc.ts`(필요 시), `publish/resolveNodes.ts` 의 `EDITOR_ONLY_FIELDS` 를 확인한다.
 3. 저장된 문서와 호환이 깨지면 `SCHEMA_VERSION` 을 올리고 `migrate/migrate.ts` 에 단계를 추가한다.
-4. `npm run typecheck && npm test` → 문서(`website/dev-docs/doc-model/`) 갱신.
+4. `npm run typecheck && npm test` → 문서(`../magFlipDocs/docs/magflip/dev/doc-model/`) 갱신.

@@ -41,7 +41,7 @@ src/
 
 - 새 공개 타입/클래스는 `src/index.ts` 에 export 되는지 확인. 없으면 추가.
 - models.ts 의 인터페이스 변경은 flipview/scrollview 컴파일에 영향 → 루트에서 `npm run typecheck`.
-- 공개 API 변경 시 `website/user-docs/reference/api.md`, 클래스 관계 변경 시 `website/dev-docs/architecture/class-model.md` 갱신.
+- 공개 API 변경 시 `../magFlipDocs/docs/magflip/user/reference/api.md`, 클래스 관계 변경 시 `../magFlipDocs/docs/magflip/dev/architecture/class-model.md` 갱신.
 - 명령: `npm test -w packages/core`(jest, DOM 없이 `__tests__/documentStub.ts` 로 돈다), `npm run typecheck -w packages/core`, `npm run build:local -w packages/core` (`npm run build` 는 버전 증가 — 금지).
 - flipview/scrollview 는 core 의 **빌드된** `index.d.ts` 를 본다. models.ts 를 고쳤으면 `npm run build:local -w packages/core` 를 먼저 돌려야 그쪽 typecheck 가 맞는다.
 - 관련 skill: `core-model-change`

@@ -40,4 +40,4 @@ npm run pub --otp=<OTP>
 ## 마무리
 
 - 변경된 `package.json`, `package-lock.json`, `README.md`, `docs/examples/prebuild/magflip.html` 을 `Update versions` 로 커밋.
-- `website/user-docs/getting-started/*.md` 의 CDN 버전 예시가 오래됐으면 갱신.
+- `../magFlipDocs/docs/magflip/user/getting-started/*.md` 의 CDN 버전 예시가 오래됐으면 갱신.

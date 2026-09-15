@@ -13,8 +13,10 @@
 | `packages/scrollview` | `@magflip/scrollview` — 스크롤 뷰 (개발 중, 뷰 플러그인 템플릿) | `packages/scrollview/CLAUDE.md` |
 | `packages/minjs` | `@magflip/minjs` — 모든 패키지를 IIFE `magflip.min.js` 로 번들 | `packages/minjs/CLAUDE.md` |
 | `docs/examples` | `local/`(로컬 번들 테스트), `prebuild/`(CDN 공개 데모, GitHub Pages), `react-ts/` | `docs/examples/CLAUDE.md` |
-| `website` | Docusaurus 문서 사이트. `user-docs/`(→/user), `dev-docs/`(→/dev). 별도 npm 프로젝트 | `website/CLAUDE.md` |
 | `scripts/serve.mjs` | 의존성 없는 로컬 정적 서버 | |
+| `docs/img/flip-math` | README 용 Flip 기하 그림 (문서 사이트에도 같은 그림) | |
+
+문서 사이트는 옆 저장소 **`../magFlipDocs`** 에 있다(Docusaurus). 이 저장소의 문서는 `../magFlipDocs/docs/magflip/{user,dev}`, 작성 규칙은 그 저장소의 `CLAUDE.md` 와 `write-docs` skill.
 
 의존 방향: `flipview`, `scrollview` → `core`; `render` → `doc`; `minjs` → 전부. **core 는 다른 MagFlip 패키지를 import 하지 않는다.**
 `doc` 은 아무 패키지에도 의존하지 않는다(가장 아래). Editor·Server 와 공유하는 형식이므로 DOM 코드를 넣지 않는다.
@@ -30,9 +32,6 @@ npm run sample:book      # docs/examples/local/sample-book 게시본 다시 생�
 npm run typecheck        # 모든 패키지 tsc --noEmit
 npm run serve            # http://localhost:8080/docs/examples/local/
 npm run dev              # build:local + serve
-npm run docs:install     # website 의존성 설치 (최초 1회)
-npm run docs:start       # build:local → 데모 복사 → http://localhost:3000
-npm run docs:build       # 문서 정적 빌드 (깨진 링크 시 실패)
 ```
 
 ## 반드시 지킬 것
@@ -51,20 +50,20 @@ npm run docs:build       # 문서 정적 빌드 (깨진 링크 시 실패)
 - 좌표 계산은 DOM 없는 곳(`Flipping`, `MZMath`)에 두고 테스트 가능하게. 렌더링(속성/CSS 변수 쓰기)은 `FlipView`.
 - 공개 멤버에 영문 JSDoc. 조기 반환으로 중첩 줄이기. 매직 넘버는 이름 있는 상수/config 로.
 - 주석 처리된 죽은 코드를 새로 추가하지 않는다. 기존 파일의 들여쓰기(2칸)·따옴표 스타일을 따른다.
-- 상세: `website/dev-docs/development/coding-conventions.md`
+- 상세: `../magFlipDocs/docs/magflip/dev/development/coding-conventions.md`
 
 ## 변경 후 체크리스트
 
 1. `npm run typecheck && npm test`
 2. `npm run build:local` 후 `docs/examples/local` 에서 드래그 / Next / Prev / moveTo / Zoom / 닫기 확인
-3. 공개 API 변경 → `website/user-docs/reference/api.md` 갱신
-4. 구조·흐름 변경 → `website/dev-docs` 다이어그램, 해당 `CLAUDE.md`, 관련 skill 갱신
-5. 발견한 버그/부채 → `website/dev-docs/known-issues.md`
+3. 공개 API 변경 → `../magFlipDocs/docs/magflip/user/reference/api.md` 갱신
+4. 구조·흐름 변경 → `../magFlipDocs/docs/magflip/dev` 다이어그램, 해당 `CLAUDE.md`, 관련 skill 갱신
+5. 발견한 버그/부채 → `../magFlipDocs/docs/magflip/dev/known-issues.md`
 
 ## Skills
 
 - 루트 `.claude/skills/`: `local-dev`(빌드·테스트·데모), `release`(npm 배포)
-- 패키지/폴더별: doc `doc-model-change`, render `render-change`, core `core-model-change`, flipview `flip-effect-debug`, scrollview `new-view-plugin`, minjs `bundle-check`, website `write-docs`, docs/examples `update-examples`
+- 패키지/폴더별: doc `doc-model-change`, render `render-change`, core `core-model-change`, flipview `flip-effect-debug`, scrollview `new-view-plugin`, minjs `bundle-check`, docs/examples `update-examples`
 
 ## Git
 

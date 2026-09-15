@@ -1,8 +1,0 @@
-# Docusaurus
-/node_modules
-/build
-/.docusaurus
-/.cache-loader
-
-# Copied by scripts/sync-demo.mjs from the library build output.
-/static/demo

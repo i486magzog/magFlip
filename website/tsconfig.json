@@ -1,9 +1,0 @@
-{
-  // This file is only for editor support and `npm run typecheck`.
-  // Docusaurus itself does not need it to build.
-  "extends": "@docusaurus/tsconfig",
-  "compilerOptions": {
-    "baseUrl": "."
-  },
-  "exclude": [".docusaurus", "build"]
-}
