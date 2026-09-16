@@ -11,7 +11,11 @@ src/
 ├─ actions.ts         InputAction(키 → 뜻), DirectionAction, isDirection
 ├─ keyMap.ts          DEFAULT_KEY_MAP(key), DEFAULT_KEY_CODE_MAP(keyCode), resolveAction
 ├─ flipQueue.ts       넘기는 중에 들어온 요청을 limit(기본 1)개만 기억
-└─ spatialFocus.ts    IFocusRect 목록 + 방향 → 다음 대상 (findNextFocus / findFirstFocus)
+├─ spatialFocus.ts    IFocusRect 목록 + 방향 → 다음 대상 (findNextFocus / findFirstFocus)
+├─ focusTargets.ts    페이지 DOM → 포커스 대상 (a.mf-link, .mf-el-video/audio/widget)
+├─ bookNavigator.ts   동작 → IBookView 호출. 페이지 모드 ⇄ 요소 모드, 대기열, 포커스 표시
+├─ remoteController.ts  keydown 연결 + dispatch(네이티브 브리지) + destroy
+└─ input.css          `.mf-focused` 표시 (--mf-focus-color/width/offset 로 덮어쓰기)
 ```
 
 ## 핵심 규칙
@@ -30,7 +34,21 @@ npm test -w packages/input            # vitest (core 는 소스로 alias)
 npm run build:local -w packages/input
 ```
 
+## 두 가지 모드
+
+- **페이지 모드**(시작): ←/→ 넘김, Ok → 요소 모드, Back → `onBack` 콜백(뷰어를 직접 닫지 않는다 — 순서는 플랫폼마다 다르다). ↑/↓ 는 쓰지 않고 `false` 를 반환해 호스트에 넘긴다(1-5 확대 이동 자리).
+- **요소 모드**: 방향키로 링크·미디어·위젯 사이 이동, Ok → 사용, Back → 페이지 모드. 좌우 끝에서 더 가면 그쪽으로 한 장 넘기고 페이지 모드로 돌아온다.
+- `handle()` 은 **썼는지 여부**를 반환한다. 쓰지 않은 키는 `RemoteController` 가 `preventDefault` 하지 않는다.
+
+## 규칙 (추가)
+
+- **진짜 `focus()` 를 부르지 않는다.** 위젯은 다른 출처 iframe 이라 포커스가 들어가면 키 이벤트가 페이지로 오지 않아 빠져나올 수 없다. `.mf-focused` 클래스로만 표시한다.
+- 링크는 직접 해석하지 않고 `element.click()` 한다 → 렌더러의 `onPageLink`/`onUrlLink` 규칙을 그대로 따른다(중복 구현 금지).
+- 포커스 대상과 좌표는 **쓸 때마다 다시 잰다**. 페이지는 처음 보일 때 만들어지고 넘기는 동안 움직인다.
+- 넘김이 끝나면(`onFlipEnd`) 표시를 지우고 **페이지 모드로 돌아간다**. 페이지 링크로 이동한 뒤에도 마찬가지 — 새 펼침에서는 좌우가 다시 넘김이어야 한다.
+
 ## 상태
 
-1-3 단계(순수 로직)까지 들어와 있다. 다음: `bookNavigator`(동작 → `IBookView`), `remoteController`(document keydown + `dispatch`), `input.css`(`.mf-focused`).
+1-4 단계까지 들어와 있다(순수 로직 + DOM 연결 + `minjs` 번들 포함).
+남은 것: 예제·문서(1-6), 확대·화면 이동(1-5, 조사 후 결정).
 계획 전체는 메모리 `magflip-tv-plan` 과 `../magFlipDocs/docs/tv/` 에 있다.
