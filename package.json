@@ -9,7 +9,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build:local": "npm run build:local --workspace packages/doc && npm run build:local --workspace packages/render && npm run build:local --workspace packages/core && npm run build:local --workspace packages/flipview && npm run build:local --workspace packages/scrollview && npm run build:local --workspace packages/minjs",
+    "build:local": "npm run build:local --workspace packages/doc && npm run build:local --workspace packages/render && npm run build:local --workspace packages/core && npm run build:local --workspace packages/input && npm run build:local --workspace packages/flipview && npm run build:local --workspace packages/scrollview && npm run build:local --workspace packages/minjs",
     "typecheck": "npm run typecheck --ws --if-present",
     "test": "npm test --ws --if-present",
     "serve": "node scripts/serve.mjs",
@@ -24,6 +24,8 @@
     "build:watch:core": "npm run build:watch --workspace packages/core",
     "build:watch:doc": "npm run build:watch --workspace packages/doc",
     "build:watch:render": "npm run build:watch --workspace packages/render",
+    "build:input": "npm run build --workspace packages/input",
+    "build:watch:input": "npm run build:watch --workspace packages/input",
     "build:flipview": "npm run build --workspace packages/flipview",
     "build:watch:flipview": "npm run build:watch --workspace packages/flipview",
     "build:scrollview": "npm run build --workspace packages/scrollview",
