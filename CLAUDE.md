@@ -32,7 +32,7 @@ npm run build:local      # doc → render → core → input → flipview → sc
 npm test                 # 전 패키지 (doc·render·input: Vitest, core·flipview: Jest)
 npm run sample:book      # docs/examples/local/sample-book 게시본 다시 생성
 npm run typecheck        # 모든 패키지 tsc --noEmit
-npm run serve            # http://localhost:8080/docs/examples/local/
+npm run serve            # http://localhost:8090/docs/examples/local/
 npm run dev              # build:local + serve
 ```
 

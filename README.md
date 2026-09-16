@@ -52,7 +52,7 @@ npm install
 npm run build:local    # build all packages WITHOUT bumping versions (npm run build bumps patch versions)
 npm test               # unit tests
 npm run typecheck
-npm run serve          # http://localhost:8080/docs/examples/local/
+npm run serve          # http://localhost:8090/docs/examples/local/
 ```
 
 <br>
