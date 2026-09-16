@@ -103,3 +103,46 @@ export function getEditRect(surface: ISurfaceDoc, kind: SurfaceKind, pageSize: I
   if (containsRect(surface.extent.rect, trimRect)) { return surface.extent.rect; }
   return unionRects([surface.extent.rect, trimRect]) as IRect;
 }
+/**
+ * A change to one surface that has to reach editors who are working on it,
+ * rather than replace their document.
+ *
+ * Merging and splitting spreads produce one. Applied to a collaboration room
+ * it writes only these fields, so what other editors change at the same time
+ * elsewhere on the surface survives.
+ */
+export interface ISurfaceChange {
+  background: IFill | null;
+  extent: ISurfaceExtent | null;
+  masterId: string | null;
+  /** Replaces every override of the surface. */
+  masterOverrides: Record<string, IMasterOverride>;
+  /** Elements taken off the surface. */
+  removedIds: string[];
+  /** Fields to change on elements that stay, keyed by element id. */
+  patches: Record<string, Partial<IElement>>;
+  /** Elements put on the surface. */
+  added: IElement[];
+}
+
+/**
+ * Returns the surface with a change applied.
+ */
+export function applySurfaceChange(surface: ISurfaceDoc, change: ISurfaceChange): ISurfaceDoc {
+  const elements: Record<string, IElement> = {};
+  const removed = new Set(change.removedIds);
+  for (const element of Object.values(surface.elements)) {
+    if (removed.has(element.id)) { continue; }
+    elements[element.id] = { ...element, ...change.patches[element.id] } as IElement;
+  }
+  for (const element of change.added) { elements[element.id] = element; }
+
+  return {
+    ...surface,
+    background: change.background,
+    extent: change.extent,
+    masterId: change.masterId,
+    masterOverrides: change.masterOverrides,
+    elements,
+  };
+}

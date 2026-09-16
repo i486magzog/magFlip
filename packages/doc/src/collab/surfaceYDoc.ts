@@ -1,7 +1,8 @@
 import * as Y from 'yjs';
 import { SCHEMA_VERSION } from '../common/constants';
 import { ElementType, IElement } from '../model/element';
-import { IMasterOverride, ISurfaceDoc } from '../model/surface';
+import { isJsonEqual } from '../common/json';
+import { IMasterOverride, ISurfaceChange, ISurfaceDoc } from '../model/surface';
 import { ITextContent } from '../model/text';
 import { readTextContent, writeTextContent } from './textYXml';
 
@@ -137,6 +138,34 @@ export function setSurfaceSetting<K extends keyof ISurfaceSettings>(ydoc: Y.Doc,
 export function setMasterOverride(ydoc: Y.Doc, key: string, override: IMasterOverride | null): void {
   const overrides = ydoc.getMap<IMasterOverride>(SURFACE_KEYS.masterOverrides);
   if (override === null) { overrides.delete(key); } else { overrides.set(key, override); }
+}
+/**
+ * Applies a change made outside the room, such as merging two pages into a
+ * spread, in one transaction.
+ *
+ * Only the fields the change names are written, and a setting or an override
+ * that already has the value is left alone: editors keep what they change at
+ * the same time, and a text they are typing in stays bound to its fragment.
+ */
+export function writeSurfaceChange(ydoc: Y.Doc, change: ISurfaceChange): void {
+  ydoc.transact(() => {
+    const surfaceMap = ydoc.getMap(SURFACE_KEYS.surface);
+    for (const key of ['background', 'extent', 'masterId'] as const) {
+      if (!isJsonEqual(surfaceMap.get(key) ?? null, change[key])) { surfaceMap.set(key, change[key]); }
+    }
+
+    const overrides = ydoc.getMap<IMasterOverride>(SURFACE_KEYS.masterOverrides);
+    for (const key of [...overrides.keys()]) {
+      if (!(key in change.masterOverrides)) { overrides.delete(key); }
+    }
+    for (const [key, override] of Object.entries(change.masterOverrides)) {
+      if (!isJsonEqual(overrides.get(key), override)) { overrides.set(key, override); }
+    }
+
+    for (const id of change.removedIds) { removeElement(ydoc, id); }
+    for (const [id, patch] of Object.entries(change.patches)) { patchElement(ydoc, id, patch); }
+    for (const element of change.added) { writeElement(ydoc, element); }
+  });
 }
 /**
  * Returns the map that holds the elements of the surface.

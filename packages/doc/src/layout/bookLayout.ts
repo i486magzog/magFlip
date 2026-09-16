@@ -67,6 +67,36 @@ export function canSpreadStartAt(index: number): boolean {
   return index % 2 === 1;
 }
 /**
+ * Two single pages that face each other, and so can become one spread.
+ */
+export interface IFacingSinglePair {
+  /** The page read first. Its surface is the one a merge keeps. */
+  firstId: string;
+  secondId: string;
+  leftId: string;
+  rightId: string;
+}
+/**
+ * Returns the single page facing a single page, or `null` when the page is not
+ * a single page, stands alone, or faces half of a spread.
+ *
+ * Only pages that face each other in the book can be merged: the spread they
+ * make then starts on a left page and nothing behind it moves.
+ */
+export function findFacingSinglePair(book: IBookDoc, layout: IBookLayout, surfaceId: string): IFacingSinglePair | null {
+  const pages = layout.surfacePages.get(surfaceId);
+  const page = pages?.length === 1 ? pages[0] : undefined;
+  if (!page || book.surfaces[surfaceId]?.kind !== SurfaceKind.Single) { return null; }
+
+  const facingIndex = getFacingPageIndex(page.index, layout.pages.length);
+  const facing = facingIndex === null ? undefined : layout.pages[facingIndex];
+  if (!facing || layout.surfacePages.get(facing.surfaceId)?.length !== 1) { return null; }
+
+  const [first, second] = page.index < facing.index ? [page, facing] : [facing, page];
+  const [left, right] = page.side === PageSide.Left ? [page, facing] : [facing, page];
+  return { firstId: first.surfaceId, secondId: second.surfaceId, leftId: left.surfaceId, rightId: right.surfaceId };
+}
+/**
  * Blank pages that have to go in with a new surface so that the page order
  * stays valid.
  */

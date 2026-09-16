@@ -32,6 +32,7 @@ src/
 ├─ master/resolveMaster.ts 마스터를 대상 surface 좌표로 복사 + override 적용
 ├─ text/textContent.ts     정규화, 필드 치환, 평문 추출
 ├─ text/textList.ts        목록 번호·기호 계산 (getListMarkers — 편집기·렌더러 공용)
+├─ spread/spreadEdit.ts    펼침 합치기·나누기 계산 → ISurfaceChange (서버가 방에 writeSurfaceChange 로 적용)
 ├─ publish/                resolveNodes(에디터·게시 공용) → publishSurface → publishBook
 ├─ validate/validateBook.ts 스키마 + 의미 검증 (게시 전 필수)
 ├─ migrate/migrate.ts      schemaVersion 마이그레이션

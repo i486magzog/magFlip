@@ -16,3 +16,4 @@ export * from './publish/publishSurface';
 export * from './publish/publishBook';
 export * from './validate/validateBook';
 export * from './migrate/migrate';
+export * from './spread/spreadEdit';
