@@ -249,6 +249,12 @@
         publishedSource = published.source;
         shelfManager.importBookToShelf(published.book);
         window.publishedSource = published.source;
+        // Someone who arrived with `?book=` asked for that book - the editor's
+        // "뷰어에서 보기" link does - so open it rather than leaving them to
+        // find it on the shelf.
+        if (new URLSearchParams(location.search).has('book')) {
+          shelfManager.pickupAndView(published.book);
+        }
       } catch (error) {
         console.error('The published sample book could not be loaded.', error);
       }
