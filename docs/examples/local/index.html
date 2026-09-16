@@ -51,6 +51,24 @@
       top: 20px;
       right: 20px;
     }
+    /* What a reader can press. A TV shows the same kind of hint. */
+    #keyHint {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      z-index: 200;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, .6);
+      color: #fff;
+      font: 13px/1.5 system-ui, sans-serif;
+    }
+    #keyHint kbd {
+      padding: 1px 5px;
+      border: 1px solid #888;
+      border-radius: 3px;
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
@@ -164,13 +182,52 @@
       bookViewer.element.appendChild(toolbar);
     }
 
+    /** Shows which keys work, the way a TV app tells a reader what the remote does. */
+    function addKeyHint(bookViewer) {
+      const hint = document.createElement('div');
+      hint.id = 'keyHint';
+      hint.className = 'do-not-remove';
+      hint.innerHTML = `
+        <kbd>←</kbd> <kbd>→</kbd> turn &nbsp;
+        <kbd>Enter</kbd> use a link or video &nbsp;
+        <kbd>Esc</kbd> back &nbsp;
+        <kbd>↑</kbd> <kbd>↓</kbd> move around a zoomed page
+      `;
+      bookViewer.element.appendChild(hint);
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       if (typeof window.Book === 'undefined') {
         showBuildGuide();
         return;
       }
 
-      const shelfManager = new BookShelfManager();
+      // `?tv=1` hides the mouse toolbar, leaving the page as a TV sees it.
+      const isTvMode = new URLSearchParams(location.search).has('tv');
+      let controller;
+
+      const shelfManager = new BookShelfManager({
+        // The pages of a book exist once it is open, so the remote is wired here.
+        onViewerOpen: (book) => {
+          controller = new RemoteController({
+            view: flipView,
+            // A page builds itself when first shown; ask only for what is there.
+            getPageContentEl: (index) => {
+              const page = book.getPage(index);
+              return page && page.hasElements ? page.contentEl : undefined;
+            },
+            // Back means "close the book" here. An app may close an overlay first.
+            onBack: () => bookViewer.closeViewer(),
+          });
+          window.controller = controller;
+        },
+        onViewerClose: () => {
+          // A controller left behind would keep answering keys for a closed book.
+          controller?.destroy();
+          controller = undefined;
+          window.controller = undefined;
+        },
+      });
       const bookViewer = shelfManager.getBookViewer();
       const flipView = new FlipView();
       // The published book links to its own pages, so it needs the view it is shown in.
@@ -184,7 +241,8 @@
       shelfManager.importBookToShelf(createSampleBook(2, 10));
       shelfManager.importBookToShelf(createSampleBook(3, 16));
 
-      addToolbar(bookViewer, flipView, () => publishedSource);
+      if (!isTvMode) { addToolbar(bookViewer, flipView, () => publishedSource); }
+      addKeyHint(bookViewer);
 
       try {
         const published = await createPublishedBook(flipViewRef);

@@ -23,10 +23,10 @@ export class BookViewer extends Base {
    * 
    */
   private registeredViews: { [n:string] : IBookView } = {};
-  private registeredEventHandlers: { [n:string] : (event?:Event) => void } = {};
-  private callbackEventHandler = (handlerName: string, event?: Event) => {
+  private registeredEventHandlers: { [n:string] : (...args:any[]) => void } = {};
+  private callbackEventHandler = (handlerName: string, ...args: any[]) => {
     if(this.registeredEventHandlers[handlerName]){
-      this.registeredEventHandlers[handlerName](event);
+      this.registeredEventHandlers[handlerName](...args);
     }
   };
   /**
@@ -74,6 +74,9 @@ export class BookViewer extends Base {
 
     if(bookManager.config.onViewerClose) {
       this.registeredEventHandlers['close'] = bookManager.config.onViewerClose;
+    }
+    if(bookManager.config.onViewerOpen) {
+      this.registeredEventHandlers['open'] = bookManager.config.onViewerOpen;
     }
 
     ({ bookViewerEl: this.element } = this.createViewerElements());
@@ -146,6 +149,7 @@ export class BookViewer extends Base {
     this.element.classList.add(this.curView.id);
     this.curView.view(book, openPageIndex);
     this.element.classList.remove("hidden");
+    this.callbackEventHandler('open', book);
   }
   /**
    * Closes the book on the viewer.

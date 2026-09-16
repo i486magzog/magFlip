@@ -29,7 +29,7 @@
 ```bash
 npm install              # workspaces 링크 (node_modules/@magflip/* → packages/*)
 npm run build:local      # doc → render → core → input → flipview → scrollview → minjs 빌드. 버전 변경 없음
-npm test                 # 전 패키지 (doc·render: Vitest, flipview: Jest)
+npm test                 # 전 패키지 (doc·render·input: Vitest, core·flipview: Jest)
 npm run sample:book      # docs/examples/local/sample-book 게시본 다시 생성
 npm run typecheck        # 모든 패키지 tsc --noEmit
 npm run serve            # http://localhost:8080/docs/examples/local/

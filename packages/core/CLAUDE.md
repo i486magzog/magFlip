@@ -18,7 +18,7 @@ src/
    ├─ base.ts               Base extends MZEvent
    ├─ bookShelfManager.ts   진입점. BookShelf + BookViewer 소유, pickupAndView / returnBookToShelf
    ├─ bookShelf.ts          #bookShelf, .book-holder
-   ├─ bookViewer.ts         #bookViewer, #btnClose, 뷰 등록/선택, setZoomLevel, closeViewer
+   ├─ bookViewer.ts         #bookViewer, #btnClose, 뷰 등록/선택, setZoomLevel, closeViewer, onViewerOpen/Close 콜백
    ├─ book.ts / bookEl.ts   Book(데이터·페이지 맵) extends BookEl(.book/.container/.label-container)
    ├─ page.ts / pageEl.ts   Page extends PageEl(.page[pageIdx] > .content-container > .content)
    ├─ pageLabel(El).ts      책 옆 라벨 탭

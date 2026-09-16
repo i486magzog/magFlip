@@ -8,7 +8,12 @@ import { deepMerge } from '../common/helper';
 export interface IBookShelfManagerConfig {
   hideBookShelf?: boolean;
   onViewerClose?: () => void;
-  onViewerOpen?: () => void;
+  /**
+   * Called with the book the viewer just opened. A host that drives the book
+   * from outside - a keyboard, a remote, its own buttons - starts there,
+   * because that is when the pages exist.
+   */
+  onViewerOpen?: (book: Book) => void;
 }
 /**
  * BookManager class

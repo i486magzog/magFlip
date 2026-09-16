@@ -1,6 +1,6 @@
 # @magflip/minjs — CLAUDE.md
 
-코드 없는 번들 패키지. `src/index.js` 가 core/flipview/scrollview 를 re-export 하고 Rollup 이 IIFE(`name: 'window', extend: true`)로 묶어 **모든 export 를 전역(window)에 노출**한다. CSS 는 JS 에 주입된다.
+코드 없는 번들 패키지. `src/index.js` 가 render/core/input/flipview/scrollview 를 re-export 하고 Rollup 이 IIFE(`name: 'window', extend: true`)로 묶어 **모든 export 를 전역(window)에 노출**한다. CSS 는 JS 에 주입된다.
 
 ## 파일
 
