@@ -31,7 +31,7 @@ cat docs/examples/local/sample-book/surfaces/<id>.json | head -60
 ## 3. 지켜야 할 것
 
 - 텍스트는 `textContent`. `innerHTML` 금지.
-- 링크는 `createLink` 를 거친다(URL 재검사, 페이지 링크는 `onPageLink` 콜백).
+- 링크는 `createLink` 를 거친다(URL 재검사, 페이지 링크는 `onPageLink` 콜백, URL 링크는 `onUrlLink` 가 있을 때만 이동을 막고 콜백).
 - 위젯 iframe 에 `allow-same-origin` 을 주지 않는다.
 - 요소마다 달라지는 값은 인라인 스타일, 공통 규칙만 CSS.
 - 렌더러는 문서를 고치거나 검증하지 않는다.

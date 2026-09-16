@@ -9,7 +9,7 @@
 src/
 ├─ index.ts                 공개 API
 ├─ common/
-│  ├─ renderOptions.ts      IRenderOptions (resolveWidgetUrl, onPageLink, isInteractive, onNodeRendered)
+│  ├─ renderOptions.ts      IRenderOptions (resolveWidgetUrl, onPageLink, onUrlLink, isInteractive, onNodeRendered)
 │  ├─ style.ts              px/round, applyRect, applyTransform, toCssFill, toGradientVector, createDiv
 │  └─ types.ts              PublishedElementOf<T>
 ├─ nodes/                   요소 타입별 DOM 생성
@@ -29,7 +29,7 @@ src/
 
 - **텍스트는 `textContent` 로만** 넣는다. `innerHTML` 은 절대 쓰지 않는다(문서 내용은 신뢰할 수 없다).
 - 목록 기호는 글자가 아니라 `.mf-text-li::before { content: attr(data-mf-marker) }` 로 그린다 → 독자가 복사해도 기호가 딸려 가지 않는다. 편집기도 같은 클래스를 쓰므로 이 CSS 를 바꾸면 양쪽이 함께 바뀐다.
-- 링크 URL 은 그릴 때 `isSafeUrl` 로 다시 확인한다. 페이지 링크는 직접 이동하지 않고 `onPageLink` 로 넘긴다.
+- 링크 URL 은 그릴 때 `isSafeUrl` 로 다시 확인한다. 페이지 링크는 직접 이동하지 않고 `onPageLink` 로 넘긴다. URL 링크는 기본적으로 브라우저가 따라가고, 호스트가 `onUrlLink` 를 주면 이동을 막고 넘긴다(앱으로 포장한 TV 앱은 페이지를 떠날 수 없다).
 - 위젯 iframe 에 `allow-same-origin` 을 주지 않는다. props 는 로드 후 위젯 URL 의 origin 으로만 `postMessage`.
 - 층의 좌표 = surface 좌표 − `visibleRect` 원점. 페이지 잘라내기와 배율은 `PageRenderer` 만 담당한다.
 - 그룹은 좌표계를 만들지 않는다(`.mf-el-group` 은 0,0 크기 0). 자식은 surface 좌표 그대로.

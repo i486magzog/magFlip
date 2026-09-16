@@ -1,4 +1,4 @@
-import { IPageLink, IPublishedNode, IWidgetElement } from '@magflip/doc';
+import { IPageLink, IPublishedNode, IUrlLink, IWidgetElement } from '@magflip/doc';
 
 /**
  * How a surface is drawn.
@@ -13,6 +13,15 @@ export interface IRenderOptions {
    * Called when a reader follows a link to another page of the same book.
    */
   onPageLink?: (link: IPageLink) => void;
+  /**
+   * Called when a reader follows a link to an address outside the book, and
+   * stops the page from going there. Leave it unset to let the browser follow
+   * the link as usual.
+   *
+   * A host that cannot leave its own page sets it: an app packaged for a TV
+   * has nowhere to come back from, so it shows the address instead.
+   */
+  onUrlLink?: (link: IUrlLink) => void;
   /**
    * False turns the page into a picture: links do not react and media does not
    * play. The editor canvas uses it so that clicking selects instead of navigating.

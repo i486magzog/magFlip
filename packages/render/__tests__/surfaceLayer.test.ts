@@ -163,6 +163,47 @@ describe('createSurfaceLayer', () => {
     expect((anchor.firstElementChild as HTMLElement).style.width).toBe('100%');
   });
 
+  it('lets the browser follow a URL link while onUrlLink is not set', () => {
+    const link = { kind: LinkKind.Url as const, href: 'https://magzog.com', isNewTab: false };
+    const layer = layerOf(publishSurfaces([{ kind: Single, elements: [makeImage('outside', 0, 100, { link })] }]));
+    document.body.appendChild(layer);
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    findElement(layer, 'outside').dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('hands a URL link to the host instead of leaving the page when onUrlLink is set', () => {
+    const link = { kind: LinkKind.Url as const, href: 'https://magzog.com', isNewTab: true };
+    const surfaces = publishSurfaces([{ kind: Single, elements: [makeImage('outside', 0, 100, { link })] }]);
+    const surface = surfaces['s0'] as IPublishedSurface;
+    const followed: string[] = [];
+    const layer = createSurfaceLayer(surface, { onUrlLink: target => followed.push(target.href) });
+    document.body.appendChild(layer);
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    findElement(layer, 'outside').dispatchEvent(event);
+
+    expect(followed).toEqual(['https://magzog.com']);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('does not hand a URL link over on the editor canvas, and still does not navigate', () => {
+    const link = { kind: LinkKind.Url as const, href: 'https://magzog.com', isNewTab: false };
+    const surfaces = publishSurfaces([{ kind: Single, elements: [makeImage('outside', 0, 100, { link })] }]);
+    const surface = surfaces['s0'] as IPublishedSurface;
+    const followed: string[] = [];
+    const layer = createSurfaceLayer(surface, { isInteractive: false, onUrlLink: target => followed.push(target.href) });
+    document.body.appendChild(layer);
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    findElement(layer, 'outside').dispatchEvent(event);
+
+    expect(followed).toEqual([]);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
   it('calls back to the book instead of navigating on a page link', () => {
     const link = { kind: LinkKind.Page as const, surfaceId: 's0', surfaceX: 0 };
     const surfaces = publishSurfaces([{ kind: Single, elements: [makeImage('toCover', 0, 100, { link })] }]);

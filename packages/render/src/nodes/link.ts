@@ -7,6 +7,9 @@ import { IRenderOptions } from '../common/renderOptions';
  * A URL is checked again here even though the schema already refused unsafe
  * ones: this renderer also draws documents that are still being edited, and a
  * link is the one place where document content becomes executable.
+ *
+ * A URL link is followed by the browser unless the host takes it over with
+ * `onUrlLink`; a page link never navigates and is always handed to `onPageLink`.
  */
 export function createLink(link: ILink, options: IRenderOptions): HTMLAnchorElement {
   const anchor = document.createElement('a');
@@ -18,6 +21,13 @@ export function createLink(link: ILink, options: IRenderOptions): HTMLAnchorElem
     if (link.isNewTab) {
       anchor.target = '_blank';
       anchor.rel = 'noopener noreferrer';
+    }
+    const onUrlLink = options.onUrlLink;
+    if (onUrlLink) {
+      anchor.addEventListener('click', event => {
+        event.preventDefault();
+        if (isInteractive) { onUrlLink(link); }
+      });
     }
   } else {
     anchor.href = `#${link.surfaceId}`;
