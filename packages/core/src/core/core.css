@@ -14,6 +14,9 @@ html, body {
   gap: 20px;
   padding: 20px;
 }
+/* `hideBookShelf: true` is for a host that draws its own shelf. It puts this
+   class on, so the rule has to exist for the option to mean anything. */
+#bookShelf.hidden { display: none; }
 
 #bookShelf .book-holder {
   position: relative;
