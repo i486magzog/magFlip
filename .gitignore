@@ -2,6 +2,7 @@
 /**/node_modules
 /**/dist
 /**/types
+/**/.env*
 
 /packages/minjs/magflip.min.*
 /packages/*/index.d.ts

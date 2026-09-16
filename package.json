@@ -12,7 +12,7 @@
     "build:local": "npm run build:local --workspace packages/doc && npm run build:local --workspace packages/render && npm run build:local --workspace packages/core && npm run build:local --workspace packages/input && npm run build:local --workspace packages/flipview && npm run build:local --workspace packages/scrollview && npm run build:local --workspace packages/minjs",
     "typecheck": "npm run typecheck --ws --if-present",
     "test": "npm test --ws --if-present",
-    "serve": "node scripts/serve.mjs",
+    "serve": "node --env-file-if-exists=.env scripts/serve.mjs",
     "dev": "npm run build:local && npm run serve",
     "build:dev:minjs": "npm run build:dev --workspace packages/minjs",
     "build:dev:watch:minjs": "npm run build:dev:watch --workspace packages/minjs",
