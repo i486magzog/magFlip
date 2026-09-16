@@ -54,6 +54,14 @@ export class ScrollView implements IBookView{
    */
   onFlipEnd(listener:() => void):() => void { return () => {}; }
   /**
+   * Always 1: the scroll view does not zoom yet.
+   */
+  get zoomLevel():number { return 1; }
+  /**
+   * Never moves, because a book that is not zoomed has nowhere to go.
+   */
+  pan(dx:number, dy:number):boolean { return false; }
+  /**
    * 
    * @param book 
    * @param openPageIndex 

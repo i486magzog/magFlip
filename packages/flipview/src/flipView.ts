@@ -2,6 +2,7 @@ import { Book, BookEvent, deepMerge, DeepRequired, EventStatus, IBookView, IPage
 import { FlipData } from './flipData';
 import { Flipping as FlipManager } from './flipManager';
 import { Gutter } from './gutter';
+import { clampPan, IPanOffset } from './panning';
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -49,7 +50,15 @@ export class FlipView implements IBookView {
   /**
    * Zoom level of the viewer.
    */
-  private zoomLevel:number = 1;
+  private _zoomLevel:number = 1;
+  /**
+   * How large the book is drawn. 1 is the size that fits the viewer.
+   */
+  get zoomLevel():number { return this._zoomLevel; }
+  /**
+   * How far the book was moved from the middle, in screen pixels.
+   */
+  private panOffset:IPanOffset = { x: 0, y: 0 };
   /**
    * This id is unique string for FlipView object.
    */
@@ -236,9 +245,12 @@ export class FlipView implements IBookView {
   /**
    * Inits variables and properties when a new book opens.
    */
-  private init(){ 
+  private init(){
     this.curOpenLeftPageIndex = -1;
     this.bookLastPageIndex = 0;
+    // A new book starts in the middle, whatever the reader did to the last one.
+    this.panOffset = { x: 0, y: 0 };
+    this.applyContainerTransform();
   }
   /**
    * Creates the viewer related elements.
@@ -514,10 +526,48 @@ export class FlipView implements IBookView {
    * @param zoomLevel 
    */
   zoom(zoomLevel:number){
-    this.zoomLevel = zoomLevel;
-    this.bookContainerEl.style.transform = `scale(${this.zoomLevel})`;
+    this._zoomLevel = zoomLevel;
+    // Zooming out can leave the book hanging off the screen, so the move it
+    // was given is measured against its new size.
+    this.panOffset = this.clampedPan(this.panOffset);
+    this.applyContainerTransform();
+    // setViewer() ends in updateDimension(), which measures the gutter again.
     this.setViewer();
-    // this.updateDimension();
+  }
+  /**
+   * Moves the book by that many screen pixels, within the screen.
+   * @returns whether the book moved.
+   */
+  pan(dx:number, dy:number):boolean {
+    if(!this.book){ return false; }
+
+    const next = this.clampedPan({ x: this.panOffset.x + dx, y: this.panOffset.y + dy });
+    if(next.x === this.panOffset.x && next.y === this.panOffset.y){ return false; }
+
+    this.panOffset = next;
+    this.applyContainerTransform();
+    // Every flip coordinate is read off the screen, and the gutter is the one
+    // that is kept rather than measured per frame - so it is measured again.
+    this.updateDimension();
+    return true;
+  }
+  /**
+   * Writes the move and the zoom as one transform. The move comes first so
+   * that its pixels are screen pixels, whatever the zoom is.
+   */
+  private applyContainerTransform(){
+    const { x, y } = this.panOffset;
+    this.bookContainerEl.style.transform = `translate(${x}px, ${y}px) scale(${this._zoomLevel})`;
+  }
+  /**
+   * Returns the move, cut down to what keeps the book on the screen.
+   */
+  private clampedPan(pan:IPanOffset):IPanOffset {
+    const bookEl = this.book?.element;
+    const bookSize = bookEl
+      ? { width: bookEl.offsetWidth * this._zoomLevel, height: bookEl.offsetHeight * this._zoomLevel }
+      : { width: 0, height: 0 };
+    return clampPan(pan, bookSize, { width: window.innerWidth, height: window.innerHeight });
   }
   /**
    * Gets pages from book.
@@ -1305,7 +1355,12 @@ export class FlipView implements IBookView {
     })
     document.addEventListener('mouseup', this.documentMouseUp.bind(this));
     document.addEventListener('mousemove', this.documentMouseMove.bind(this));
-    window.addEventListener('resize', () => { this.updateDimension(); });
+    window.addEventListener('resize', () => {
+      // A bigger window may leave the book moved further than it may now be.
+      this.panOffset = this.clampedPan(this.panOffset);
+      this.applyContainerTransform();
+      this.updateDimension();
+    });
   }
   /**
    * 

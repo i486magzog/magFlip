@@ -46,8 +46,11 @@ export interface IBookNavigatorOptions {
   flipQueueLimit?: number;
   /** Zoom steps `ZoomIn` / `ZoomOut` walk through. */
   zoom?: { min?: number, max?: number, step?: number };
+  /** How far one arrow press moves a zoomed-in book, in screen pixels. */
+  panStep?: number;
 }
 const DEFAULT_ZOOM = { min: 1, max: 3, step: 0.25 };
+const DEFAULT_PAN_STEP = 120;
 /**
  * Turns reader actions into calls on a book view.
  *
@@ -61,7 +64,6 @@ export class BookNavigator {
   private readonly removeFlipEndListener: () => void;
   private _mode: NavigatorMode = NavigatorMode.Page;
   private focused: IFocusTarget | undefined;
-  private zoomLevel = 1;
 
   constructor(options: IBookNavigatorOptions) {
     this.options = options;
@@ -154,6 +156,10 @@ export class BookNavigator {
   }
   private move(direction: DirectionAction, isRepeat?: boolean): boolean {
     if (this._mode === NavigatorMode.Page) {
+      // While zoomed in the arrows walk around the page. Only once the book
+      // cannot move further that way does the press turn a page, which is how
+      // a reader gets to the next spread without zooming out first.
+      if (this.panTowards(direction)) { return true; }
       if (direction === InputAction.Left) { return this.turn('prev', isRepeat); }
       if (direction === InputAction.Right) { return this.turn('next', isRepeat); }
       return false;
@@ -239,12 +245,33 @@ export class BookNavigator {
     this.options.onBack();
     return true;
   }
+  /**
+   * Moves the book the way the reader is looking. Pressing left shows what is
+   * on the left, which means the book itself moves right.
+   *
+   * Up and down move whenever the book is taller than the screen, since they
+   * do nothing else on a page. Left and right are the page keys, so they only
+   * move a book the reader chose to zoom into — otherwise a book a little
+   * wider than the window would slide instead of turning.
+   */
+  private panTowards(direction: DirectionAction): boolean {
+    const view = this.options.view;
+    const step = this.options.panStep ?? DEFAULT_PAN_STEP;
+    switch (direction) {
+      case InputAction.Up: return view.pan(0, step);
+      case InputAction.Down: return view.pan(0, -step);
+      case InputAction.Left: return view.zoomLevel > 1 && view.pan(step, 0);
+      case InputAction.Right: return view.zoomLevel > 1 && view.pan(-step, 0);
+    }
+  }
   private zoomBy(step: number): boolean {
+    const view = this.options.view;
     const { min, max } = this.zoomRange;
-    const level = Math.min(max, Math.max(min, this.zoomLevel + step));
-    if (level === this.zoomLevel) { return false; }
-    this.zoomLevel = level;
-    this.options.view.zoom(level);
+    // The view is asked rather than counted from here: a host with its own
+    // zoom control (a slider, a pinch) changes it without telling us.
+    const level = Math.min(max, Math.max(min, view.zoomLevel + step));
+    if (level === view.zoomLevel) { return false; }
+    view.zoom(level);
     return true;
   }
 }

@@ -9,6 +9,7 @@
 | `src/flipView.ts` (~1300줄) | DOM/SVG defs 생성, 6개 Zone 마우스 이벤트, `flipPage()` 렌더링(mask points·CSS 변수·그림자), `shiftPages`/`updateHiddenPages`, `nextPage`/`prevPage`/`moveTo`/`autoFlip` |
 | `src/flipManager.ts` | `class Flipping extends PageWindow` (import alias `FlipManager`). `eventStatus`, `setInitFlipping`, `flip()` 기하 계산 → `FlipData`, `animateFlip*`, `getInfoToFlip`, `updateMousePointOnArea` |
 | `src/pageWindow.ts` | 6칸 슬롯 `windows[0..5]`, `moveRight`/`moveLeft` |
+| `src/panning.ts` | `clampPan()` — 확대·이동 시 책이 화면 밖으로 나가지 않게 자르는 순수 함수 |
 | `src/flipData.ts` | 프레임 계산 결과: `page2{top,left,rotate}`, `mask.page1/page2{p1..p4}`, `shadow` |
 | `src/flipDiagonals.ts`, `flipDiagonal.ts` | 마우스 제한 Area 1~4 (반지름·각도 범위) |
 | `src/flipActionLine.ts`, `gutter.ts` | 드래그 기준 수평선, 책 가운데 선 |
@@ -24,6 +25,7 @@
 - 넘김/드래그가 끝나 `None` 으로 돌아갈 때는 `eventStatus = None` 을 직접 쓰지 말고 `flipManager.finishFlip()` 을 부른다 → 공개 `onFlipEnd` 리스너가 불린다. 공개 `isFlipping` 은 `Flipping|Dragging` 비트, 내부 `isPageLifted` 는 여기에 `AutoFlip`(호버)까지 포함.
 - `Zone` 도 비트 플래그 (`zone & Zone.Left`, `zone & Zone.Top`).
 - 좌표는 뷰포트 기준(`...GP`). SVG/CSS 에 쓸 때 `/ zoomLevel`.
+- `#bookContainer` transform 은 `translate(pan) scale(zoom)`. 이동 단위는 화면 픽셀. **책을 옮기면 `updateDimension()` 을 불러 `gutter` 를 다시 재야 한다**(안 그러면 접힘이 옛 가운데 선 기준으로 계산된다). `zoom()` 은 `setViewer()` 안에서 이미 부른다.
 - `pivot` = 오른쪽 +1 / 왼쪽 -1 로 공식을 좌우 재사용.
 
 ## 작업 규칙

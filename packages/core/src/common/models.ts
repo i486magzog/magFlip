@@ -356,4 +356,15 @@ export interface IBookView {
    * @returns A function that removes the listener.
    */
   onFlipEnd(listener:() => void):() => void;
+  /**
+   * How large the book is drawn. 1 is the size that fits the viewer.
+   */
+  readonly zoomLevel: number;
+  /**
+   * Moves the book by that many screen pixels, for a reader who zoomed in and
+   * wants to see another part of the page. The book is never pushed off the
+   * screen, so a move that would do that is refused.
+   * @returns whether the book moved.
+   */
+  pan(dx:number, dy:number):boolean;
 }

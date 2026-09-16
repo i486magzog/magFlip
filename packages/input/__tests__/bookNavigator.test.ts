@@ -116,6 +116,94 @@ describe('BookNavigator in page mode', () => {
 
     expect(view.zoomLevels).toEqual([1.5, 1]);
   });
+
+  it('zooms from where the view stands, not from what it last set', () => {
+    const view = new FakeView();
+    const navigator = navigatorOf(view, twoPages().pages, { zoom: { min: 1, max: 3, step: 0.5 } });
+    // The host zoomed with its own control, a slider say.
+    view.zoomLevel = 2;
+
+    navigator.handle(InputAction.ZoomIn);
+
+    expect(view.zoomLevels).toEqual([2.5]);
+  });
+});
+
+describe('BookNavigator with a book larger than the screen', () => {
+  beforeEach(() => { document.body.replaceChildren(); });
+
+  it('walks around the page with the arrows instead of turning', () => {
+    const view = new FakeView();
+    view.zoomLevel = 2;
+    view.panLimit = 300;
+    const navigator = navigatorOf(view, twoPages().pages, { panStep: 100 });
+
+    navigator.handle(InputAction.Right);
+    navigator.handle(InputAction.Down);
+
+    // Looking right and down means the book moves left and up.
+    expect(view.panOffset).toEqual({ x: -100, y: -100 });
+    expect(view.turns).toEqual([]);
+  });
+
+  it('turns the page once the book cannot move that way any more', () => {
+    const view = new FakeView();
+    view.zoomLevel = 2;
+    view.panLimit = 100;
+    const navigator = navigatorOf(view, twoPages().pages, { panStep: 100 });
+
+    navigator.handle(InputAction.Right);          // moves to the edge
+    expect(view.turns).toEqual([]);
+
+    navigator.handle(InputAction.Right);          // nowhere left to go
+
+    expect(view.turns).toEqual(['next']);
+  });
+
+  it('stays put at the top and bottom, where there is no page to turn to', () => {
+    const view = new FakeView();
+    view.zoomLevel = 2;
+    view.panLimit = 0;
+    const navigator = navigatorOf(view, twoPages().pages);
+
+    expect(navigator.handle(InputAction.Up)).toBe(false);
+    expect(navigator.handle(InputAction.Down)).toBe(false);
+    expect(view.turns).toEqual([]);
+  });
+
+  it('turns the page when the book fits and has nowhere to move', () => {
+    const view = new FakeView();
+    view.panLimit = 0;
+    const navigator = navigatorOf(view, twoPages().pages);
+
+    navigator.handle(InputAction.Right);
+
+    expect(view.panOffset).toEqual({ x: 0, y: 0 });
+    expect(view.turns).toEqual(['next']);
+  });
+
+  it('scrolls a tall book up and down at zoom 1, where nothing else uses those keys', () => {
+    const view = new FakeView();
+    view.zoomLevel = 1;
+    view.panLimit = 200;   // taller than the screen, as a tall book can be
+    const navigator = navigatorOf(view, twoPages().pages, { panStep: 100 });
+
+    expect(navigator.handle(InputAction.Down)).toBe(true);
+
+    expect(view.panOffset).toEqual({ x: 0, y: -100 });
+  });
+
+  it('still turns the page on left and right at zoom 1, rather than sliding a little', () => {
+    const view = new FakeView();
+    view.zoomLevel = 1;
+    view.panLimit = 200;   // a book slightly wider than the window
+    const navigator = navigatorOf(view, twoPages().pages, { panStep: 100 });
+
+    navigator.handle(InputAction.Right);
+
+    expect(view.panOffset.x).toBe(0);
+    expect(view.turns).toEqual(['next']);
+  });
 });
 
 describe('BookNavigator in element mode', () => {

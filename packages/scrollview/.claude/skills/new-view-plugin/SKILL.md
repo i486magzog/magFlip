@@ -18,6 +18,8 @@ description: Create or complete a MagFlip view plugin that implements IBookView 
 | `openPageIndexes` | 지금 보이는 페이지 index 배열 (책이 없으면 `[]`) |
 | `isFlipping` | 페이지가 움직이는 중이면 `true`. 이때 `nextPage/prevPage/moveTo` 는 무시해야 한다 |
 | `onFlipEnd(listener)` | 이동이 끝날 때마다 호출, 리스너 제거 함수를 반환. 이동 애니메이션이 없는 뷰는 빈 제거 함수만 반환 |
+| `zoomLevel` | 지금 배율 (확대가 없으면 `1`) |
+| `pan(dx, dy)` | 책을 화면 픽셀만큼 옮기고 **움직였는지** 반환. 화면 밖으로 나가지 않게 자른다. 옮길 수 없는 뷰는 `false` |
 
 ## 새 패키지 절차
 

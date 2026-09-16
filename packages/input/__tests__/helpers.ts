@@ -11,6 +11,11 @@ export class FakeView implements IBookView {
   readonly bookContainerEl = document.createElement('div');
   openPageIndexes: number[] = [1, 2];
   isFlipping = false;
+  zoomLevel = 1;
+  /** How far the book may move from the middle in each direction. */
+  panLimit = 0;
+  /** Where the book stands now. */
+  readonly panOffset = { x: 0, y: 0 };
   /** Every turn the view actually made, in order. */
   readonly turns: string[] = [];
   readonly zoomLevels: number[] = [];
@@ -19,7 +24,20 @@ export class FakeView implements IBookView {
   getBookContainerEl(): HTMLElement { return this.bookContainerEl; }
   view(_book: IBookData, _openPageIndex?: number): HTMLElement { return this.bookContainerEl; }
   closeViewer(): void {}
-  zoom(zoomLevel: number): void { this.zoomLevels.push(zoomLevel); }
+  zoom(zoomLevel: number): void {
+    this.zoomLevel = zoomLevel;
+    this.zoomLevels.push(zoomLevel);
+  }
+  /** Moves within `panLimit`, and refuses a move that would go past it. */
+  pan(dx: number, dy: number): boolean {
+    const limit = (value: number) => Math.min(this.panLimit, Math.max(-this.panLimit, value));
+    const x = limit(this.panOffset.x + dx);
+    const y = limit(this.panOffset.y + dy);
+    if (x === this.panOffset.x && y === this.panOffset.y) { return false; }
+    this.panOffset.x = x;
+    this.panOffset.y = y;
+    return true;
+  }
   nextPage(): void { this.startTurn('next'); }
   prevPage(): void { this.startTurn('prev'); }
   moveTo(pageIndex: number): void { this.startTurn(`to:${pageIndex}`); }

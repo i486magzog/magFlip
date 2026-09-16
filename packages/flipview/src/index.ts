@@ -6,6 +6,7 @@ export * from './flipManager';
 export * from './flipView';
 export * from './gutter';
 export * from './pageWindow';
+export * from './panning';
 
 import '@magflip/core/index.css';
 import './flipView.css';
