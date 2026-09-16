@@ -9,13 +9,17 @@ import { makeBook, makeBundle, makeShape, makeSurface, PAGE_SIZE } from './helpe
 
 const { Single, Spread } = SurfaceKind;
 
+/**
+ * Codes of the problems found. Most books here have a single page, which
+ * cannot end a book; `bookLayout.test.ts` covers that, so it is left out.
+ */
 function codesOf(bundleProblems: ReturnType<typeof validateBookBundle>): ProblemCode[] {
-  return bundleProblems.map(problem => problem.code);
+  return bundleProblems.map(problem => problem.code).filter(code => code !== ProblemCode.LastPageMisaligned);
 }
 
 describe('validateBookBundle', () => {
   it('accepts a plain book', () => {
-    const bundle = makeBundle(makeBook([Single, Spread]), [makeSurface('s0'), makeSurface('s1')]);
+    const bundle = makeBundle(makeBook([Single, Spread, Single]), [makeSurface('s0'), makeSurface('s1'), makeSurface('s2')]);
 
     expect(validateBookBundle(bundle)).toEqual([]);
   });
@@ -59,7 +63,7 @@ describe('validateBookBundle', () => {
 
   it('warns when the extent does not cover the pages', () => {
     const extent = { rect: { x: 100, y: 0, width: 200, height: 200 }, isViewerVisible: true };
-    const bundle = makeBundle(makeBook([Single]), [makeSurface('s0', [], { extent })]);
+    const bundle = makeBundle(makeBook([Single, Single]), [makeSurface('s0', [], { extent }), makeSurface('s1')]);
 
     const problems = validateBookBundle(bundle);
     expect(codesOf(problems)).toEqual([ProblemCode.ExtentExcludesTrim]);
@@ -83,7 +87,7 @@ describe('validateBookBundle', () => {
   it('accepts the font families every browser has', () => {
     const bundle = makeBundle(makeBook([Single]), [makeSurface('s0', [createElement(ElementType.Text, { id: 't' })])]);
 
-    expect(validateBookBundle(bundle)).toEqual([]);
+    expect(codesOf(validateBookBundle(bundle))).toEqual([]);
   });
 
   it('reports an element stored under the wrong key', () => {
@@ -99,7 +103,7 @@ describe('validateBookBundle', () => {
 
     const problems = validateBookBundle(bundle);
     expect(codesOf(problems)).toEqual([ProblemCode.InvalidSchema]);
-    expect(problems[0]?.path).toContain('opacity');
+    expect(problems.find(problem => problem.code === ProblemCode.InvalidSchema)?.path).toContain('opacity');
   });
 
   it('refuses a link that is not http, https, mailto or tel', () => {

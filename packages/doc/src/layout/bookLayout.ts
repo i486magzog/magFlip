@@ -67,6 +67,50 @@ export function canSpreadStartAt(index: number): boolean {
   return index % 2 === 1;
 }
 /**
+ * Blank pages that have to go in with a new surface so that the page order
+ * stays valid.
+ */
+export interface ISurfaceInsertPlan {
+  /** A single page in front of the new surface, so that a spread starts on the left. */
+  blankBefore: boolean;
+  /** A single page right after the new surface, so that the spreads behind it stay on the left. */
+  blankAfter: boolean;
+}
+/**
+ * Works out what inserting a surface right after `afterSurfaceId` (or at the
+ * end) takes to keep the spreads aligned.
+ *
+ * - The cover is a single page, so a spread added to an empty book gets a
+ *   blank cover in front of it.
+ * - A spread whose first page would fall on the right gets a blank page in
+ *   front of it.
+ * - When the pages added shift the next spread onto the right, a blank page
+ *   goes in right after the new surface, which leaves every page behind it
+ *   where it was.
+ *
+ * The last page is not taken care of here: while pages are added one by one
+ * the book is short of a page every other step, and `computeBookLayout`
+ * reports that.
+ */
+export function planSurfaceInsert(book: IBookDoc, kind: SurfaceKind, afterSurfaceId?: string): ISurfaceInsertPlan {
+  const refs = getSortedSurfaceRefs(book);
+  const layout = computeBookLayout(book);
+  const afterIndex = afterSurfaceId === undefined ? -1 : refs.findIndex(ref => ref.id === afterSurfaceId);
+  const position = afterIndex < 0 ? refs.length - 1 : afterIndex;
+
+  const afterPages = refs[position] ? layout.surfacePages.get(refs[position].id) : undefined;
+  const startIndex = afterPages ? (afterPages[afterPages.length - 1]?.index ?? -1) + 1 : 0;
+
+  const blankBefore = kind === SurfaceKind.Spread && !canSpreadStartAt(startIndex);
+  const addedPageCount = (blankBefore ? 1 : 0) + getSurfacePageCount(kind);
+
+  const nextSpread = refs.slice(position + 1).find(ref => ref.kind === SurfaceKind.Spread);
+  const nextSpreadIndex = nextSpread ? layout.surfacePages.get(nextSpread.id)?.[0]?.index : undefined;
+  const blankAfter = nextSpreadIndex !== undefined && !canSpreadStartAt(nextSpreadIndex + addedPageCount);
+
+  return { blankBefore, blankAfter };
+}
+/**
  * Walks the surfaces of a book in order and assigns a page index to each page.
  *
  * Runs in O(n log n) for n surfaces; it is cheap enough to recompute whenever
@@ -102,6 +146,17 @@ export function computeBookLayout(book: IBookDoc): IBookLayout {
     }
     pages.push(...slots);
     surfacePages.set(ref.id, slots);
+  }
+
+  // The back cover stands alone, on the side the cover does not use. That
+  // needs an even page count, which also rules out a spread at the end.
+  if (pages.length % 2 === 1) {
+    problems.push(createProblem(
+      ProblemCode.LastPageMisaligned,
+      ProblemSeverity.Error,
+      `The book has ${pages.length} pages, so its last page does not stand alone opposite the cover. Add or remove a single page.`,
+      { surfaceId: pages[pages.length - 1]?.surfaceId as string, pageIndex: pages.length - 1 },
+    ));
   }
 
   return { pages, surfacePages, lastPageIndex: pages.length - 1, problems };

@@ -46,8 +46,12 @@ function idsOf(nodes: IPublishedNode[]): string[] {
 
 describe('publishBookBundle', () => {
   it('keeps one image that covers both pages of a spread', () => {
-    const book = makeBook([Single, Spread]);
-    const bundle = makeBundle(book, [makeSurface('s0'), makeSurface('s1', [makeImage('cover', 0, PAGE_SIZE.width * 2)])]);
+    const book = makeBook([Single, Spread, Single]);
+    const bundle = makeBundle(book, [
+      makeSurface('s0'),
+      makeSurface('s1', [makeImage('cover', 0, PAGE_SIZE.width * 2)]),
+      makeSurface('s2'),
+    ]);
 
     const result = publishBookBundle(bundle, publishOptions);
 
@@ -56,7 +60,7 @@ describe('publishBookBundle', () => {
     expect(idsOf(nodes)).toEqual(['cover']);
     expect(nodes[0]?.type === ElementType.Image && nodes[0].width).toBe(PAGE_SIZE.width * 2);
     // The two pages of the spread are windows into the same surface.
-    expect(result.book?.pages.slice(1)).toEqual([
+    expect(result.book?.pages.slice(1, 3)).toEqual([
       { index: 1, surfaceId: 's1', surfaceX: 0, side: PageSide.Left, number: 2 },
       { index: 2, surfaceId: 's1', surfaceX: PAGE_SIZE.width, side: PageSide.Right, number: 3 },
     ]);

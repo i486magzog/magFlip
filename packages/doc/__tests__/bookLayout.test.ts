@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canSpreadStartAt, computeBookLayout, getFacingPageIndex, getPageSide } from '../src/layout/bookLayout';
+import { canSpreadStartAt, computeBookLayout, getFacingPageIndex, getPageSide, planSurfaceInsert } from '../src/layout/bookLayout';
 import { PageSide, ReadingDirection } from '../src/model/book';
 import { hasError, ProblemCode } from '../src/model/problem';
 import { SurfaceKind } from '../src/model/surface';
@@ -94,5 +94,62 @@ describe('computeBookLayout', () => {
 
     expect(layout.pages).toEqual([]);
     expect(layout.lastPageIndex).toBe(-1);
+    expect(layout.problems).toEqual([]);
+  });
+
+  it('reports a book whose last page does not stand alone on the left', () => {
+    // Cover, a spread, and nothing behind it: the spread ends the book on the right.
+    const layout = computeBookLayout(makeBook([Single, Spread]));
+
+    expect(layout.problems.map(problem => problem.code)).toEqual([ProblemCode.LastPageMisaligned]);
+    expect(layout.problems[0]?.pageIndex).toBe(2);
+  });
+
+  it('reports a cover that is the only page', () => {
+    expect(computeBookLayout(makeBook([Single])).problems.map(problem => problem.code))
+      .toEqual([ProblemCode.LastPageMisaligned]);
+  });
+});
+
+describe('planSurfaceInsert', () => {
+  const noBlank = { blankBefore: false, blankAfter: false };
+
+  it('gives a spread added to an empty book a blank cover', () => {
+    expect(planSurfaceInsert(makeBook([]), Spread)).toEqual({ blankBefore: true, blankAfter: false });
+    expect(planSurfaceInsert(makeBook([]), Single)).toEqual(noBlank);
+  });
+
+  it('adds single pages one by one, pairing them on their own', () => {
+    expect(planSurfaceInsert(makeBook([Single]), Single)).toEqual(noBlank);
+    expect(planSurfaceInsert(makeBook([Single, Single]), Single)).toEqual(noBlank);
+  });
+
+  it('starts a spread right behind the cover', () => {
+    expect(planSurfaceInsert(makeBook([Single]), Spread)).toEqual(noBlank);
+  });
+
+  it('fills the right page before a spread when the last pair has only its left page', () => {
+    expect(planSurfaceInsert(makeBook([Single, Single]), Spread)).toEqual({ blankBefore: true, blankAfter: false });
+  });
+
+  it('keeps the spreads behind a page inserted in the middle on the left', () => {
+    // Cover, 1-2 spread, 3 left page, 4-5 spread... inserting after the cover.
+    const book = makeBook([Single, Spread, Spread, Single]);
+
+    expect(planSurfaceInsert(book, Single, 's0')).toEqual({ blankBefore: false, blankAfter: true });
+    expect(planSurfaceInsert(book, Spread, 's0')).toEqual(noBlank);
+  });
+
+  it('needs no blank behind a page when only single pages follow', () => {
+    const book = makeBook([Single, Single, Single, Single]);
+
+    expect(planSurfaceInsert(book, Single, 's1')).toEqual(noBlank);
+  });
+
+  it('fixes both sides of a spread inserted in the middle of a pair', () => {
+    // After page 1, a spread would start on page 2; the spread at 3-4 would move to 6.
+    const book = makeBook([Single, Single, Single, Spread, Single]);
+
+    expect(planSurfaceInsert(book, Spread, 's1')).toEqual({ blankBefore: true, blankAfter: true });
   });
 });

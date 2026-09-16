@@ -23,6 +23,8 @@ export enum ProblemCode {
   OrphanSurface = 'orphan-surface',
   /** A spread surface does not start on a left page. */
   SpreadMisaligned = 'spread-misaligned',
+  /** The book does not end with a single page standing alone. */
+  LastPageMisaligned = 'last-page-misaligned',
   /** `masterId` points to a master that does not exist. */
   MissingMaster = 'missing-master',
   /** A master surface uses another master. */
