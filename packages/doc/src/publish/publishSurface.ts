@@ -1,6 +1,7 @@
 import { SCHEMA_VERSION } from '../common/constants';
 import { containsRect, IRect, unionRects } from '../common/geometry';
 import { IAsset, IPublishedAsset } from '../model/asset';
+import { IWidgetElement } from '../model/element';
 import { createProblem, IDocProblem, ProblemCode, ProblemSeverity } from '../model/problem';
 import { IPublishedSurface } from '../model/published';
 import { getSurfaceTrimRect } from '../model/surface';
@@ -15,6 +16,8 @@ export interface IPublishAssetOptions {
   assets: Record<string, IAsset>;
   /** Returns the URL a reader fetches the asset from. */
   resolveAssetUrl: (asset: IAsset) => string;
+  /** Returns the address of the page a widget runs in; see `IResolveSurfaceOptions`. */
+  resolveWidgetUrl?: (element: IWidgetElement) => string | undefined;
 }
 /**
  * The result of publishing one surface.
@@ -54,6 +57,7 @@ export function publishSurface(input: IResolveSurfaceInput, options: IPublishAss
     clipRect: visibleRect,
     includeHidden: false,
     hasAsset: assetId => options.assets[assetId] !== undefined,
+    ...(options.resolveWidgetUrl ? { resolveWidgetUrl: options.resolveWidgetUrl } : {}),
   });
   problems.push(...resolved.problems);
 

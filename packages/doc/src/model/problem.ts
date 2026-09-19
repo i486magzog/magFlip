@@ -51,6 +51,10 @@ export enum ProblemCode {
   UnknownFontFamily = 'unknown-font-family',
   /** A limit in `DOC_LIMITS` was exceeded. */
   LimitExceeded = 'limit-exceeded',
+  /** A widget names a type the server does not offer; it is published as an empty box. */
+  UnknownWidget = 'unknown-widget',
+  /** The props of a widget do not fit its settings. */
+  InvalidWidgetProps = 'invalid-widget-props',
 }
 /**
  * One problem found while validating or publishing a book.

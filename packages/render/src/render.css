@@ -71,6 +71,17 @@
   color: inherit;
   text-decoration: inherit;
 }
+.mf-surface .mf-el-widget:not(:has(iframe)) {
+  border: 1px dashed currentColor;
+  opacity: 0.5;
+}
+.mf-surface .mf-el-widget:not(:has(iframe))::after {
+  content: attr(data-widget-type);
+  display: block;
+  padding: 4px 6px;
+  font: 12px/1.4 system-ui, sans-serif;
+  word-break: break-all;
+}
 .mf-surface .mf-el-shape svg {
   display: block;
   overflow: visible;

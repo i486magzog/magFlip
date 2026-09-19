@@ -23,6 +23,7 @@ src/
 │  ├─ link.ts paint.ts     ILink(url|page), IFill, IStroke
 │  ├─ asset.ts             IAsset(서버 소유), IPublishedAsset
 │  ├─ published.ts         IPublishedBook, IPublishedSurface, IPublishedNode
+│  ├─ widget.ts            IWidgetDefinition(서버 등록부의 형식), 필드 종류, props 기본값·검증
 │  ├─ problem.ts           IDocProblem, ProblemCode, hasError
 │  └─ defaults.ts          createBookDoc/createSurfaceDoc/createElement, DEFAULT_PAGE_SIZE
 ├─ schema/                 zod 스키마. model 과 1:1, __tests__/schemaTypes.test.ts 가 동기화 보증

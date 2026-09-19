@@ -240,3 +240,41 @@ describe('createSurfaceLayer', () => {
     expect(findElement(layer, 'inside').style.left).toBe('40px');
   });
 });
+
+describe('widgets', () => {
+  function widgetLayer(url: string | null, options: Parameters<typeof createSurfaceLayer>[1] = {}): HTMLElement {
+    const widget = createElement(ElementType.Widget, {
+      id: 'w', widgetType: 'magflip.quiz', widgetVersion: 2, props: { question: 'Why?' },
+      x: 0, y: 0, width: 300, height: 200, order: 'a0',
+    });
+    const surfaces = publishSurfaces([{ kind: Single, elements: [widget] }]);
+    const surface = surfaces['s0'] as IPublishedSurface;
+    // Publishing writes the address only when the host resolves one; these
+    // tests set it the way a server would.
+    const node = surface.nodes[0] as { url?: string | null };
+    node.url = url;
+    return createSurfaceLayer(surface, options);
+  }
+
+  it('runs the widget of the publication in a sandboxed frame', () => {
+    const frame = findElement(widgetLayer('https://widgets.test/quiz/2'), 'w').querySelector('iframe');
+
+    expect(frame?.src).toBe('https://widgets.test/quiz/2');
+    expect(frame?.getAttribute('sandbox')).toBe('allow-scripts allow-forms allow-popups');
+  });
+
+  it('lets the host override the address', () => {
+    const frame = findElement(widgetLayer('https://widgets.test/quiz/2', {
+      resolveWidgetUrl: element => `https://mine.test/${element.widgetType}`,
+    }), 'w').querySelector('iframe');
+
+    expect(frame?.src).toBe('https://mine.test/magflip.quiz');
+  });
+
+  it('shows an empty box naming the widget when there is no address', () => {
+    const box = findElement(widgetLayer(null), 'w');
+
+    expect(box.querySelector('iframe')).toBeNull();
+    expect(box.getAttribute('data-widget-type')).toBe('magflip.quiz');
+  });
+});

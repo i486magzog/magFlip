@@ -21,6 +21,7 @@ export * from './model/problem';
 export * from './model/published';
 export * from './model/surface';
 export * from './model/text';
+export * from './model/widget';
 
 export * from './layout/bookLayout';
 export * from './media/imagePlacement';

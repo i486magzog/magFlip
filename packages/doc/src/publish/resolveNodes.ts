@@ -1,6 +1,6 @@
 import { getRectCenter, IRect, ISize, rotatedRectIntersectsRect } from '../common/geometry';
 import { IBookDoc, PageSide } from '../model/book';
-import { ElementType, getElementRect, IElement, isBoxElement } from '../model/element';
+import { ElementType, getElementRect, IElement, isBoxElement, IWidgetElement } from '../model/element';
 import { createProblem, IDocProblem, ProblemCode, ProblemSeverity } from '../model/problem';
 import { IPublishedNode } from '../model/published';
 import { ISurfaceDoc, SurfaceKind } from '../model/surface';
@@ -41,6 +41,12 @@ export interface IResolveSurfaceOptions {
   includeHidden?: boolean;
   /** When set, elements referencing an unknown asset are dropped. */
   hasAsset?: (assetId: string) => boolean;
+  /**
+   * Returns the address of the page a widget runs in, which is written into
+   * the published widget. When set, a widget it has no address for is kept as
+   * an empty box and reported.
+   */
+  resolveWidgetUrl?: (element: IWidgetElement) => string | undefined;
 }
 /**
  * The renderable tree of one surface.
@@ -147,7 +153,7 @@ function toPublishedNodes(
     // A group whose children are all gone would draw nothing.
     if (element.type === ElementType.Group && children.length === 0) { continue; }
 
-    const publishedElement = toPublishedElement(element, input, options);
+    const publishedElement = toPublishedElement(element, input, options, problems);
     collectAssetIds(publishedElement, assetIds);
     published.push({ ...publishedElement, isFromMaster, children } as IPublishedNode);
   }
@@ -161,6 +167,7 @@ function toPublishedElement(
   element: IElement,
   input: IResolveSurfaceInput,
   options: IResolveSurfaceOptions,
+  problems: IDocProblem[],
 ): Record<string, unknown> {
   const published: Record<string, unknown> = { ...element };
   for (const field of EDITOR_ONLY_FIELDS) { delete published[field]; }
@@ -173,6 +180,18 @@ function toPublishedElement(
   const posterAssetId = element.type === ElementType.Video ? element.posterAssetId : null;
   if (posterAssetId !== null && options.hasAsset && !options.hasAsset(posterAssetId)) {
     published['posterAssetId'] = null;
+  }
+  if (element.type === ElementType.Widget && options.resolveWidgetUrl) {
+    const url = element.widgetType === '' ? undefined : options.resolveWidgetUrl(element);
+    published['url'] = url ?? null;
+    if (url === undefined) {
+      problems.push(createProblem(
+        ProblemCode.UnknownWidget,
+        ProblemSeverity.Warning,
+        `Widget "${element.id}" uses "${element.widgetType}" version ${element.widgetVersion}, which is not offered; it shows as an empty box.`,
+        { surfaceId: input.surface.id, elementId: element.id },
+      ));
+    }
   }
   return published;
 }

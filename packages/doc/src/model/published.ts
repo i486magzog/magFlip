@@ -1,7 +1,7 @@
 import { IRect, ISize } from '../common/geometry';
 import { IPublishedAsset } from './asset';
 import { FontStyle, IBookMeta, PageSide, ReadingDirection } from './book';
-import { IElement } from './element';
+import { IElement, IWidgetElement } from './element';
 import { IFill } from './paint';
 import { SurfaceKind } from './surface';
 
@@ -10,11 +10,23 @@ import { SurfaceKind } from './surface';
  */
 type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
 
+type EditorOnlyField = 'parentId' | 'order' | 'name' | 'isHidden' | 'isLocked';
+/**
+ * A widget as it is published: with the address of the page it runs in, so
+ * that a viewer draws it without knowing the widgets the server offers.
+ */
+export type PublishedWidget = Omit<IWidgetElement, EditorOnlyField> & {
+  /**
+   * Address of the widget page. `null` when the server does not offer the
+   * widget; absent in books published before widgets got their address.
+   */
+  url?: string | null;
+};
 /**
  * An element as it is published: editor-only fields removed and the tree
  * already resolved, so the viewer renders it without any further lookup.
  */
-export type PublishedElement = DistributiveOmit<IElement, 'parentId' | 'order' | 'name' | 'isHidden' | 'isLocked'>;
+export type PublishedElement = DistributiveOmit<Exclude<IElement, IWidgetElement>, EditorOnlyField> | PublishedWidget;
 /**
  * A published element together with its children, ordered back to front.
  */

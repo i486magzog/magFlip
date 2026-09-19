@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { IAsset, AssetKind } from '../src/model/asset';
 import { PageSide } from '../src/model/book';
 import { createElement } from '../src/model/defaults';
-import { ElementType } from '../src/model/element';
+import { ElementType, IWidgetElement } from '../src/model/element';
 import { hasError, ProblemCode } from '../src/model/problem';
 import { IPublishedNode } from '../src/model/published';
 import { SurfaceKind } from '../src/model/surface';
 import { TextAlign, TextBlockType, TextFieldKind } from '../src/model/text';
+import { getDefaultWidgetProps, IWidgetDefinition, validateWidgetProps, WidgetFieldKind } from '../src/model/widget';
 import { computeBookLayout } from '../src/layout/bookLayout';
 import { publishBookBundle } from '../src/publish/publishBook';
 import { createSurfaceTextContext, resolveSurfaceNodes } from '../src/publish/resolveNodes';
@@ -203,5 +204,75 @@ describe('resolveSurfaceNodes', () => {
     });
 
     expect(idsOf(result.nodes)).toEqual(['onPage', 'scratch']);
+  });
+});
+
+describe('widgets', () => {
+  function resolveWidget(widgetType: string, resolveWidgetUrl?: (element: IWidgetElement) => string | undefined) {
+    const book = makeBook([Single]);
+    const widget = createElement(ElementType.Widget, { id: 'w', widgetType, widgetVersion: 2, x: 0, y: 0, width: 100, height: 100, order: 'a0' });
+    return resolveSurfaceNodes({
+      surface: makeSurface('s0', [widget]),
+      kind: Single,
+      pageSize: PAGE_SIZE,
+      textContext: createSurfaceTextContext(book, computeBookLayout(book), 's0'),
+    }, resolveWidgetUrl ? { resolveWidgetUrl } : {});
+  }
+
+  it('writes the address of the widget page into the published widget', () => {
+    const result = resolveWidget('magflip.quiz', element => `https://widgets.test/${element.widgetType}/${element.widgetVersion}`);
+
+    expect(result.nodes[0]).toMatchObject({ type: ElementType.Widget, url: 'https://widgets.test/magflip.quiz/2' });
+    expect(result.problems).toEqual([]);
+  });
+
+  it('keeps a widget nobody offers as an empty box, and says so', () => {
+    const result = resolveWidget('someone.gone', () => undefined);
+
+    expect(result.nodes[0]).toMatchObject({ url: null });
+    expect(result.problems.map(problem => [problem.code, problem.severity])).toEqual([[ProblemCode.UnknownWidget, 'warning']]);
+  });
+
+  it('leaves the address out when nothing resolves it', () => {
+    expect(resolveWidget('magflip.quiz').nodes[0]).not.toHaveProperty('url');
+  });
+});
+
+describe('widget settings', () => {
+  const definition: IWidgetDefinition = {
+    type: 'magflip.quiz',
+    version: 1,
+    name: 'Quiz',
+    description: '',
+    defaultSize: { width: 300, height: 200 },
+    fields: [
+      { kind: WidgetFieldKind.Text, key: 'question', label: 'Question', defaultValue: 'Why?', maxLength: 10 },
+      { kind: WidgetFieldKind.Lines, key: 'choices', label: 'Choices', defaultValue: ['A', 'B'], maxItems: 3 },
+      { kind: WidgetFieldKind.Number, key: 'answer', label: 'Answer', defaultValue: 1, min: 1, isInteger: true },
+      { kind: WidgetFieldKind.Color, key: 'color', label: 'Color', defaultValue: '#1f2937' },
+    ],
+  };
+
+  it('starts from the defaults, as copies', () => {
+    const props = getDefaultWidgetProps(definition);
+
+    expect(props).toEqual({ question: 'Why?', choices: ['A', 'B'], answer: 1, color: '#1f2937' });
+    expect(props['choices']).not.toBe(definition.fields[1]?.defaultValue);
+  });
+
+  it('accepts what fits and props it does not know', () => {
+    expect(validateWidgetProps(definition, { ...getDefaultWidgetProps(definition), legacy: true })).toEqual([]);
+  });
+
+  it('says which props do not fit', () => {
+    const errors = validateWidgetProps(definition, {
+      question: 'Far too long a question',
+      choices: ['A', 'B', 'C', 'D'],
+      answer: 1.5,
+      color: 'red',
+    });
+
+    expect(errors).toHaveLength(4);
+    expect(errors[0]).toContain('"question"');
   });
 });
