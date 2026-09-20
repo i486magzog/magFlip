@@ -17,7 +17,7 @@ description: Build, type-check, test and run the MagFlip demo locally without bu
 3. 단위 테스트: `npm test` (Jest, `packages/flipview/__tests__`, core 는 TS 소스로 매핑되어 빌드 불필요)
 4. 빌드: `npm run build:local` (core → flipview → scrollview → minjs 순서 보장)
    - `@magflip/flipview/index.css ... external` 경고는 정상.
-5. 브라우저 확인: `npm run serve` (백그라운드) → `http://localhost:8090/docs/examples/local/`
+5. 브라우저 확인: `npm run serve` (백그라운드) → `http://localhost:8190/docs/examples/local/`
    - 포트 사용 중이면 `PORT=8081 npm run serve`.
    - 확인 항목: 책 썸네일 클릭 → 열림, 오른쪽/왼쪽 zone 드래그 넘김, Next/Prev, Move(앞/뒤), Zoom 슬라이더, X 닫기, 첫/마지막 페이지에서 닫힌 책 모양.
    - 콘솔: `window.flipView`, `window.bookViewer`. resize 시 `getBoundingClientRect` 에러는 알려진 이슈(known-issues #1).

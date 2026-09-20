@@ -4,7 +4,7 @@
  * Serves the repository root so that example pages can load
  * the locally built bundle at /packages/minjs/magflip.min.js.
  *
- * Usage: npm run serve            (default port 8090)
+ * Usage: npm run serve            (default port 8190)
  *        PORT=3000 npm run serve
  */
 import { createServer } from 'node:http';
@@ -13,7 +13,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT_DIR = resolve(fileURLToPath(import.meta.url), '../..');
-const PORT = Number(process.env.PORT) || 8090;
+const PORT = Number(process.env.PORT) || 8190;
 const LOCAL_BUNDLE = join(ROOT_DIR, 'packages/minjs/magflip.min.js');
 
 const MIME_TYPES = {

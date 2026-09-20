@@ -41,7 +41,7 @@ cat docs/examples/local/sample-book/surfaces/<id>.json | head -60
 ```bash
 npm test -w packages/render          # vitest + happy-dom
 npm run build:local                  # doc → render → core → … 순서
-npm run serve                        # http://localhost:8090/docs/examples/local/
+npm run serve                        # http://localhost:8190/docs/examples/local/
 ```
 
 브라우저에서 네 번째 책(게시본 샘플)으로 확인한다: 표지 텍스트, 펼침을 가로지르는 이미지, 마스터 쪽번호, 본문 링크, Expand 버튼.
