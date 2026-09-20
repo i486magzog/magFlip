@@ -29,6 +29,16 @@ export interface IRenderOptions {
    */
   isInteractive?: boolean;
   /**
+   * The language the reader is reading in, as a language tag ('en', 'ko').
+   *
+   * The page itself is content and is never translated: this is only passed on
+   * to widgets, which carry words of their own - a card that says "Tap to
+   * flip". A published book has one address per widget and is read by people
+   * who read different languages, so the language cannot be part of that
+   * address and travels with the props instead.
+   */
+  locale?: string;
+  /**
    * Called for every rendered node, after its element is built. The editor uses
    * it to attach selection handles to the element of an id.
    */

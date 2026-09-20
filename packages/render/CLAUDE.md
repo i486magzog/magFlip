@@ -9,7 +9,7 @@
 src/
 ├─ index.ts                 공개 API
 ├─ common/
-│  ├─ renderOptions.ts      IRenderOptions (resolveWidgetUrl, onPageLink, onUrlLink, isInteractive, onNodeRendered)
+│  ├─ renderOptions.ts      IRenderOptions (resolveWidgetUrl, onPageLink, onUrlLink, isInteractive, locale, onNodeRendered)
 │  ├─ style.ts              px/round, applyRect, applyTransform, toCssFill, toGradientVector, createDiv
 │  └─ types.ts              PublishedElementOf<T>
 ├─ nodes/                   요소 타입별 DOM 생성
@@ -17,7 +17,7 @@ src/
 │  ├─ textNode.ts           문단·목록 기호·런·마크 (textContent 만 사용)
 │  ├─ shapeNode.ts          SVG rect/ellipse/line/path, 그라디언트 defs
 │  ├─ mediaNode.ts          video/audio
-│  ├─ widgetNode.ts         sandbox iframe + postMessage(props)
+│  ├─ widgetNode.ts         sandbox iframe + postMessage(props·locale)
 │  └─ link.ts               <a> 생성, URL 재검사, 페이지 링크 콜백
 ├─ surfaceLayer.ts          노드 트리 → 층(layer). data-mf-id 부여
 ├─ pageRenderer.ts          층에서 한 페이지만 잘라 보여주고 배율을 맞춤 (ResizeObserver)
@@ -34,6 +34,7 @@ src/
 - 층의 좌표 = surface 좌표 − `visibleRect` 원점. 페이지 잘라내기와 배율은 `PageRenderer` 만 담당한다.
 - 그룹은 좌표계를 만들지 않는다(`.mf-el-group` 은 0,0 크기 0). 자식은 surface 좌표 그대로.
 - 렌더러는 문서를 고치지 않는다. 값이 이상하면 그대로 그리고, 검증은 `@magflip/doc/authoring` 이 한다.
+- **렌더러는 번역하지 않는다.** 그리는 글자는 전부 저자가 쓴 내용이다. `@magflip/i18n` 을 import 하지 않으며, `options.locale` 은 위젯에 전달만 한다(위젯은 제 말이 있다). 게시본의 위젯 주소에 언어를 넣지 않는다 — 한 번 게시한 책을 여러 언어의 독자가 읽는다.
 
 ## 명령
 

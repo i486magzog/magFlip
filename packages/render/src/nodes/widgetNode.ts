@@ -53,6 +53,7 @@ export function createWidgetNode(element: PublishedWidget, options: IRenderOptio
     widgetType: element.widgetType,
     widgetVersion: element.widgetVersion,
     props: element.props,
+    locale: options.locale,
   }, '*');
 
   frame.addEventListener('load', sendProps);
