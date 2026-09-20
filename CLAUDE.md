@@ -6,6 +6,7 @@
 
 | 경로 | 내용 | 가이드 |
 | --- | --- | --- |
+| `packages/i18n` | `@magflip/i18n` — Editor/Server/TV 공용 다국어 기반(로케일·메시지 카탈로그·복수형·Intl 서식). 말 자체는 각 앱이 가진다 | `packages/i18n/CLAUDE.md` |
 | `packages/doc` | `@magflip/doc` — Editor/Server/Viewer 공용 문서 모델(타입·zod 스키마·페이지 레이아웃·마스터·게시·Yjs 매핑) | `packages/doc/CLAUDE.md` |
 | `packages/render` | `@magflip/render` — 게시된 surface 를 DOM 으로 그리는 공용 렌더러(뷰어·에디터 공용) | `packages/render/CLAUDE.md` |
 | `packages/core` | `@magflip/core` — Book/Page 모델, BookShelfManager, BookViewer, MZMath, models.ts | `packages/core/CLAUDE.md` |
@@ -21,15 +22,16 @@
 
 의존 방향: `flipview`, `scrollview`, `input` → `core`; `render` → `doc`; `minjs` → 전부. **core 는 다른 MagFlip 패키지를 import 하지 않는다.**
 `input` 은 뷰 구현(flipview)이 아니라 규약(`IBookView`)에만 의존한다 → 어떤 뷰에도 붙는다.
-`doc` 은 아무 패키지에도 의존하지 않는다(가장 아래). Editor·Server 와 공유하는 형식이므로 DOM 코드를 넣지 않는다.
+`doc` 과 `i18n` 은 아무 패키지에도 의존하지 않는다(가장 아래). Editor·Server 와 공유하므로 DOM 코드를 넣지 않는다.
+화면의 말은 `i18n`, 문서·DB 에서 온 값은 번역하지 않는다 → 뷰어·렌더러는 `i18n` 을 import 하지 않는다(글자가 전부 내용이다).
 뷰어가 게시본을 그리는 경로는 `IPageData.render` 콜백이다 → core 는 게시 형식을 모른다.
 
 ## 명령어 (저장소 루트)
 
 ```bash
 npm install              # workspaces 링크 (node_modules/@magflip/* → packages/*)
-npm run build:local      # doc → render → core → input → flipview → scrollview → minjs 빌드. 버전 변경 없음
-npm test                 # 전 패키지 (doc·render·input: Vitest, core·flipview: Jest)
+npm run build:local      # i18n → doc → render → core → input → flipview → scrollview → minjs 빌드. 버전 변경 없음
+npm test                 # 전 패키지 (i18n·doc·render·input: Vitest, core·flipview: Jest)
 npm run sample:book      # docs/examples/local/sample-book 게시본 다시 생성
 npm run typecheck        # 모든 패키지 tsc --noEmit
 npm run serve            # http://localhost:8190/docs/examples/local/

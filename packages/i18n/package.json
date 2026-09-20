@@ -1,0 +1,49 @@
+{
+  "name": "@magflip/i18n",
+  "version": "0.1.0",
+  "title": "MagFlip(Magzog's flip book) Internationalization Package",
+  "description": "The language of the interface, shared by MagFlipEditor, MagFlipServer and MagFlipTV: locales, message catalogs, interpolation, plurals and Intl formatting.",
+  "type": "module",
+  "author": {
+    "name": "Shinkee Cho",
+    "email": "sing@magzog.com",
+    "url": "https://github.com/i486magzog"
+  },
+  "license": "MIT",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "sideEffects": false,
+  "keywords": [
+    "magflip",
+    "magzog",
+    "i18n",
+    "l10n",
+    "locale"
+  ],
+  "homepage": "https://github.com/i486magzog/magFlip",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i486magzog/magFlip.git",
+    "directory": "packages/i18n"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build:local": "tsc --noEmit && npx rollup -c",
+    "versionup:minor": "npm version minor --git-tag-version",
+    "prebuild": "npm version patch",
+    "build": "tsc --noEmit && npx rollup -c",
+    "build:watch": "npx rollup -cw",
+    "pub": "npm publish --access public --otp=$npm_config_otp"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "rollup": "^4.24.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2",
+    "vitest": "^5.0.0"
+  }
+}
