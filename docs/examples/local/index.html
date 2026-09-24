@@ -96,8 +96,11 @@
      * Creates a Book whose pages are the pictures in resources/book{bookNum},
      * page0.jpg ~ page{imageCnt-1}.jpg. A book with more pages than pictures
      * shows them again, which gives the shelf a thick book to stand.
+     * @param options.id defaults to `book{bookNum}-{pageCnt}`.
+     * @param options.hasSpinePicture false leaves the spine without a picture,
+     *   so that it takes a color from the title.
      */
-    function createSampleBook(bookNum, imageCnt, title, pageCnt = imageCnt) {
+    function createSampleBook(bookNum, imageCnt, title, { pageCnt = imageCnt, id, hasSpinePicture = true } = {}) {
       const pages = [];
       for (let i = 0; i < pageCnt; i++) {
         pages.push({ id: `page${i}`, index: i, image: `${RESOURCE_DIR}/book${bookNum}/page${i % imageCnt}.jpg` });
@@ -105,14 +108,44 @@
 
       const cover = pages[0].image;
       const book = new Book({
-        id: `book${bookNum}-${pageCnt}`,
+        id: id ?? `book${bookNum}-${pageCnt}`,
         title,
         lastPageIndex: pageCnt - 1,
-        thumbnails: { spine: cover, small: cover, medium: cover, cover: { front: cover, back: cover } },
+        thumbnails: {
+          spine: hasSpinePicture ? cover : '',
+          small: cover,
+          medium: cover,
+          cover: { front: cover, back: cover },
+        },
       });
       book.importPages(pages, { width: 700, height: 700 });
       return book;
     }
+
+    /**
+     * More books, so that a row fills up and a narrow screen sends books on to
+     * the next shelf: [sample pictures, picture count, title, page count]. Their
+     * spines have no picture, as many books have none, and each takes a color
+     * from its title.
+     */
+    const MORE_BOOKS = [
+      [1, 6, '바다의 기억', 96],
+      [2, 10, 'City Lights', 48],
+      [3, 16, '봄날의 정원', 128],
+      [2, 10, 'The Long Road Home', 320],
+      [1, 6, '한밤의 도서관', 240],
+      [3, 16, 'Kitchen Notes', 72],
+      [2, 10, '작은 새의 노래', 36],
+      [1, 6, 'Mountains & Rivers', 180],
+      [3, 16, '여름 방학', 60],
+      [2, 10, 'Letters to Lisbon', 150],
+      [1, 6, '고양이 식당', 88],
+      [3, 16, 'Silent Harbor', 260],
+      [2, 10, '겨울 산책', 44],
+      [1, 6, 'Paper Moons', 120],
+      [3, 16, '별을 세는 밤', 210],
+      [2, 10, 'Northern Tales', 400],
+    ];
 
     /** Lets the reader lay the shelf out as a grid or as a bookshelf. */
     function addLayoutButtons(shelf) {
@@ -275,8 +308,11 @@
       shelf.addBook(createSampleBook(1, 6, '도토리 속 도시'));
       shelf.addBook(createSampleBook(2, 10, 'Street Portraits'));
       shelf.addBook(createSampleBook(3, 16, '웨딩 데이'));
-      shelf.addBook(createSampleBook(2, 10, 'Portraits, The Complete Year', 180));
-      shelf.addBook(createSampleBook(3, 16, 'Wedding Stories', 64));
+      shelf.addBook(createSampleBook(2, 10, 'Portraits, The Complete Year', { pageCnt: 180 }));
+      shelf.addBook(createSampleBook(3, 16, 'Wedding Stories', { pageCnt: 64 }));
+      MORE_BOOKS.forEach(([bookNum, imageCnt, title, pageCnt], index) => {
+        shelf.addBook(createSampleBook(bookNum, imageCnt, title, { pageCnt, id: `more${index}`, hasSpinePicture: false }));
+      });
 
       if (!isTvMode) { addToolbar(bookViewer, flipView, () => publishedSource); }
       addKeyHint(bookViewer);

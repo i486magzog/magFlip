@@ -38,8 +38,15 @@
  * move smoothly from one to another. The poses are those of getBookPose() in
  * bookObjectMetrics.ts: a raised book comes toward the reader by .14 of its
  * height (RAISE_PULL_RATIO) and turns 18 degrees (RAISE_TURN).
+ *
+ * The pointer goes through it, to the place the book stands in. A raised
+ * cover swings out over the books beside it, and if it took the pointer,
+ * moving onto them would keep this book up instead of raising the next one.
+ * The place does not move, so a book cannot move out from under the pointer
+ * either.
  */
 .book-object-body {
+  pointer-events: none;
   position: absolute;
   top: 0;
   left: 50%;

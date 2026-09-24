@@ -41,6 +41,7 @@ src/
 - **책 객체(`book.objectEl`)도 처음 요구받을 때 만들어진다.** 이미 있는지는 `hasObjectEl`. `setObjectFace`·`setObjectPickedUp`·`getObjectPlace` 는 만들어지지 않은 객체를 만들지 않는다(TV 처럼 읽기만 하는 곳이 표지 그림을 받지 않게).
   - 누르면(`click`, `Enter`, `Space`) `BookEvent.objectActivated` → 책을 가진 매니저가 `pickupAndView`. 배치하는 쪽은 클릭을 연결하지 않는다.
   - 크기는 CSS 변수(`--mf-book-height` 는 놓는 쪽, `--mf-book-aspect`/`-spine`/`-trim-height` 는 책). 자세는 모두 `translate3d() rotateY()` 모양 — `getBookPose()` 와 `bookObject.css` 의 숫자를 같이 고친다.
+  - 포인터는 책의 **자리**(`.book-object` 의 레이아웃 상자)만 받는다. 도는 몸체 `.book-object-body` 는 `pointer-events: none`. 빠져나온 표지가 오른쪽 책들을 덮어도 포인터가 그 책의 자리에 들어가면 그 책이 올라오고, 자리는 움직이지 않으니 책이 포인터 밑에서 빠져나가 떨리는 일도 없다. 몸체나 면에 포인터를 다시 켜지 않는다.
 - **비행**: 원본이 아니라 복사본(`BookFlight`)이 날고, 원본은 `.is-picked-up` 으로 자리만 비운다. 도착·출발 위치는 뷰의 `getClosedBookPlace?()`(없으면 날지 않음). 동작 줄이기·`animateBook: false`·`Element.animate` 없음이면 `canFly()` 가 false.
 - `Book.fetchPages()` / `BookShelfManager.loadAndAddBooks()` 는 서버 연동 전 샘플 코드(TODO).
 - `IBookView` 가 뷰 플러그인 규약. core 는 구체 뷰(FlipView)를 모른다.

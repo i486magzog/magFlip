@@ -10,15 +10,22 @@
  *   --mf-shelf-shortest      how short a book may stand, against the tallest (default .62)
  *   --mf-shelf-headroom      the room above the tallest book (default 30px)
  *   --mf-shelf-board         how thick a board is (default 16px)
+ *   --mf-shelf-frame         how thick the sides and the top of the case are (default 16px)
+ *   --mf-shelf-min-rows      how many shelves there are at least, filled or not (default 3)
  *   --mf-shelf-back          the wall behind the books
- *   --mf-shelf-wood          the boards
- *   --mf-shelf-frame         the frame around the shelves
+ *   --mf-shelf-wood          the wood of the case, under its grain
  * Set by BookShelf:
  *   --mf-shelf-tallest       the designed height of the tallest book, without a unit
  */
 .mf-shelf {
   box-sizing: border-box;
   width: 100%;
+  /*
+   * A raised book comes up over the books beside it (z-index in core's
+   * bookObject.css), but not over what covers the shelf, such as the viewer
+   * that opens on top of it.
+   */
+  isolation: isolate;
 }
 /* Set for a moment while the books take new heights (BookShelf.updateTallest). */
 .mf-shelf.is-resizing .book-object,
@@ -62,33 +69,94 @@
 }
 
 /*
- * Bookshelf: books stand in rows, each row on a board. A row is as tall as
- * the tallest book and some room above it, so the boards can be painted on
- * the wall behind at fixed steps however many rows there are.
+ * Bookshelf: books stand in rows, each row on a board, in a wooden case of at
+ * least --mf-shelf-min-rows shelves. A row is as tall as the tallest book and
+ * some room above it, so the boards can be painted on the wall behind at fixed
+ * steps however many rows there are; a book that does not fit on a row goes
+ * on to the next one.
+ *
+ * The wood is --mf-shelf-wood with a grain laid over it: a picture of noise
+ * drawn by the browser (feTurbulence), stretched along the wood and gray
+ * around the middle, so that `overlay` only lightens and darkens the color.
+ * It runs along the boards and the top, and up the two sides.
  */
 .mf-shelf.layout-shelf {
   --mf-shelf-row: calc(var(--mf-shelf-book-height, 200px) + var(--mf-shelf-headroom, 30px) + var(--mf-shelf-board, 16px));
   --mf-shelf-board-top: calc(var(--mf-shelf-row) - var(--mf-shelf-board, 16px));
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  column-gap: 2px;
+  /*
+   * The books stand side by side with nothing between them. A gap would be a
+   * place under the pointer where no book is, and a book raised by the pointer
+   * would drop there on its way to the next one.
+   */
+  column-gap: 0;
+  min-height: calc(var(--mf-shelf-min-rows, 3) * var(--mf-shelf-row) + var(--mf-shelf-frame, 16px));
   padding: 0 22px;
-  border: solid var(--mf-shelf-frame, #5e3d26);
-  border-width: 14px 14px 0;
-  background-color: var(--mf-shelf-back, #efe6d8);
-  background-image: repeating-linear-gradient(to bottom,
-    /* the shadow of the board above */
-    rgba(40, 24, 12, .22) 0,
-    rgba(40, 24, 12, 0) 14px,
-    /* the wall, darker where the books stand */
-    rgba(40, 24, 12, 0) calc(var(--mf-shelf-board-top) - 40px),
-    rgba(40, 24, 12, .1) var(--mf-shelf-board-top),
-    /* the board: a lit front edge, then its face */
-    #c69466 var(--mf-shelf-board-top),
-    #c69466 calc(var(--mf-shelf-board-top) + 2px),
-    var(--mf-shelf-wood, #9a6a42) calc(var(--mf-shelf-board-top) + 2px),
-    #7c5232 var(--mf-shelf-row));
+  /* The top of the case. The sides are drawn over the side borders below. */
+  border: solid transparent;
+  border-width: var(--mf-shelf-frame, 16px) var(--mf-shelf-frame, 16px) 0;
+  background-color: var(--mf-shelf-wood, #9a6a42);
+  background-image:
+    /* the top: lit along its front, in shadow underneath */
+    linear-gradient(to bottom,
+      rgba(255, 236, 210, .28), rgba(255, 236, 210, 0) 35%,
+      rgba(40, 24, 12, 0) 60%, rgba(40, 24, 12, .3)),
+    repeating-linear-gradient(to bottom,
+      /* the shadow of the board above */
+      rgba(40, 24, 12, .3) 0,
+      rgba(40, 24, 12, 0) 18px,
+      /* the wall, darker where the books stand */
+      rgba(40, 24, 12, 0) calc(var(--mf-shelf-board-top) - 44px),
+      rgba(40, 24, 12, .12) var(--mf-shelf-board-top),
+      /* the board: its front edge catches the light, and its face turns away below */
+      rgba(255, 240, 220, .5) var(--mf-shelf-board-top),
+      rgba(255, 240, 220, 0) calc(var(--mf-shelf-board-top) + 4px),
+      rgba(40, 24, 12, 0) calc(var(--mf-shelf-board-top) + 6px),
+      rgba(40, 24, 12, .3) var(--mf-shelf-row)),
+    /* the wall, over the wood everywhere but on the boards */
+    repeating-linear-gradient(to bottom,
+      var(--mf-shelf-back, #efe6d8) 0 var(--mf-shelf-board-top),
+      transparent var(--mf-shelf-board-top) var(--mf-shelf-row)),
+    /* the grain, along the boards and the top */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='320'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0022 .05' numOctaves='3' seed='5' stitchTiles='stitch' result='a'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.003 .03' numOctaves='4' seed='6' stitchTiles='stitch'/%3E%3CfeComponentTransfer result='b'%3E%3CfeFuncR type='table' tableValues='.34 .66 .34 .66 .34 .66 .34 .66 .34 .66 .34 .66 .34'/%3E%3C/feComponentTransfer%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.02 .6' numOctaves='2' seed='7' stitchTiles='stitch' result='c'/%3E%3CfeComposite in='a' in2='b' operator='arithmetic' k2='.55' k3='.35' k4='.05'/%3E%3CfeComposite in2='c' operator='arithmetic' k2='1' k3='.12' k4='-.06'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='640' height='320' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 100% var(--mf-shelf-frame, 16px), auto, auto, auto;
+  background-position: top, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat, repeat;
+  background-origin: border-box, padding-box, padding-box, border-box;
+  background-clip: border-box, padding-box, padding-box, border-box;
+  background-blend-mode: normal, normal, normal, overlay;
+  /* The wall stands back from the sides, in their shadow. */
+  box-shadow:
+    inset 10px 0 14px -10px rgba(40, 24, 12, .45),
+    inset -10px 0 14px -10px rgba(40, 24, 12, .45);
+}
+/* The sides of the case, with the grain running up. */
+.mf-shelf.layout-shelf::before,
+.mf-shelf.layout-shelf::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--mf-shelf-frame, 16px) * -1);
+  bottom: 0;
+  width: var(--mf-shelf-frame, 16px);
+  pointer-events: none;
+  background-color: var(--mf-shelf-wood, #9a6a42);
+  background-image:
+    /* lit on the outside, in shadow toward the books */
+    linear-gradient(var(--mf-shelf-side-light, 90deg),
+      rgba(255, 236, 210, .3), rgba(255, 236, 210, 0) 40%,
+      rgba(40, 24, 12, 0) 70%, rgba(40, 24, 12, .35)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='640'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.05 .0022' numOctaves='3' seed='11' stitchTiles='stitch' result='a'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.03 .003' numOctaves='4' seed='12' stitchTiles='stitch'/%3E%3CfeComponentTransfer result='b'%3E%3CfeFuncR type='table' tableValues='.34 .66 .34 .66 .34 .66 .34 .66 .34 .66 .34 .66 .34'/%3E%3C/feComponentTransfer%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6 .02' numOctaves='2' seed='13' stitchTiles='stitch' result='c'/%3E%3CfeComposite in='a' in2='b' operator='arithmetic' k2='.55' k3='.35' k4='.05'/%3E%3CfeComposite in2='c' operator='arithmetic' k2='1' k3='.12' k4='-.06'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='320' height='640' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-blend-mode: normal, overlay;
+}
+.mf-shelf.layout-shelf::before { left: calc(var(--mf-shelf-frame, 16px) * -1); }
+.mf-shelf.layout-shelf::after {
+  --mf-shelf-side-light: 270deg;
+  right: calc(var(--mf-shelf-frame, 16px) * -1);
+  /* Another part of the grain, so that the two sides differ. */
+  background-position: 0 0, -150px -250px;
 }
 .mf-shelf.layout-shelf .mf-shelf-slot {
   box-sizing: border-box;

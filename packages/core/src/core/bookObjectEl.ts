@@ -54,7 +54,8 @@ const FALLBACK_HUES = 12;
 export class BookObjectEl {
   /**
    * The element to place. Its layout box is the face the reader sees: a cover,
-   * or the spine.
+   * or the spine. It is also where the pointer finds the book, however the
+   * book turns inside it.
    */
   readonly element: HTMLElement;
   /**
