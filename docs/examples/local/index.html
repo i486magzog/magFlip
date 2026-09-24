@@ -7,15 +7,19 @@
     This page loads the bundle built from the local source code.
     1. npm run build:local
     2. npm run serve
-    3. open http://localhost:8080/docs/examples/local/
+    3. open http://localhost:8190/docs/examples/local/
   -->
   <script src="../../../packages/minjs/magflip.min.js"></script>
   <style>
-    #bookShelf .book,
-    #bookShelf .book-holder,
-    #bookShelf .book-on-shelf {
-      width: 200px !important;
-      height: 200px !important;
+    /* Grid or bookshelf. The page chooses; @magflip/shelf only lays the books out. */
+    #shelfLayout {
+      display: flex;
+      gap: 6px;
+      padding: 16px 28px 0;
+      font: 14px/1.4 system-ui, sans-serif;
+    }
+    #shelfLayout button[aria-pressed="true"] {
+      font-weight: 600;
     }
     #toolbar {
       position: absolute;
@@ -72,6 +76,11 @@
   </style>
 </head>
 <body>
+  <div id="shelfLayout" role="group" aria-label="Layout">
+    <button type="button" data-layout="grid">Grid</button>
+    <button type="button" data-layout="shelf">Shelf</button>
+  </div>
+  <div id="bookShelf"></div>
   <!-- Sample images are shared with the prebuild example. -->
   <script>
     const RESOURCE_DIR = '../prebuild/resources';
@@ -83,21 +92,43 @@
         '  npm run build:local\n  npm run serve</pre>';
     }
 
-    /** Creates a Book whose pages are page0.jpg ~ page{pageCnt-1}.jpg in resources/book{bookNum}. */
-    function createSampleBook(bookNum, pageCnt) {
+    /**
+     * Creates a Book whose pages are the pictures in resources/book{bookNum},
+     * page0.jpg ~ page{imageCnt-1}.jpg. A book with more pages than pictures
+     * shows them again, which gives the shelf a thick book to stand.
+     */
+    function createSampleBook(bookNum, imageCnt, title, pageCnt = imageCnt) {
       const pages = [];
       for (let i = 0; i < pageCnt; i++) {
-        pages.push({ id: `page${i}`, index: i, image: `${RESOURCE_DIR}/book${bookNum}/page${i}.jpg` });
+        pages.push({ id: `page${i}`, index: i, image: `${RESOURCE_DIR}/book${bookNum}/page${i % imageCnt}.jpg` });
       }
 
       const cover = pages[0].image;
       const book = new Book({
-        id: `book${bookNum}`,
+        id: `book${bookNum}-${pageCnt}`,
+        title,
         lastPageIndex: pageCnt - 1,
         thumbnails: { spine: cover, small: cover, medium: cover, cover: { front: cover, back: cover } },
       });
       book.importPages(pages, { width: 700, height: 700 });
       return book;
+    }
+
+    /** Lets the reader lay the shelf out as a grid or as a bookshelf. */
+    function addLayoutButtons(shelf) {
+      const group = document.getElementById('shelfLayout');
+      const showPressed = () => {
+        group.querySelectorAll('button').forEach((button) => {
+          button.setAttribute('aria-pressed', String(button.dataset.layout === shelf.layout));
+        });
+      };
+      group.addEventListener('click', (event) => {
+        const layout = event.target.dataset.layout;
+        if (!layout) { return; }
+        shelf.setLayout(layout);
+        showPressed();
+      });
+      showPressed();
     }
 
     /**
@@ -237,9 +268,15 @@
       bookViewer.registerView(flipView);
       bookViewer.setCurView(flipView.id);
 
-      shelfManager.importBookToShelf(createSampleBook(1, 6));
-      shelfManager.importBookToShelf(createSampleBook(2, 10));
-      shelfManager.importBookToShelf(createSampleBook(3, 16));
+      // The shelf lays the books out; pressing one opens it through the manager.
+      const shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
+      addLayoutButtons(shelf);
+
+      shelf.addBook(createSampleBook(1, 6, '도토리 속 도시'));
+      shelf.addBook(createSampleBook(2, 10, 'Street Portraits'));
+      shelf.addBook(createSampleBook(3, 16, '웨딩 데이'));
+      shelf.addBook(createSampleBook(2, 10, 'Portraits, The Complete Year', 180));
+      shelf.addBook(createSampleBook(3, 16, 'Wedding Stories', 64));
 
       if (!isTvMode) { addToolbar(bookViewer, flipView, () => publishedSource); }
       addKeyHint(bookViewer);
@@ -247,7 +284,7 @@
       try {
         const published = await createPublishedBook(flipViewRef);
         publishedSource = published.source;
-        shelfManager.importBookToShelf(published.book);
+        shelf.addBook(published.book);
         window.publishedSource = published.source;
         // Someone who arrived with `?book=` asked for that book - the editor's
         // "뷰어에서 보기" link does - so open it rather than leaving them to
@@ -261,6 +298,7 @@
 
       // Exposed for debugging in the browser console.
       window.shelfManager = shelfManager;
+      window.shelf = shelf;
       window.bookViewer = bookViewer;
       window.flipView = flipView;
     });

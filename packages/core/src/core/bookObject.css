@@ -1,0 +1,243 @@
+/*
+ * A book seen from outside (BookObjectEl): a box in 3D whose faces are the two
+ * covers, the spine and the edges of the pages.
+ *
+ * Set by whoever places the book:
+ *   --mf-book-height        how tall the book is drawn (default 240px)
+ *   --mf-book-focus-color   the ring around a book that has the keyboard focus
+ * Set by the book, from its own data:
+ *   --mf-book-aspect        width over height of a cover
+ *   --mf-book-spine         thickness over height - it grows with the pages
+ *   --mf-book-trim-height   the height it was designed at, in its own pixels, without a unit
+ *   --mf-book-color         the color under its pictures
+ */
+.book-object {
+  --mf-book-h: var(--mf-book-height, 240px);
+  --mf-book-w: calc(var(--mf-book-h) * var(--mf-book-aspect, 0.6667));
+  --mf-book-t: calc(var(--mf-book-h) * var(--mf-book-spine, 0.12));
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--mf-book-w);
+  height: var(--mf-book-h);
+  perspective: calc(var(--mf-book-h) * 5);
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: width .35s cubic-bezier(.2, .8, .2, 1);
+}
+/* The layout box is the face the reader sees. */
+.book-object.face-spine { width: var(--mf-book-t); }
+.book-object[role="button"] { cursor: pointer; }
+
+/*
+ * The box that turns. Each face is placed on it below.
+ *
+ * Every pose is written as translate3d() rotateY(), so that the browser can
+ * move smoothly from one to another. The poses are those of getBookPose() in
+ * bookObjectMetrics.ts: a raised book comes toward the reader by .14 of its
+ * height (RAISE_PULL_RATIO) and turns 18 degrees (RAISE_TURN).
+ */
+.book-object-body {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--mf-book-w);
+  height: var(--mf-book-h);
+  margin-left: calc(var(--mf-book-w) / -2);
+  transform-style: preserve-3d;
+  transform: translate3d(0, 0, calc(var(--mf-book-t) / -2)) rotateY(0deg);
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1);
+}
+.book-object.face-spine > .book-object-body {
+  transform: translate3d(0, 0, calc(var(--mf-book-w) / -2)) rotateY(90deg);
+}
+.book-object.face-back > .book-object-body {
+  transform: translate3d(0, 0, calc(var(--mf-book-t) / -2)) rotateY(180deg);
+}
+
+/*
+ * Raised - under the pointer, or holding the keyboard focus: the book comes
+ * toward the reader and turns a little, as a book pulled off a shelf does. A
+ * spine turns about itself and stays in its place while its front cover swings
+ * out beside it: sin 18deg = .309 and cos 18deg = .951 of half the width.
+ *
+ * :focus-visible has rules of its own, because a browser that does not know
+ * it would drop every selector written together with it.
+ */
+.book-object:hover,
+.book-object.is-raised { z-index: 1; }
+.book-object:focus-visible { z-index: 1; }
+
+.book-object:hover > .book-object-body,
+.book-object.is-raised > .book-object-body {
+  transform: translate3d(0, 0, calc(var(--mf-book-t) / -2 + var(--mf-book-h) * .14)) rotateY(18deg);
+}
+.book-object.face-spine:hover > .book-object-body,
+.book-object.face-spine.is-raised > .book-object-body {
+  transform: translate3d(calc(var(--mf-book-w) * .1545), 0, calc(var(--mf-book-w) * -.4755 + var(--mf-book-h) * .14)) rotateY(72deg);
+}
+.book-object.face-back:hover > .book-object-body,
+.book-object.face-back.is-raised > .book-object-body {
+  transform: translate3d(0, 0, calc(var(--mf-book-t) / -2 + var(--mf-book-h) * .14)) rotateY(162deg);
+}
+.book-object:focus-visible > .book-object-body {
+  transform: translate3d(0, 0, calc(var(--mf-book-t) / -2 + var(--mf-book-h) * .14)) rotateY(18deg);
+}
+.book-object.face-spine:focus-visible > .book-object-body {
+  transform: translate3d(calc(var(--mf-book-w) * .1545), 0, calc(var(--mf-book-w) * -.4755 + var(--mf-book-h) * .14)) rotateY(72deg);
+}
+.book-object.face-back:focus-visible > .book-object-body {
+  transform: translate3d(0, 0, calc(var(--mf-book-t) / -2 + var(--mf-book-h) * .14)) rotateY(162deg);
+}
+/* A raised cover throws a deeper shadow; a focused one also wears a ring. */
+.book-object:hover .book-object-face.front,
+.book-object.is-raised .book-object-face.front {
+  box-shadow: calc(var(--mf-book-h) * .06) calc(var(--mf-book-h) * .08) calc(var(--mf-book-h) * .14) rgba(0, 0, 0, .35);
+}
+.book-object:focus-visible .book-object-face.front {
+  box-shadow: 0 0 0 3px var(--mf-book-focus-color, #4da3ff),
+    calc(var(--mf-book-h) * .06) calc(var(--mf-book-h) * .08) calc(var(--mf-book-h) * .14) rgba(0, 0, 0, .35);
+}
+.book-object:focus-visible .book-object-face.spine {
+  box-shadow: 0 0 0 3px var(--mf-book-focus-color, #4da3ff);
+}
+
+/* Faces */
+.book-object-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--mf-book-color, #52606d);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.book-object-face > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.book-object-face.no-image > img { display: none; }
+
+.book-object-face.front,
+.book-object-face.back {
+  width: var(--mf-book-w);
+  height: var(--mf-book-h);
+}
+.book-object-face.front {
+  border-radius: 0 calc(var(--mf-book-h) * .02) calc(var(--mf-book-h) * .02) 0;
+  box-shadow: 0 calc(var(--mf-book-h) * .01) calc(var(--mf-book-h) * .03) rgba(0, 0, 0, .22);
+  transform: translateZ(calc(var(--mf-book-t) / 2));
+  transition: box-shadow .35s cubic-bezier(.2, .8, .2, 1);
+}
+.book-object-face.back {
+  border-radius: calc(var(--mf-book-h) * .02) 0 0 calc(var(--mf-book-h) * .02);
+  transform: rotateY(180deg) translateZ(calc(var(--mf-book-t) / 2));
+}
+/* The fold of the cover, next to the spine. */
+.book-object-face.front::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 7%;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .28), rgba(255, 255, 255, .12) 45%, rgba(0, 0, 0, 0));
+}
+.book-object-cover-title { display: none; }
+.book-object-face.front.no-image > .book-object-cover-title {
+  position: absolute;
+  top: 12%;
+  left: 12%;
+  right: 12%;
+  display: block;
+  font-size: calc(var(--mf-book-h) * .075);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #fff;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.book-object-face.spine,
+.book-object-face.edge {
+  left: calc((var(--mf-book-w) - var(--mf-book-t)) / 2);
+  width: var(--mf-book-t);
+  height: var(--mf-book-h);
+}
+.book-object-face.spine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(-90deg) translateZ(calc(var(--mf-book-w) / 2));
+}
+/* A cover given as the spine picture shows its left edge. */
+.book-object-face.spine > img { object-position: left center; }
+/* Rounded, and dark enough under the title to read it on any picture. */
+.book-object-face.spine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .22) 30%, rgba(0, 0, 0, .18) 60%, rgba(0, 0, 0, .5));
+}
+/*
+ * The title reads down the spine: Korean stands upright, Latin lies on its
+ * side. Its size follows the book and nothing else, so that a copy of the book
+ * drawn larger and scaled down (BookFlight) shows the same title.
+ */
+.book-object-title {
+  position: relative;
+  z-index: 1;
+  max-height: 86%;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: min(calc(var(--mf-book-t) * .5), calc(var(--mf-book-h) * .07));
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+
+/* The edges of the pages: opposite the spine, and on top. */
+.book-object-face.edge {
+  transform: rotateY(90deg) translateZ(calc(var(--mf-book-w) / 2));
+  background: repeating-linear-gradient(90deg, #f7f3ea 0 2px, #ded6c7 2px 3px);
+}
+.book-object-face.top {
+  top: calc((var(--mf-book-h) - var(--mf-book-t)) / 2);
+  width: var(--mf-book-w);
+  height: var(--mf-book-t);
+  transform: rotateX(90deg) translateZ(calc(var(--mf-book-h) / 2));
+  background: repeating-linear-gradient(0deg, #f7f3ea 0 2px, #ded6c7 2px 3px);
+}
+
+/* Taken out: open in the viewer, or on its way there and back. */
+.book-object.is-picked-up {
+  visibility: hidden;
+  pointer-events: none;
+}
+/* The copy that flies (BookFlight). Its transform comes from its animation. */
+.book-object.is-flying {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  margin: 0;
+  pointer-events: none;
+  transition: none;
+}
+.book-object.is-flying > .book-object-body { transition: none; }

@@ -3,7 +3,6 @@ import { Base } from "./base";
 import { PageLabelEl } from "./pageLabelEl";
 
 interface IBookElElements {
-  bookOnShelfEl: HTMLElement;
   bookEl: HTMLElement;
   containerEl: HTMLElement;
   labelContainerEl: HTMLElement;
@@ -26,10 +25,6 @@ export class BookEl extends Base {
       back: string;
     };
   };
-  /**
-   * Returns the the book element shown on the book shelf.
-   */
-  readonly elementOnShelf: HTMLElement;
   /**
    * Returns the book element shown on the book viewer.
    */
@@ -67,7 +62,6 @@ export class BookEl extends Base {
     // Element creation
     //
     const elements = this.createBookElement();
-    this.elementOnShelf = elements.bookOnShelfEl;
     this.element = elements.bookEl;
     this.pageContainerEl = elements.containerEl;
     this.labelContainerEl = elements.labelContainerEl;
@@ -93,11 +87,6 @@ export class BookEl extends Base {
    * @returns 
    */
   private createBookElement(): IBookElElements {
-    const bookOnShelfEl = document.createElement('div');
-    bookOnShelfEl.className = "book-on-shelf";
-    const coverEl = document.createElement('img');
-    coverEl.src = this.thumbnails.medium;
-    bookOnShelfEl.appendChild(coverEl);
     const bookEl = document.createElement('div');
     const containerEl = document.createElement('div');
     // const labelContainerEls = this.createLabelContainerEl();
@@ -109,7 +98,6 @@ export class BookEl extends Base {
     bookEl.appendChild(containerEl);
 
     return { 
-      bookOnShelfEl: bookOnShelfEl, 
       bookEl: bookEl, 
       containerEl: containerEl, 
       labelContainerEl: labelContainerEl, 

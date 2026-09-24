@@ -1,12 +1,35 @@
-import { IBookData, BookStatus, BookType } from '../common/models';
+import { IBookData, BookStatus, BookType, IClosedBookPlace } from '../common/models';
 import { BookSize } from '../common/dimension';
-import { BookShelf } from './bookShelf';
-import { Book } from './book';
+import { Book, BookEvent } from './book';
+import { BookFlight } from './bookFlight';
 import { BookViewer } from './bookViewer';
 import { deepMerge } from '../common/helper';
 
+/**
+ * How long a book flies from where it was chosen to the viewer, in milliseconds.
+ */
+const OPEN_FLIGHT_DURATION = 700;
+/**
+ * How long a closed book flies back to where it was chosen, in milliseconds.
+ */
+const RETURN_FLIGHT_DURATION = 550;
+/**
+ * How long the flying copy fades over the book the viewer shows, in milliseconds.
+ */
+const LANDING_FADE_DURATION = 160;
+
 export interface IBookShelfManagerConfig {
+  /**
+   * @deprecated core no longer draws a shelf, so there is nothing to hide.
+   * Place the books with `@magflip/shelf`, or draw your own from `book.objectEl`.
+   */
   hideBookShelf?: boolean;
+  /**
+   * Flies a book from the place it was chosen - its `objectEl` - to the viewer
+   * when it is opened, and back when it is closed. Default true. A reader who
+   * asked for less motion never sees it.
+   */
+  animateBook?: boolean;
   onViewerClose?: () => void;
   /**
    * Called with the book the viewer just opened. A host that drives the book
@@ -16,47 +39,62 @@ export interface IBookShelfManagerConfig {
   onViewerOpen?: (book: Book) => void;
 }
 /**
- * BookManager class
+ * Holds the books a reader can open, and opens them in the viewer.
+ *
+ * It does not show the books. Whoever lets the reader choose places each
+ * book's `objectEl` - `@magflip/shelf` does it as a grid or a bookshelf - and
+ * pressing one opens that book here.
  */
 export class BookShelfManager {
   config:IBookShelfManagerConfig = {
-    hideBookShelf: false
+    animateBook: true
   };
   /**
-   * Returns the BookShelf instance.
+   * The books this manager can open, by id.
    */
-  private readonly bookShelf: BookShelf;
+  private readonly books: { [id:string]: Book } = {};
   /**
    * Returns the BookViewer instance.
    */
   private readonly bookViewer: BookViewer;
   /**
-   * 
-   * @param bookShelfDocId 
-   * @param bookViewerId 
+   * The flight in the air, if any. A new one takes its place.
+   */
+  private flight: BookFlight|undefined;
+  /**
+   *
+   * @param bookShelfDocId
+   * @param bookViewerId
    */
   constructor(config?:IBookShelfManagerConfig) {
     this.config = deepMerge(this.config, config);
-    this.bookShelf = new BookShelf(this);
     this.bookViewer = new BookViewer(this);
   }
   /**
+   * True when books fly between the place they were chosen and the viewer.
+   */
+  get animatesBooks():boolean { return this.config.animateBook !== false && BookFlight.canFly(); }
+  /**
    * Change viewing book style.
-   * @param type 
+   * @param type
    */
   getBookViewer(){ return this.bookViewer; }
   /**
-   * Gets a book holder's element with the book's id.
-   * @param id 
-   * @returns 
+   * @deprecated The shelf left core. Returns the element the book's object was
+   * placed in, if it was placed.
+   * @param id
+   * @returns
    */
-  getBookHolder(id:string):Element { return this.bookShelf.getBookHolder(id); }
+  getBookHolder(id:string):Element|null {
+    const book = this.books[id];
+    return book?.hasObjectEl ? book.objectEl.parentElement : null;
+  }
   /**
    * Gets a book object with the book's id.
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
-  getBook(id:string):Book { return this.bookShelf.getBook(id); }
+  getBook(id:string):Book { return this.books[id]; }
   /**
    * Load books from the server and add them to the shelf.
    */
@@ -98,7 +136,7 @@ export class BookShelfManager {
   }
   /**
    * Load a book from the server and add it to the shelf.
-   * @param id 
+   * @param id
    */
   async loadAndAddBook(id:string):Promise<void> {
     // TODO: fetch book from the server
@@ -131,41 +169,82 @@ export class BookShelfManager {
 
     this.addBookToShelf(bookSample);
   }
+  /**
+   * Adds a book to the books this manager can open. Pressing its object
+   * (`book.objectEl`) opens it from then on. Adding the same book again does
+   * nothing.
+   * @param book
+   */
   importBookToShelf(book:Book){
-    this.bookShelf.addBook(book, {
-      click: (event: Event) => { this.pickupAndView(this.getBook(book.id)); }
-    });
+    if(this.books[book.id] === book){ return; }
+    this.books[book.id] = book;
+    book.addEventListener(BookEvent.objectActivated, () => { this.pickupAndView(book); });
   }
   /**
-   * Append the book to the shelf.
-   * @param id 
+   * Makes a book from its data and adds it (see `importBookToShelf`).
+   * @param book
+   * @returns the book that was made.
    */
-  addBookToShelf(book:IBookData) { 
-    this.bookShelf.addBook(new Book(book), {
-      click: (event: Event) => { this.pickupAndView(this.getBook(book.id)); }
-    });
+  addBookToShelf(book:IBookData):Book {
+    const newBook = new Book(book);
+    this.importBookToShelf(newBook);
+    return newBook;
   }
   /**
-   * Pickup a book from the shelf and view it on the viewer.
-   * @param book 
-   * @returns 
+   * Opens the book in the viewer, at its front cover.
+   *
+   * When the book's object is on the screen, the book flies from there to the
+   * viewer, and its place stays empty while it is being read.
+   * @param book
+   * @returns
    */
-  pickupAndView(book: Book) { 
+  pickupAndView(book: Book) {
     if(book.status == BookStatus.Open){ return; }
     book.status = BookStatus.Open;
-    this.bookViewer?.view(book); 
+    this.flight?.cancel();
+
+    const from = this.animatesBooks ? book.getObjectPlace() : undefined;
+    book.setObjectPickedUp(true);
+    this.bookViewer.view(book);
+
+    const to = from && this.bookViewer.getClosedBookPlace();
+    if(!from || !to){ return; }
+
+    const flight = this.flight = new BookFlight(book.getObjectData(), from, to, OPEN_FLIGHT_DURATION);
+    this.bookViewer.awaitBook(flight.finished);
+    flight.finished.then(() => {
+      if(this.flight !== flight){ return; }
+      this.flight = undefined;
+      flight.land(LANDING_FADE_DURATION);
+    });
   }
   /**
-   * Put back the book from the viewer to the shelf.
-   * @param book 
+   * Puts the book back where it was chosen. `BookViewer.closeViewer` calls this.
+   * @param book
+   * @param from where the viewer showed the closed book. The book flies back
+   * from there when it is given and animation is on.
    */
-  returnBookToShelf(book: Book | undefined) { 
-    if(!book){ 
+  returnBookToShelf(book: Book | undefined, from?: IClosedBookPlace) {
+    if(!book){
       // TODO: Find empty book cases and reload the books.
-    } else {
-      if(book.status == BookStatus.Close){ return; }
-      book.status = BookStatus.Close;
-      this.bookShelf.putbackBook(book);
+      return;
     }
+    if(book.status == BookStatus.Close){ return; }
+    book.status = BookStatus.Close;
+    this.flight?.cancel();
+
+    const to = from && this.animatesBooks ? book.getObjectPlace() : undefined;
+    if(!from || !to){
+      book.setObjectPickedUp(false);
+      return;
+    }
+
+    const flight = this.flight = new BookFlight(book.getObjectData(), from, to, RETURN_FLIGHT_DURATION);
+    flight.finished.then(() => {
+      if(this.flight === flight){ this.flight = undefined; }
+      flight.land();
+      // Opened again before it got back: it stays out of its place.
+      if(book.status == BookStatus.Close){ book.setObjectPickedUp(false); }
+    });
   }
 }

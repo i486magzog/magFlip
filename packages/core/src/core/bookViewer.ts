@@ -1,7 +1,16 @@
-import { IBookView } from '../common/models';
+import { IBookView, IClosedBookPlace } from '../common/models';
 import { Book} from './book'
 import { BookShelfManager as BookShelfManager } from './bookShelfManager'
 import { Base } from './base';
+
+/**
+ * How long the viewer takes to come in while a book flies to it, in milliseconds.
+ */
+const VIEWER_FADE_IN_DURATION = 420;
+/**
+ * How long the viewer takes to go while a closed book flies away, in milliseconds.
+ */
+const VIEWER_FADE_OUT_DURATION = 300;
 
 /**
  * This is an object type used to reference Elements related to the Viewer.
@@ -64,6 +73,10 @@ export class BookViewer extends Base {
    * Returns the instance of current Viewer.
    */
   private curView:IBookView|undefined;
+  /**
+   * The viewer fading away after it was closed. Opening a book stops it.
+   */
+  private closing:Animation|undefined;
 
 
 
@@ -142,6 +155,8 @@ export class BookViewer extends Base {
    */
   view(book: Book, openPageIndex: number = 0) {
     if(!this.curView){ throw new Error('Please select one view.'); }
+    this.closing?.cancel();
+    this.closing = undefined;
     this.book = book;
     this.element.className = 'hidden';
     const bookContainerEl = this.bookContainerEl = this.curView.getBookContainerEl();
@@ -155,10 +170,12 @@ export class BookViewer extends Base {
    * Closes the book on the viewer.
    */
   closeViewer(){
-    this.element.className = 'hidden';
+    // Taken before the book leaves the view: a closed book flies back from here.
+    const closedPlace = this.getClosedBookPlace();
+    this.hide(closedPlace !== undefined && this.bookShelfManager.animatesBooks);
     this.bookContainerEl && this.element.removeChild(this.bookContainerEl);
     this.curView?.closeViewer();
-    this.bookShelfManager.returnBookToShelf(this.book);
+    this.bookShelfManager.returnBookToShelf(this.book, closedPlace);
     if(this.book){
       this.book.resetBook();
       if(this.bookContainerEl){
@@ -169,6 +186,46 @@ export class BookViewer extends Base {
       this.book = undefined;
     }
     this.callbackEventHandler('close');
+  }
+  /**
+   * Where the current view shows the book closed, or would if it were closed
+   * now. `undefined` without a book, or when the view never shows one closed.
+   */
+  getClosedBookPlace():IClosedBookPlace|undefined {
+    if(!this.book){ return undefined; }
+    return this.curView?.getClosedBookPlace?.();
+  }
+  /**
+   * Keeps the open book out of sight until `arrival` settles, while a copy of
+   * it flies in, and brings the viewer in over the same time.
+   * @param arrival settles when the copy has landed where the book is.
+   */
+  awaitBook(arrival:Promise<void>){
+    const book = this.book;
+    this.element.classList.add('book-arriving');
+    this.element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: VIEWER_FADE_IN_DURATION, easing: 'ease-out' });
+    arrival.then(() => {
+      if(this.book === book){ this.element.classList.remove('book-arriving'); }
+    });
+  }
+  /**
+   * Hides the viewer - at once, or fading while the closed book flies away.
+   */
+  private hide(isFading:boolean){
+    if(!isFading){
+      this.element.className = 'hidden';
+      return;
+    }
+    // Still drawn while it fades, but no longer in the reader's way.
+    this.element.classList.add('is-closing');
+    const closing = this.closing = this.element.animate([{ opacity: 1 }, { opacity: 0 }], { duration: VIEWER_FADE_OUT_DURATION, easing: 'ease-in', fill: 'forwards' });
+    closing.finished.then(() => {
+      if(this.closing !== closing){ return; }
+      this.closing = undefined;
+      this.element.className = 'hidden';
+      // Held at nothing until now, so that it could not flash back first.
+      closing.cancel();
+    }, () => undefined);
   }
   /**
    * 

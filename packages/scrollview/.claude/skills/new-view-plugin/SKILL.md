@@ -20,6 +20,7 @@ description: Create or complete a MagFlip view plugin that implements IBookView 
 | `onFlipEnd(listener)` | 이동이 끝날 때마다 호출, 리스너 제거 함수를 반환. 이동 애니메이션이 없는 뷰는 빈 제거 함수만 반환 |
 | `zoomLevel` | 지금 배율 (확대가 없으면 `1`) |
 | `pan(dx, dy)` | 책을 화면 픽셀만큼 옮기고 **움직였는지** 반환. 화면 밖으로 나가지 않게 자른다. 옮길 수 없는 뷰는 `false` |
+| `getClosedBookPlace?()` | 선택. 닫힌 책을 보여 주는 뷰라면, 그 자리(뷰포트 px)와 보이는 면(`BookFace`)을 반환한다. 있으면 책이 제자리에서 이 자리로 날아와 열리고 닫을 때 여기서 날아간다. 없으면 날지 않고 바로 열린다 |
 
 ## 새 패키지 절차
 

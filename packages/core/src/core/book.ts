@@ -1,6 +1,7 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, IBook, IPage, IPageLabel, IPageLabelData, DeepRequired } from "../common/models";
+import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, IBook, IPage, IPageLabel, IPageLabelData, DeepRequired, BookFace, IClosedBookPlace } from "../common/models";
 import { BookSize, ISize, SizeExt } from "../common/dimension";
 import { BookEl } from "./bookEl";
+import { BookObjectEl, IBookObjectData } from "./bookObjectEl";
 import { Page } from "./page";
 import { PageLabel } from "./pageLabel";
 import { deepMerge } from "../common/helper";
@@ -9,6 +10,11 @@ import { deepMerge } from "../common/helper";
 export type TRequiredBookData = DeepRequired<IBookData>;
 export enum BookEvent {
   pageAdded = 'pageAdded',
+  /**
+   * The reader chose the book: clicked its object, or pressed Enter or Space
+   * on it. `BookShelfManager` opens a book it holds when this happens.
+   */
+  objectActivated = 'objectActivated',
 }
 /**
  * Book class
@@ -81,6 +87,14 @@ export class Book extends BookEl implements IBook {
    * Returns and sets the page labels.
    */
   private pageLabels: { [n:number|string]: PageLabel };
+  /**
+   * The book seen from outside. Built the first time it is asked for.
+   */
+  private bookObject: BookObjectEl|undefined;
+  /**
+   * The face the object shows, kept for an object that is not built yet.
+   */
+  private _objectFace: BookFace = BookFace.Front;
   /**
    * 
    */
@@ -195,6 +209,7 @@ export class Book extends BookEl implements IBook {
   importPages(pages:IPageData[], size: ISize){
     this.size.closed = new SizeExt(size.width, size.height);
     this.size.opened = new SizeExt(size.width*2, size.height);
+    this.bookObject?.setSize(this.size.closed, this.pageCount);
     pages.forEach(pageData => {
       const page = new Page(pageData);
       this.addPage(page, page.index);
@@ -255,6 +270,74 @@ export class Book extends BookEl implements IBook {
    */
   setEvents(event:BookEvent, handler:(event:Event)=>void){
 
+  }
+
+  /**
+   * The book closed, seen from outside: covers, a spine with the title on it,
+   * and a thickness that grows with the pages. Whoever lets a reader choose a
+   * book places this element; `BookShelfManager` opens the book when it is
+   * pressed.
+   *
+   * Built the first time it is asked for, so a book that is only read - as on
+   * a TV, which draws its own shelf - never loads its cover pictures here.
+   */
+  get objectEl():HTMLElement { return this.getBookObject().element; }
+  /**
+   * True once `objectEl` was built. Code that only wants to update an object
+   * that exists should check this instead of reaching for `objectEl`.
+   */
+  get hasObjectEl():boolean { return this.bookObject !== undefined; }
+  /**
+   * @deprecated Use `objectEl`. The book no longer knows where it is placed.
+   */
+  get elementOnShelf():HTMLElement { return this.objectEl; }
+  /**
+   * The face the object shows the reader.
+   */
+  get objectFace():BookFace { return this._objectFace; }
+  /**
+   * Turns the object to show another face - its spine to stand on a shelf, or
+   * its front cover to lie in a grid.
+   */
+  setObjectFace(face:BookFace){
+    this._objectFace = face;
+    this.bookObject?.setFace(face);
+  }
+  /**
+   * Leaves the place of the object empty while the book is open, and fills it
+   * again when the book comes back.
+   */
+  setObjectPickedUp(isPickedUp:boolean){ this.bookObject?.setPickedUp(isPickedUp); }
+  /**
+   * Where the object is drawn and which face it shows, or `undefined` when it
+   * is not on the screen.
+   */
+  getObjectPlace():IClosedBookPlace|undefined { return this.bookObject?.getPlace(); }
+  /**
+   * What the object shows of this book. A flight draws its copy from it.
+   */
+  getObjectData():IBookObjectData {
+    return {
+      title: this.title,
+      spineImage: this.thumbnails.spine,
+      frontImage: this.thumbnails.cover.front,
+      backImage: this.thumbnails.cover.back,
+      size: this.size.closed,
+      pageCount: this.pageCount,
+    };
+  }
+  /**
+   * The number of pages the book has, counting the covers.
+   */
+  private get pageCount():number { return this.lastPageIndex + 1; }
+
+  private getBookObject():BookObjectEl {
+    if(!this.bookObject){
+      this.bookObject = new BookObjectEl(this.getObjectData(), this._objectFace, {
+        onActivate: () => { this.emitEvent(BookEvent.objectActivated, this); },
+      });
+    }
+    return this.bookObject;
   }
 
   resetBook():Promise<void>{

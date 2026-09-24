@@ -1,0 +1,108 @@
+/*
+ * Books to choose from (BookShelf). The books draw themselves - see
+ * bookObject.css in @magflip/core - and this file only places them.
+ *
+ * Grid:
+ *   --mf-grid-column-width   the narrowest a column gets (default 150px)
+ *   --mf-grid-cover-height   the tallest a cover is drawn (default 210px)
+ * Bookshelf:
+ *   --mf-shelf-book-height   how tall the tallest book stands (default 200px)
+ *   --mf-shelf-shortest      how short a book may stand, against the tallest (default .62)
+ *   --mf-shelf-headroom      the room above the tallest book (default 30px)
+ *   --mf-shelf-board         how thick a board is (default 16px)
+ *   --mf-shelf-back          the wall behind the books
+ *   --mf-shelf-wood          the boards
+ *   --mf-shelf-frame         the frame around the shelves
+ * Set by BookShelf:
+ *   --mf-shelf-tallest       the designed height of the tallest book, without a unit
+ */
+.mf-shelf {
+  box-sizing: border-box;
+  width: 100%;
+}
+/* Set for a moment while the books take new heights (BookShelf.updateTallest). */
+.mf-shelf.is-resizing .book-object,
+.mf-shelf.is-resizing .book-object-body,
+.mf-shelf.is-resizing .book-object-face {
+  transition: none;
+}
+
+/* Grid: covers in rows, the bottom of every cover on one line. */
+.mf-shelf.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--mf-grid-column-width, 150px), 1fr));
+  gap: 36px 24px;
+  padding: 32px 28px;
+}
+.mf-shelf.layout-grid .mf-shelf-slot {
+  display: grid;
+  grid-template-rows: var(--mf-grid-cover-height, 210px) auto;
+  row-gap: 14px;
+  justify-items: center;
+  min-width: 0;
+}
+.mf-shelf.layout-grid .book-object {
+  align-self: end;
+  --mf-book-height: min(
+    var(--mf-grid-cover-height, 210px),
+    calc(var(--mf-grid-column-width, 150px) / var(--mf-book-aspect, .6667))
+  );
+}
+.mf-shelf-caption {
+  max-width: 100%;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #2b2b2b;
+  text-align: center;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/*
+ * Bookshelf: books stand in rows, each row on a board. A row is as tall as
+ * the tallest book and some room above it, so the boards can be painted on
+ * the wall behind at fixed steps however many rows there are.
+ */
+.mf-shelf.layout-shelf {
+  --mf-shelf-row: calc(var(--mf-shelf-book-height, 200px) + var(--mf-shelf-headroom, 30px) + var(--mf-shelf-board, 16px));
+  --mf-shelf-board-top: calc(var(--mf-shelf-row) - var(--mf-shelf-board, 16px));
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: 2px;
+  padding: 0 22px;
+  border: solid var(--mf-shelf-frame, #5e3d26);
+  border-width: 14px 14px 0;
+  background-color: var(--mf-shelf-back, #efe6d8);
+  background-image: repeating-linear-gradient(to bottom,
+    /* the shadow of the board above */
+    rgba(40, 24, 12, .22) 0,
+    rgba(40, 24, 12, 0) 14px,
+    /* the wall, darker where the books stand */
+    rgba(40, 24, 12, 0) calc(var(--mf-shelf-board-top) - 40px),
+    rgba(40, 24, 12, .1) var(--mf-shelf-board-top),
+    /* the board: a lit front edge, then its face */
+    #c69466 var(--mf-shelf-board-top),
+    #c69466 calc(var(--mf-shelf-board-top) + 2px),
+    var(--mf-shelf-wood, #9a6a42) calc(var(--mf-shelf-board-top) + 2px),
+    #7c5232 var(--mf-shelf-row));
+}
+.mf-shelf.layout-shelf .mf-shelf-slot {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  height: var(--mf-shelf-row);
+  padding-bottom: var(--mf-shelf-board, 16px);
+}
+/* As tall as its pages were designed, against the tallest book here. */
+.mf-shelf.layout-shelf .book-object {
+  --mf-book-height: max(
+    calc(var(--mf-shelf-book-height, 200px) * var(--mf-shelf-shortest, .62)),
+    calc(var(--mf-shelf-book-height, 200px) * var(--mf-book-trim-height, 1) / var(--mf-shelf-tallest, var(--mf-book-trim-height, 1)))
+  );
+}
+/* On a bookshelf the title is on the spine. */
+.mf-shelf.layout-shelf .mf-shelf-caption { display: none; }

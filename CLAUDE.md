@@ -9,8 +9,9 @@
 | `packages/i18n` | `@magflip/i18n` — Editor/Server/TV 공용 다국어 기반(로케일·메시지 카탈로그·복수형·Intl 서식). 말 자체는 각 앱이 가진다 | `packages/i18n/CLAUDE.md` |
 | `packages/doc` | `@magflip/doc` — Editor/Server/Viewer 공용 문서 모델(타입·zod 스키마·페이지 레이아웃·마스터·게시·Yjs 매핑) | `packages/doc/CLAUDE.md` |
 | `packages/render` | `@magflip/render` — 게시된 surface 를 DOM 으로 그리는 공용 렌더러(뷰어·에디터 공용) | `packages/render/CLAUDE.md` |
-| `packages/core` | `@magflip/core` — Book/Page 모델, BookShelfManager, BookViewer, MZMath, models.ts | `packages/core/CLAUDE.md` |
+| `packages/core` | `@magflip/core` — Book/Page 모델, 책 한 권의 모습(책 객체)과 열고 닫는 비행, BookShelfManager, BookViewer, MZMath, models.ts | `packages/core/CLAUDE.md` |
 | `packages/input` | `@magflip/input` — 키보드·TV 리모컨 입력을 책 조작으로(키 매핑, 넘김 대기열, 방향 포커스) | `packages/input/CLAUDE.md` |
+| `packages/shelf` | `@magflip/shelf` — 책 고르기 화면: 여러 권을 격자(표지)나 책장(책등)으로 배치 | `packages/shelf/CLAUDE.md` |
 | `packages/flipview` | `@magflip/flipview` — FlipView(IBookView 구현), Flipping(상태·애니메이션·기하) | `packages/flipview/CLAUDE.md` |
 | `packages/scrollview` | `@magflip/scrollview` — 스크롤 뷰 (개발 중, 뷰 플러그인 템플릿) | `packages/scrollview/CLAUDE.md` |
 | `packages/minjs` | `@magflip/minjs` — 모든 패키지를 IIFE `magflip.min.js` 로 번들 | `packages/minjs/CLAUDE.md` |
@@ -20,7 +21,8 @@
 
 문서 사이트는 옆 저장소 **`../magFlipDocs`** 에 있다(Docusaurus). 이 저장소의 문서는 `../magFlipDocs/docs/magflip/{user,dev}`, 작성 규칙은 그 저장소의 `CLAUDE.md` 와 `write-docs` skill.
 
-의존 방향: `flipview`, `scrollview`, `input` → `core`; `render` → `doc`; `minjs` → 전부. **core 는 다른 MagFlip 패키지를 import 하지 않는다.**
+의존 방향: `flipview`, `scrollview`, `input`, `shelf` → `core`; `render` → `doc`; `minjs` → 전부. **core 는 다른 MagFlip 패키지를 import 하지 않는다.**
+**core 에는 책 한 권에 대한 것만 둔다.** 책장·격자처럼 여러 권을 늘어놓는 배치는 `shelf`(또는 앱)가 한다 — core 는 책의 모습(`book.objectEl`)과 열고 닫는 움직임까지만 안다.
 `input` 은 뷰 구현(flipview)이 아니라 규약(`IBookView`)에만 의존한다 → 어떤 뷰에도 붙는다.
 `doc` 과 `i18n` 은 아무 패키지에도 의존하지 않는다(가장 아래). Editor·Server 와 공유하므로 DOM 코드를 넣지 않는다.
 화면의 말은 `i18n`, 문서·DB 에서 온 값은 번역하지 않는다 → 뷰어·렌더러는 `i18n` 을 import 하지 않는다(글자가 전부 내용이다).
@@ -30,8 +32,8 @@
 
 ```bash
 npm install              # workspaces 링크 (node_modules/@magflip/* → packages/*)
-npm run build:local      # i18n → doc → render → core → input → flipview → scrollview → minjs 빌드. 버전 변경 없음
-npm test                 # 전 패키지 (i18n·doc·render·input: Vitest, core·flipview: Jest)
+npm run build:local      # i18n → doc → render → core → input → shelf → flipview → scrollview → minjs 빌드. 버전 변경 없음
+npm test                 # 전 패키지 (i18n·doc·render·input·shelf: Vitest, core·flipview: Jest)
 npm run sample:book      # docs/examples/local/sample-book 게시본 다시 생성
 npm run typecheck        # 모든 패키지 tsc --noEmit
 npm run serve            # http://localhost:8190/docs/examples/local/
@@ -45,7 +47,8 @@ npm run dev              # build:local + serve
 - 빌드 산출물(`index.js`, `index.d.ts`, `index.css`, `dist/`, `types/`, `magflip.min.js`)은 git ignore 대상. `src/` 만 수정.
 - 패키지 내부 import 는 상대 경로. `src/...` (baseUrl) 경로 금지.
 - 공개 API 는 각 패키지 `src/index.ts` 의 `export *` 로만 노출.
-- 고정 DOM id(`#bookShelf`, `#bookViewer`, `#bookContainer`, `#mzZone*`)와 `document.documentElement` CSS 변수를 사용한다 → 뷰어는 페이지당 1개.
+- 고정 DOM id(`#bookViewer`, `#bookContainer`, `#mzZone*`)와 `document.documentElement` CSS 변수를 사용한다 → 뷰어는 페이지당 1개. `#bookShelf` 는 `shelf` 가 요소를 받지 못했을 때 쓰는 기본 id.
+- `minjs` 는 모든 export 를 `window` 에 올린다 → 패키지 내부에서만 쓰는 계산 함수·상수는 `src/index.ts` 에서 re-export 하지 않는다(예: core 의 `bookObjectMetrics`, `flightPath`).
 
 ## 코드 스타일 (사람이 읽기 쉬운 코드)
 
@@ -59,7 +62,7 @@ npm run dev              # build:local + serve
 ## 변경 후 체크리스트
 
 1. `npm run typecheck && npm test`
-2. `npm run build:local` 후 `docs/examples/local` 에서 드래그 / Next / Prev / moveTo / Zoom / 닫기 확인
+2. `npm run build:local` 후 `docs/examples/local` 에서 책장·격자 전환, 책 호버·클릭(날아가 열림), 드래그 / Next / Prev / moveTo / Zoom / 닫기(제자리로 돌아감) 확인
 3. 공개 API 변경 → `../magFlipDocs/docs/magflip/user/reference/api.md` 갱신
 4. 구조·흐름 변경 → `../magFlipDocs/docs/magflip/dev` 다이어그램, 해당 `CLAUDE.md`, 관련 skill 갱신
 5. 발견한 버그/부채 → `../magFlipDocs/docs/magflip/dev/known-issues.md`
@@ -68,6 +71,7 @@ npm run dev              # build:local + serve
 
 - 루트 `.claude/skills/`: `local-dev`(빌드·테스트·데모), `release`(npm 배포)
 - 패키지/폴더별: doc `doc-model-change`, render `render-change`, core `core-model-change`, flipview `flip-effect-debug`, scrollview `new-view-plugin`, minjs `bundle-check`, docs/examples `update-examples`
+- 책 고르기 화면의 설계(core ↔ shelf 경계, 자세·비행 계산): `../magFlipDocs/docs/magflip/dev/book-object.md`
 
 ## Git
 

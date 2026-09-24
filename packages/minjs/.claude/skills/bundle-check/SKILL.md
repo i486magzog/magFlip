@@ -10,10 +10,11 @@ description: Verify or change the @magflip/minjs browser bundle (magflip.min.js)
 1. 루트에서 `npm run build:local` (의존 패키지 먼저 빌드됨).
 2. 전역 노출 확인 — `npm run serve` 후 `docs/examples/local/` 콘솔에서:
    ```js
-   ['Book', 'BookShelfManager', 'FlipView', 'ScrollView', 'MZMath'].map(n => [n, typeof window[n]])
+   ['Book', 'BookShelfManager', 'BookShelf', 'ShelfLayout', 'BookFace', 'FlipView', 'ScrollView', 'RemoteController', 'MZMath'].map(n => [n, typeof window[n]])
    ```
+   내부 계산이 새지 않았는지도 본다: `['getBookPose', 'getFlightPath', 'RAISE_TURN'].filter(n => n in window)` 는 빈 배열이어야 한다.
 3. CSS 주입 확인: `document.querySelectorAll('style').length > 0`, 뷰어 배경·페이지 배치가 정상인지.
-4. 크기: `ls -la packages/minjs/magflip.min.js` (현재 약 74KB). 크게 늘면 원인 확인.
+4. 크기: `ls -la packages/minjs/magflip.min.js` (2026-09-24 기준 약 120KB — render·input·shelf 포함). 크게 늘면 원인 확인.
 
 ## 변경
 

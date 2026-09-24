@@ -66,6 +66,14 @@ export enum BookStatus {
   Close = "Close",
 }
 /**
+ * A face of a closed book: its two covers, and the spine that joins them.
+ */
+export enum BookFace {
+  Front = "Front",
+  Spine = "Spine",
+  Back = "Back",
+}
+/**
  * Flipping event status.
  * TODO: FlipEventStatus 로 변경 필요.
  * TODO: FlipView 패키지로 옮길 필요 있음.
@@ -179,6 +187,24 @@ export interface IBox {
   width: number,
   height:number
 }
+/**
+ * Where a closed book is drawn on the screen, and which of its faces the
+ * reader sees there. A book moving between two places turns from one face to
+ * the other on the way.
+ */
+export interface IClosedBookPlace {
+  /**
+   * The face the reader sees, in viewport pixels (as `getBoundingClientRect`
+   * measures it).
+   */
+  box: IBox;
+  face: BookFace;
+  /**
+   * True while the book is pulled toward the reader, as it is under the
+   * pointer or when it has the keyboard focus.
+   */
+  isRaised?: boolean;
+}
 
 export interface IBookData {
   id: string;
@@ -220,6 +246,14 @@ export interface IBook extends IBookData {
 }
 
 export interface IBookEl {
+  /**
+   * The book closed, seen from outside: covers, a spine with the title on it,
+   * and a thickness. Whoever shows books to choose from places this element.
+   */
+  readonly objectEl: HTMLElement;
+  /**
+   * @deprecated Use `objectEl`. The book no longer knows where it is placed.
+   */
   readonly elementOnShelf: HTMLElement;
   readonly element: HTMLElement;
   readonly pageContainerEl: HTMLElement;
@@ -367,4 +401,13 @@ export interface IBookView {
    * @returns whether the book moved.
    */
   pan(dx:number, dy:number):boolean;
+  /**
+   * Where the open book would lie if it were closed now, and which cover would
+   * face the reader. The viewer flies a book to this place when it is opened
+   * and away from it when it is closed.
+   *
+   * A view that never shows a closed book leaves this out, and books open and
+   * close there without moving.
+   */
+  getClosedBookPlace?():IClosedBookPlace|undefined;
 }

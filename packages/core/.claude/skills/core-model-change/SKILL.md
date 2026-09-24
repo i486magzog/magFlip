@@ -12,7 +12,8 @@ grep -rn "<이름>" packages/*/src docs/examples ../magFlipDocs/docs/magflip
 ```
 
 - `models.ts` 인터페이스 → `book.ts`/`page.ts`/`pageLabel.ts` 구현 → flipview/scrollview 사용처 → 예제 → 문서.
-- `IBookView` 변경은 모든 뷰(`flipView.ts`, `scrollView.ts`)를 수정해야 한다.
+- `IBookView` 변경은 모든 뷰(`flipView.ts`, `scrollView.ts`)를 수정해야 한다. 선택 멤버(`getClosedBookPlace?`)는 구현하지 않은 뷰도 동작해야 한다.
+- **core 에는 책 한 권에 대한 것만 넣는다.** 여러 권을 늘어놓는 배치(격자·책장·목록)가 필요하면 `packages/shelf` 에 넣는다. 책 모양·자세를 바꾸면 `bookObjectEl.ts`, `bookObject.css`, `common/bookObjectMetrics.ts`(`getBookPose` 와 CSS 의 숫자)를 함께 고친다.
 
 ## 2. 구현 순서
 

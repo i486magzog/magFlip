@@ -1,4 +1,4 @@
-import { Book, BookEvent, deepMerge, DeepRequired, EventStatus, IBookView, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
+import { Book, BookEvent, BookFace, deepMerge, DeepRequired, EventStatus, IBookView, IClosedBookPlace, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
 import { FlipData } from './flipData';
 import { Flipping as FlipManager } from './flipManager';
 import { Gutter } from './gutter';
@@ -550,6 +550,22 @@ export class FlipView implements IBookView {
     // that is kept rather than measured per frame - so it is measured again.
     this.updateDimension();
     return true;
+  }
+  /**
+   * Where the book lies closed - or would, if it were closed now - and which
+   * cover faces the reader. A book shut from an open spread comes to rest on
+   * its right page, front cover up.
+   */
+  getClosedBookPlace():IClosedBookPlace|undefined {
+    if(!this.book){ return undefined; }
+
+    const rect = this.book.element.getBoundingClientRect();
+    if(!rect.width || !rect.height){ return undefined; }
+
+    const box = { x: rect.left, y: rect.top, width: rect.width, height: rect.height };
+    if(this.isReadyToOpen){ return { box, face: BookFace.Front }; }
+    if(this.isClosed){ return { box, face: BookFace.Back }; }
+    return { box: { ...box, x: box.x + box.width / 2, width: box.width / 2 }, face: BookFace.Front };
   }
   /**
    * Writes the move and the zoom as one transform. The move comes first so
