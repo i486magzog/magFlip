@@ -5,7 +5,7 @@
  * the locally built bundle at /packages/minjs/magflip.min.js.
  *
  * Usage: npm run serve            (default port 8190)
- *        PORT=3000 npm run serve
+ *        PORT=8191 npm run serve
  */
 import { createServer } from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';

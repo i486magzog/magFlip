@@ -41,7 +41,7 @@ Documentation lives in the separate [magFlipDocs](https://github.com/i486magzog/
 cd ../magFlipDocs
 npm install
 npm run build:magflip  # builds this repository for the live demo
-npm start              # http://localhost:3000
+npm start              # http://localhost:3107
 ```
 
 <br>
