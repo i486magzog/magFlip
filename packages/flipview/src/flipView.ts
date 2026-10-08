@@ -1327,6 +1327,10 @@ export class FlipView implements IBookView {
     this.flipManager.eventZone = startZone;
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(startZone, startGP, this.pageContainerRect, this.zoomLevel);
+    // Draw the starting fold now. The flipping class is already on, and when this
+    // is called from a frame callback the first `animate` only runs a frame later,
+    // so that frame would be painted with the last flip's fold: the next spread flashes.
+    this.flipPage(startGP);
 
     const startTime = performance.now();
     const duration = this.config.autoFlip.duration;
