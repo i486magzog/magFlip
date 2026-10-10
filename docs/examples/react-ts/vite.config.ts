@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ command }) => ({
   // dev 서버: '/' (로컬 테스트 정상)
   // build: GitHub Pages 실제 경로
-  base: command === 'serve' ? '/' : '/magFlip-public/examples/react-ts/dist/',
+  base: command === 'serve' ? '/' : '/magFlip/examples/react-ts/dist/',
   plugins: [
     react(),
   ],
