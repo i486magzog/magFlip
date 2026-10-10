@@ -16,6 +16,6 @@
 
 - `id` 는 `#bookViewer` 의 class 로 추가되므로 CSS 는 `#bookViewer.<id>` 아래로 한정.
 - `view()` 는 `bookContainerEl` 을 반환하고, `closeViewer()` 에서 책 참조를 해제.
-- 기능을 완성하면 `packages/minjs` 는 이미 포함하므로 추가 작업 없음. 사용자 문서(`../magFlipDocs/docs/magflip/user`)의 "개발 중" 표기 갱신.
+- 기능을 완성하면 `packages/minjs` 는 이미 포함하므로 추가 작업 없음. 사용자 문서(`../magBookDocs/docs/magflip/user`)의 "개발 중" 표기 갱신.
 - 명령: `npm run typecheck -w packages/scrollview`, `npm run build:local -w packages/scrollview`
 - 관련 skill: `new-view-plugin`

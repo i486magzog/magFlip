@@ -53,4 +53,4 @@ npm run build:local -w packages/input
 
 1-4 단계까지 들어와 있다(순수 로직 + DOM 연결 + `minjs` 번들 포함).
 남은 것: 예제·문서(1-6), 확대·화면 이동(1-5, 조사 후 결정).
-계획 전체는 메모리 `magflip-tv-plan` 과 `../magFlipDocs/docs/tv/` 에 있다.
+계획 전체는 메모리 `magflip-tv-plan` 과 `../magBookDocs/docs/tv/` 에 있다.

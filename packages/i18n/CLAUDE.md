@@ -45,5 +45,5 @@ npm run build:local -w packages/i18n   # index.js / index.d.ts (버전 안 올�
 ## 변경 체크리스트
 
 1. `npm test -w packages/i18n && npm run build:local -w packages/i18n`
-2. 소비하는 쪽(`../../magFlipEditor`, `../../magFlipServer`, `../../magFlipTV`)은 `file:` 링크로 **빌드 산출물**을 본다 → 여기서 build:local 을 먼저 돌려야 반영된다.
-3. 문서: `../../magFlipDocs/docs/magflip/dev/i18n.md`
+2. 소비하는 쪽(`../../magBookEditor`, `../../magBookServer`, `../../magBookTV`)은 `file:` 링크로 **빌드 산출물**을 본다 → 여기서 build:local 을 먼저 돌려야 반영된다.
+3. 문서: `../../magBookDocs/docs/magflip/dev/i18n.md`

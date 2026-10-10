@@ -34,6 +34,6 @@
 - `flip()` 의 점 이름(f,g,h,i / j,k,l,m)과 a,b,c,d 는 `docs/img/flip-math/*.png` 그림과 대응 — 이름 유지.
 - 한 페이지당 뷰어 1개 가정(고정 id, 전역 CSS 변수)을 깨지 않도록.
 - 검증: `npm test -w packages/flipview`, `npm run typecheck`, 루트 `npm run dev` 후 드래그(6개 zone)·Next·Prev·moveTo(앞/뒤)·Zoom·첫/마지막 페이지 닫힘.
-- 알려진 버그(resize 시 book 없음 에러 등): `../magFlipDocs/docs/magflip/dev/known-issues.md`
-- 문서: `../magFlipDocs/docs/magflip/dev/flipview/{page-window,event-flow,flip-geometry}.md`
+- 알려진 버그(resize 시 book 없음 에러 등): `../magBookDocs/docs/magflip/dev/known-issues.md`
+- 문서: `../magBookDocs/docs/magflip/dev/flipview/{page-window,event-flow,flip-geometry}.md`
 - 관련 skill: `flip-effect-debug`

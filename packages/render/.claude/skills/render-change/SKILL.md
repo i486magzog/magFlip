@@ -49,4 +49,4 @@ npm run serve                        # http://localhost:8190/docs/examples/local
 
 ## 5. 문서
 
-`../magFlipDocs/docs/magflip/dev/doc-model/rendering.md`, 공개 API 는 `../magFlipDocs/docs/magflip/user/reference/api.md`, 파일 지도는 `packages/render/CLAUDE.md`.
+`../magBookDocs/docs/magflip/dev/doc-model/rendering.md`, 공개 API 는 `../magBookDocs/docs/magflip/user/reference/api.md`, 파일 지도는 `packages/render/CLAUDE.md`.

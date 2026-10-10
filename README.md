@@ -1,5 +1,5 @@
 # MagFlip ![npm version](https://img.shields.io/npm/v/@magflip/minjs)
-***<span style="color:yellow">MagFlip</span>*** is *<u>Magzog</u>'s first open project, implementing a page-flipping effect for books. Additionally, the ***<span style="color:green">MagFlipEditor</span>***, which allows for the creation and editing of books, and the ***<span style="color:green">MagFlipServer</span>***, which manages and serves book information, are also currently in development.
+***<span style="color:yellow">MagFlip</span>*** is *<u>Magzog</u>'s first open project, implementing a page-flipping effect for books. Additionally, the ***<span style="color:green">MagBookEditor</span>***, which allows for the creation and editing of books, and the ***<span style="color:green">MagBookServer</span>***, which manages and serves book information, are also currently in development.
 See [demo](https://i486magzog.github.io/magFlip/examples/prebuild/magflip.html).
 
 <span style="color:#888888">[*] "<u>Magzog</u> is a blend of 'magazine' and 'blog.' The idea is to combine printed formats like books, magazines, and newspapers with digital features."</span>
@@ -29,16 +29,16 @@ Please refer to the [sample code](./docs/examples/prebuild) for more details.
 <br>
 
 ## Documentation
-Documentation lives in the separate [magFlipDocs](https://github.com/i486magzog/magFlipDocs) repository (Docusaurus). It covers MagFlip, MagFlipEditor, MagFlipServer and MagFlipTV.
+Documentation lives in the separate [magBookDocs](https://github.com/i486magzog/magBookDocs) repository (Docusaurus). It covers MagFlip, MagBookEditor, MagBookServer and MagBookTV.
 
-| Docs | Path in magFlipDocs | For |
+| Docs | Path in magBookDocs | For |
 | --- | --- | --- |
 | User Guide | `docs/magflip/user` | People who use MagFlip in their web pages |
 | Developer Guide | `docs/magflip/dev` | People who develop MagFlip itself (architecture, document model, flip math, build & release) |
 
 ```bash
-# Clone magFlipDocs next to this repository, then:
-cd ../magFlipDocs
+# Clone magBookDocs next to this repository, then:
+cd ../magBookDocs
 npm install
 npm run build:magflip  # builds this repository for the live demo
 npm start              # http://localhost:3107

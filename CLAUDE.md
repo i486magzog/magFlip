@@ -19,7 +19,7 @@
 | `scripts/serve.mjs` | 의존성 없는 로컬 정적 서버 | |
 | `docs/img/flip-math` | README 용 Flip 기하 그림 (문서 사이트에도 같은 그림) | |
 
-문서 사이트는 옆 저장소 **`../magFlipDocs`** 에 있다(Docusaurus). 이 저장소의 문서는 `../magFlipDocs/docs/magflip/{user,dev}`, 작성 규칙은 그 저장소의 `CLAUDE.md` 와 `write-docs` skill.
+문서 사이트는 옆 저장소 **`../magBookDocs`** 에 있다(Docusaurus). 이 저장소의 문서는 `../magBookDocs/docs/magflip/{user,dev}`, 작성 규칙은 그 저장소의 `CLAUDE.md` 와 `write-docs` skill.
 
 의존 방향: `flipview`, `scrollview`, `input`, `shelf` → `core`; `render` → `doc`; `minjs` → 전부. **core 는 다른 MagFlip 패키지를 import 하지 않는다.**
 **core 에는 책 한 권에 대한 것만 둔다.** 책장·격자처럼 여러 권을 늘어놓는 배치는 `shelf`(또는 앱)가 한다 — core 는 책의 모습(`book.objectEl`)과 열고 닫는 움직임까지만 안다.
@@ -57,21 +57,21 @@ npm run dev              # build:local + serve
 - 좌표 계산은 DOM 없는 곳(`Flipping`, `MZMath`)에 두고 테스트 가능하게. 렌더링(속성/CSS 변수 쓰기)은 `FlipView`.
 - 공개 멤버에 영문 JSDoc. 조기 반환으로 중첩 줄이기. 매직 넘버는 이름 있는 상수/config 로.
 - 주석 처리된 죽은 코드를 새로 추가하지 않는다. 기존 파일의 들여쓰기(2칸)·따옴표 스타일을 따른다.
-- 상세: `../magFlipDocs/docs/magflip/dev/development/coding-conventions.md`
+- 상세: `../magBookDocs/docs/magflip/dev/development/coding-conventions.md`
 
 ## 변경 후 체크리스트
 
 1. `npm run typecheck && npm test`
 2. `npm run build:local` 후 `docs/examples/local` 에서 책장·격자 전환, 책 호버·클릭(날아가 열림), 드래그 / Next / Prev / moveTo / Zoom / 닫기(제자리로 돌아감) 확인
-3. 공개 API 변경 → `../magFlipDocs/docs/magflip/user/reference/api.md` 갱신
-4. 구조·흐름 변경 → `../magFlipDocs/docs/magflip/dev` 다이어그램, 해당 `CLAUDE.md`, 관련 skill 갱신
-5. 발견한 버그/부채 → `../magFlipDocs/docs/magflip/dev/known-issues.md`
+3. 공개 API 변경 → `../magBookDocs/docs/magflip/user/reference/api.md` 갱신
+4. 구조·흐름 변경 → `../magBookDocs/docs/magflip/dev` 다이어그램, 해당 `CLAUDE.md`, 관련 skill 갱신
+5. 발견한 버그/부채 → `../magBookDocs/docs/magflip/dev/known-issues.md`
 
 ## Skills
 
 - 루트 `.claude/skills/`: `local-dev`(빌드·테스트·데모), `release`(npm 배포)
 - 패키지/폴더별: doc `doc-model-change`, render `render-change`, core `core-model-change`, flipview `flip-effect-debug`, scrollview `new-view-plugin`, minjs `bundle-check`, docs/examples `update-examples`
-- 책 고르기 화면의 설계(core ↔ shelf 경계, 자세·비행 계산): `../magFlipDocs/docs/magflip/dev/book-object.md`
+- 책 고르기 화면의 설계(core ↔ shelf 경계, 자세·비행 계산): `../magBookDocs/docs/magflip/dev/book-object.md`
 
 ## Git
 
