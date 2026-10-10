@@ -1155,6 +1155,7 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
     if(!this.pageContainerRect){ return; }
 
+    this.unsetViewerToAutoFlip();
     this.flipManager.eventStatus = EventStatus.Dragging;
     this.flipManager.eventZone = param.zone;
     
@@ -1322,6 +1323,9 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
     if(!this.pageContainerRect){ return; }
 
+    // A corner the mouse lifted may still be up, often on the other side. Its class
+    // would stay on and draw that page beside the turning one, apart from its shadow.
+    this.unsetViewerToAutoFlip();
     this.flipManager.eventStatus = EventStatus.Flipping;
     this.flipManager.curMouseGP = startGP;
     this.flipManager.eventZone = startZone;
