@@ -264,6 +264,30 @@ export class Flipping extends PageWindow {
     return this.getInfoToFlip(isClick ? this.activeCornerOppositeGP : mouseGP);
   }
   /**
+   * The angle a hard-cover board stands at when its outer edge is over the mouse:
+   * 0 lying on its own side of the gutter, π lying on the other side.
+   * A board does not bend, so only how far the mouse is from the gutter counts.
+   * @param mouseGP The position of the mouse pointer.
+   * @param pageWidth The width of a page on the screen.
+   * @param isLeftPage Whether the board lies on the left of the gutter.
+   * @returns The angle in radians, from 0 to π.
+   */
+  getHardSheetAngle(mouseGP:Point, pageWidth:number, isLeftPage:boolean):number {
+    const reach = isLeftPage ? this.gutter.left - mouseGP.x : mouseGP.x - this.gutter.left;
+    return Math.acos(Math.max(-1, Math.min(1, reach / pageWidth)));
+  }
+  /**
+   * The point over a hard-cover board's outer edge when it stands at that angle,
+   * on the bottom of the gutter. The inverse of `getHardSheetAngle`.
+   * @param angle The angle in radians, from 0 to π.
+   * @param pageWidth The width of a page on the screen.
+   * @param isLeftPage Whether the board lies on the left of the gutter.
+   */
+  getHardSheetPoint(angle:number, pageWidth:number, isLeftPage:boolean):Point {
+    const reach = pageWidth * Math.cos(angle);
+    return { x: this.gutter.left + (isLeftPage ? -reach : reach), y: this.gutter.bottom };
+  }
+  /**
    * Animates the page flip action, gradually moving from the start point to the target point,
    * while applying easing to make the motion smooth. It supports auto-flip from or to the corner.
    * @param isAutoFlippingFromCorner Whether the flip is an automatic flip from the corner.

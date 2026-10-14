@@ -1,4 +1,4 @@
-import { IBookData, BookStatus, BookType, IPublication, DefaultSize, IPageData, PageType, IBook, IPage, IPageLabel, IPageLabelData, DeepRequired, BookFace, IClosedBookPlace } from "../common/models";
+import { IBookData, BookStatus, BookType, BookCover, IPublication, DefaultSize, IPageData, PageType, IBook, IPage, IPageLabel, IPageLabelData, DeepRequired, BookFace, IClosedBookPlace } from "../common/models";
 import { BookSize, ISize, SizeExt } from "../common/dimension";
 import { BookEl } from "./bookEl";
 import { BookObjectEl, IBookObjectData } from "./bookObjectEl";
@@ -24,6 +24,7 @@ export class Book extends BookEl implements IBook {
     id: "book1",
     status: BookStatus.Close,
     type: BookType.Book,
+    cover: BookCover.Soft,
     title: "",
     author: "",
     publication: {
@@ -59,6 +60,10 @@ export class Book extends BookEl implements IBook {
    * Returns and sets the book type.
    */
   type: BookType;
+  /**
+   * What the book's covers are made of.
+   */
+  readonly cover: BookCover;
   /**
    * Returns the book's title.
    */
@@ -115,6 +120,7 @@ export class Book extends BookEl implements IBook {
     this.id = bookdata.id;
     this.status = BookStatus.Close;
     this.type = bookdata.type || BookType.Book;
+    this.cover = bookdata.cover || BookCover.Soft;
     this.title = bookdata.title || "Title";
     this.author = bookdata.author || "Author";
     this.publication = bookdata.publication || {

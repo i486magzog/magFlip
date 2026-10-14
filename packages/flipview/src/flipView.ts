@@ -1,8 +1,18 @@
-import { Book, BookEvent, BookFace, deepMerge, DeepRequired, EventStatus, IBookView, IClosedBookPlace, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
+import { Book, BookCover, BookEvent, BookFace, deepMerge, DeepRequired, EventStatus, IBookView, IClosedBookPlace, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
 import { FlipData } from './flipData';
 import { Flipping as FlipManager } from './flipManager';
 import { Gutter } from './gutter';
 import { clampPan, IPanOffset } from './panning';
+/**
+ * A hard-cover board that only follows the mouse (it is not being turned yet)
+ * rises this share of the angle the mouse points at.
+ */
+const HARD_LIFT_SCALE = 0.4;
+/**
+ * Eases a turn in and out, so a board starts and lands gently.
+ * @param t Progress from 0 to 1.
+ */
+const easeInOut = (t:number) => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -184,6 +194,15 @@ export class FlipView implements IBookView {
    * Gets whether the last page is closing.
    */
   private get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.bookLastPageIndex; }
+  /**
+   * Gets whether the sheet that is turning is a board of a hard-cover book:
+   * the front cover with the inside of it, or the inside of the back cover with the back cover.
+   */
+  private get isHardSheetTurning(){
+    if(this.book?.cover !== BookCover.Hard){ return false; }
+    const index = this.getActivePage(1)?.index;
+    return index !== undefined && (index <= 1 || index >= this.bookLastPageIndex - 1);
+  }
   /**
    * Returns the instance of Page with sequence of active page.
    * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
@@ -446,12 +465,25 @@ export class FlipView implements IBookView {
     if(sh2El){ sh2El.remove(); }
     const gutterShadow = document.createElement('div');
     gutterShadow.className = "shadow2";
+
+    // A hard-cover board darkens as it stands up and shades the pages beside it.
+    const hardShadeEl = page.contentContainerEl.getElementsByClassName('hard-shade')[0];
+    if(hardShadeEl){ hardShadeEl.remove(); }
+    const hardShade = document.createElement('div');
+    hardShade.className = "hard-shade";
+    // The board's outer edge, seen while the board turns.
+    const hardEdgeEl = pageEl.getElementsByClassName('hard-edge')[0];
+    if(hardEdgeEl){ hardEdgeEl.remove(); }
+    const hardEdge = document.createElement('div');
+    hardEdge.className = "hard-edge";
     
     page.contentContainerEl.appendChild(gutterShadow)
+    page.contentContainerEl.appendChild(hardShade)
     pageEl.appendChild(page.contentContainerEl);
     pageEl.appendChild(sh6Svg);
     pageEl.appendChild(sh3Svg);
     pageEl.appendChild(sh1Svg)
+    pageEl.appendChild(hardEdge)
   }
   /**
    * 
@@ -709,6 +741,7 @@ export class FlipView implements IBookView {
   private attachBook(book:Book) {
     this.book = book;
     if(!book?.element){ throw new Error("Error the book opening"); }
+    this.bookContainerEl.classList.toggle('hard-cover', book.cover === BookCover.Hard);
   
     this.bookContainerEl.appendChild(book.element);
     this.appendShadowEl4AllPage();
@@ -1056,6 +1089,9 @@ export class FlipView implements IBookView {
     const zoomLevel = this.zoomLevel;
     const page2El = this.activePage2El;
     if(!page2El){ return; }
+    const isHardSheet = this.isHardSheetTurning;
+    this.bookContainerEl.classList.toggle('hard-sheet-turning', isHardSheet);
+    if(isHardSheet){ this.turnHardSheet(mouseGP); return; }
     const pageWH = { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel }
     const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
 
@@ -1095,6 +1131,24 @@ export class FlipView implements IBookView {
     cssVar.setProperty('--page2-rotate', `${flipData.page2.rotate}rad`)
   }
   /**
+   * Turns a hard-cover board to where the mouse is. The board stays flat and turns
+   * around the gutter in 3D (flipView.css); the masks and paper shadows are not used.
+   * @param mouseGP The point the board's outer edge is over.
+   */
+  private turnHardSheet(mouseGP:Point){
+    const page1El = this.activePage1El;
+    if(!page1El){ return; }
+    const zoomLevel = this.zoomLevel;
+    const pageWidth = page1El.offsetWidth * zoomLevel;
+    let angle = this.flipManager.getHardSheetAngle(mouseGP, pageWidth, !!this.isLeftPageFlipping);
+    if(this.flipManager.eventStatus & EventStatus.AutoFlip){ angle *= HARD_LIFT_SCALE; }
+
+    const cssVar = document.documentElement.style;
+    cssVar.setProperty('--hard-gutter', `${(this.flipManager.gutter.left - this.pageContainerRect.left) / zoomLevel}px`);
+    cssVar.setProperty('--hard-angle', `${angle}rad`);
+    cssVar.setProperty('--hard-lift', `${Math.sin(angle)}`);
+  }
+  /**
    * Sets the status of viewer as Auto Flipping.
    */
   private setViewerToAutoFlip(){
@@ -1105,7 +1159,7 @@ export class FlipView implements IBookView {
    * Unsets the status of viewer as Auto Flipping.
    */
   private unsetViewerToAutoFlip(){
-    this.bookContainerEl.classList.remove('left-page-flipping', 'right-page-flipping');
+    this.bookContainerEl.classList.remove('left-page-flipping', 'right-page-flipping', 'hard-sheet-turning');
   }
   /**
    * Sets the status of viewer as the status Flipping by dragging.
@@ -1119,7 +1173,7 @@ export class FlipView implements IBookView {
    * Unsets the status of viewer as the status Flipping by dragging.
    */
   private unsetViewerToFlip(){
-    this.bookContainerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`);
+    this.bookContainerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`, 'hard-sheet-turning');
   }
   /**
    * This is the mouseenter event handler on the 6 event zones.
@@ -1340,13 +1394,21 @@ export class FlipView implements IBookView {
 
     const startTime = performance.now();
     const duration = this.config.autoFlip.duration;
+    // A board turns by its angle, eased; a paper page follows a curved path across.
+    const isHardSheet = this.isHardSheetTurning;
+    const isLeftPage = !!this.isLeftPageFlipping;
+    const pageWidth = (this.activePage1El?.offsetWidth || 0) * this.zoomLevel;
 
     const animate = (currentTime:number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1); // 진행 비율 (0에서 1 사이)
-      const x = startGP.x + (endGP.x - startGP.x) * progress;
-      const y = startGP.y + offsetY * Math.sin(progress * Math.PI);
-      this.flipPage({x, y}); // 좌표 이동
+      if(isHardSheet){
+        this.flipPage(this.flipManager.getHardSheetPoint(Math.PI * easeInOut(progress), pageWidth, isLeftPage));
+      } else {
+        const x = startGP.x + (endGP.x - startGP.x) * progress;
+        const y = startGP.y + offsetY * Math.sin(progress * Math.PI);
+        this.flipPage({x, y}); // 좌표 이동
+      }
   
       if (progress < 1) {
         requestAnimationFrame(animate); // 다음 프레임 요청

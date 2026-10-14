@@ -254,6 +254,135 @@
 
 
 /****************
+  Hard cover
+ ****************/
+/* A board of a hard-cover book (Book `cover: BookCover.Hard`) does not curl: it turns as one
+   stiff piece around the gutter, in 3D. flipView.ts sets the angle; a page can set the
+   board's thickness and edge colour on the book element. */
+:root {
+  --hard-gutter: 0px;
+  --hard-angle: 0rad;
+  --hard-lift: 0;
+}
+#bookViewer.flip-view .book {
+  --mf-hard-cover-thickness: 6px;
+  --mf-hard-cover-edge: #3a332d;
+}
+#bookViewer.flip-view .page > .hard-edge,
+#bookViewer.flip-view .page > .content-container > .hard-shade { display: none; }
+/* A closed hard-cover book shows the bottom edge of its board. */
+#bookViewer.flip-view #bookContainer.hard-cover.ready-to-open .book {
+  box-shadow: 0 var(--mf-hard-cover-thickness) 0 0 var(--mf-hard-cover-edge);
+}
+
+/* Seen from in front of the gutter. */
+#bookViewer.flip-view #bookContainer.hard-sheet-turning .book > .container {
+  perspective: calc(var(--page-width) * 4);
+  perspective-origin: var(--hard-gutter) 50%;
+}
+/* No fold: no masks and no paper shadows. */
+#bookViewer.flip-view #bookContainer.hard-sheet-turning .book > .container > .page > .shadow1,
+#bookViewer.flip-view #bookContainer.hard-sheet-turning .book > .container > .page > .shadow3,
+#bookViewer.flip-view #bookContainer.hard-sheet-turning .book > .container > .page > .shadow6 { display: none; }
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .content-container,
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(5) > .content-container,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .content-container,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(2) > .content-container {
+  -webkit-mask-image: none;
+  mask-image: none;
+  backface-visibility: hidden;
+}
+/* The side of the board that faces up turns away from its own side of the gutter... */
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) {
+  left: calc(var(--hard-gutter) - .5px);
+  z-index: 10;
+  transform-origin: left center;
+  transform: rotateY(calc(var(--hard-angle) * -1));
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) {
+  left: calc(var(--hard-gutter) - var(--page-width) - .5px);
+  z-index: 10;
+  transform-origin: right center;
+  transform: rotateY(var(--hard-angle));
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+/* ...and its other side comes down on the far side, once the board stands past upright. */
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(5) {
+  display: block;
+  top: 0;
+  left: calc(var(--hard-gutter) - var(--page-width) - .5px);
+  z-index: 10;
+  transform-origin: right center;
+  transform: rotateY(calc(180deg - var(--hard-angle)));
+  backface-visibility: hidden;
+  filter: none;
+}
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(2) {
+  display: block;
+  top: 0;
+  left: calc(var(--hard-gutter) - .5px);
+  z-index: 10;
+  transform-origin: left center;
+  transform: rotateY(calc(var(--hard-angle) - 180deg));
+  backface-visibility: hidden;
+  filter: none;
+}
+/* The board's thickness: its outer edge, standing behind the side that faces up. */
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .hard-edge,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .hard-edge {
+  display: block;
+  position: absolute;
+  top: 0;
+  width: var(--mf-hard-cover-thickness);
+  height: 100%;
+  background: var(--mf-hard-cover-edge);
+}
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .hard-edge {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(-90deg);
+}
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .hard-edge {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(90deg);
+}
+/* The board darkens as it stands up... */
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(5) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(2) > .content-container > .hard-shade {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: calc(var(--hard-lift) * .3);
+  pointer-events: none;
+}
+/* ...and shades the pages on both sides of the gutter while it stands. */
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(6) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .content-container > .hard-shade {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 60%);
+  opacity: var(--hard-lift);
+  pointer-events: none;
+}
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(1) > .content-container > .hard-shade {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 60%);
+  opacity: var(--hard-lift);
+  pointer-events: none;
+}
+
+/****************
   Setting
  ****************/
 

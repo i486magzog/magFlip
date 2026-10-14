@@ -27,6 +27,7 @@
 - 좌표는 뷰포트 기준(`...GP`). SVG/CSS 에 쓸 때 `/ zoomLevel`.
 - `#bookContainer` transform 은 `translate(pan) scale(zoom)`. 이동 단위는 화면 픽셀. **책을 옮기면 `updateDimension()` 을 불러 `gutter` 를 다시 재야 한다**(안 그러면 접힘이 옛 가운데 선 기준으로 계산된다). `zoom()` 은 `setViewer()` 안에서 이미 부른다.
 - `pivot` = 오른쪽 +1 / 왼쪽 -1 로 공식을 좌우 재사용.
+- 하드커버(`book.cover === BookCover.Hard`): 0·1번과 마지막 두 쪽이 판지. 판이 넘어갈 때 `flipPage()` 는 마스크 대신 `turnHardSheet()` 로 각도(`--hard-angle`, `Flipping.getHardSheetAngle`)만 쓰고, `#bookContainer.hard-sheet-turning` 의 CSS(flipView.css "Hard cover")가 page1/page2 를 책등 축으로 `rotateY` 한다. 판의 옆면은 page1 의 `.hard-edge`, 그늘은 `.hard-shade`. `autoFlip` 은 판이면 각도를 이징으로 움직인다.
 
 ## 작업 규칙
 

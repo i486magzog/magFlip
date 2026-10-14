@@ -59,6 +59,21 @@ export enum BookType {
   Newspaper = "Newspaper",
 }
 /**
+ * What a book's covers are made of.
+ */
+export enum BookCover {
+  /**
+   * The covers are paper like the pages, and turn like them.
+   */
+  Soft = "Soft",
+  /**
+   * The covers are thick boards. The first page and the one after it are the
+   * two sides of the front board, and the last page and the one before it are
+   * the two sides of the back board: a board turns as one stiff piece.
+   */
+  Hard = "Hard",
+}
+/**
  * Book status.
  */
 export enum BookStatus {
@@ -212,6 +227,10 @@ export interface IBookData {
   title?: string;
   author?: string;
   type?: BookType;
+  /**
+   * What the covers are made of. Soft by default.
+   */
+  cover?: BookCover;
   publication?: IPublication;
   lastPageIndex: number;
   labels?:{ [n:number|string]: IPageLabelData };
