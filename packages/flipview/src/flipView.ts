@@ -471,11 +471,6 @@ export class FlipView implements IBookView {
     if(hardShadeEl){ hardShadeEl.remove(); }
     const hardShade = document.createElement('div');
     hardShade.className = "hard-shade";
-    // The board's outer edge, seen while the board turns.
-    const hardEdgeEl = pageEl.getElementsByClassName('hard-edge')[0];
-    if(hardEdgeEl){ hardEdgeEl.remove(); }
-    const hardEdge = document.createElement('div');
-    hardEdge.className = "hard-edge";
     
     page.contentContainerEl.appendChild(gutterShadow)
     page.contentContainerEl.appendChild(hardShade)
@@ -483,7 +478,6 @@ export class FlipView implements IBookView {
     pageEl.appendChild(sh6Svg);
     pageEl.appendChild(sh3Svg);
     pageEl.appendChild(sh1Svg)
-    pageEl.appendChild(hardEdge)
   }
   /**
    * 
@@ -741,7 +735,6 @@ export class FlipView implements IBookView {
   private attachBook(book:Book) {
     this.book = book;
     if(!book?.element){ throw new Error("Error the book opening"); }
-    this.bookContainerEl.classList.toggle('hard-cover', book.cover === BookCover.Hard);
   
     this.bookContainerEl.appendChild(book.element);
     this.appendShadowEl4AllPage();
