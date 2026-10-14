@@ -1160,6 +1160,7 @@ export class FlipView implements IBookView {
     this.flipManager.eventZone = param.zone;
     
     const viewport = { x:event.clientX, y:event.clientY };
+    this.flipManager.mouseDownGP = viewport;
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, this.zoomLevel);
     this.flipPage( viewport );
@@ -1217,7 +1218,8 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
 
     const viewport = { x:event.clientX, y:event.clientY };
-    const dataToFlip = this.flipManager.getInfoToFlip(viewport);
+    const dataToFlip = this.flipManager.getInfoToRelease(viewport);
+    this.flipManager.mouseDownGP = undefined;
 
     if(dataToFlip.isSnappingBack){ this.flipManager.eventStatus = EventStatus.SnappingBack; }
     else { this.flipManager.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }

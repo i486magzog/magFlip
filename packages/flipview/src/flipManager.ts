@@ -9,6 +9,11 @@ import { FlipActionLine } from './flipActionLine';
  */
 const FLIP_END_EVENT = 'flipEnd';
 /**
+ * How far (px) the mouse may move between going down on a page and coming up
+ * for the release to count as a click.
+ */
+const CLICK_DISTANCE = 4;
+/**
  * Flipping class
  */
 export class Flipping extends PageWindow {
@@ -85,6 +90,10 @@ export class Flipping extends PageWindow {
    * The opposite corner to the active corner during the flip.
    */
   activeCornerOppositeGP:Point = new Point();
+  /**
+   * Where the mouse went down to drag the page, until it comes up again.
+   */
+  mouseDownGP?:Point;
   /**
    * Diagonal values used to calculate flipping geometry.
    * The diagonals are depends on the dragging corner point.
@@ -242,6 +251,17 @@ export class Flipping extends PageWindow {
       isSnappingBack: isSnappingBack,
       isFlippingForward: isForward,
     }
+  }
+  /**
+   * Retrieves the information to flip when the mouse comes up on a dragged page.
+   * A click (the mouse came up where it went down) turns the page all the way across,
+   * as a drag past the gutter does; otherwise the page goes to the corner closer to the mouse.
+   * @param mouseGP The position of the mouse pointer when it came up.
+   * @returns An object containing the target corner, snap-back status, and flip direction.
+   */
+  getInfoToRelease(mouseGP:Point){
+    const isClick = this.mouseDownGP !== undefined && MZMath.getLength(mouseGP, this.mouseDownGP) < CLICK_DISTANCE;
+    return this.getInfoToFlip(isClick ? this.activeCornerOppositeGP : mouseGP);
   }
   /**
    * Animates the page flip action, gradually moving from the start point to the target point,
