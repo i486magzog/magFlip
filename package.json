@@ -32,9 +32,9 @@
     "build:watch:flipview": "npm run build:watch --workspace packages/flipview",
     "build:scrollview": "npm run build --workspace packages/scrollview",
     "build:watch:scrollview": "npm run build:watch --workspace packages/scrollview",
-    "build": "npm run build --ws --if-present",
-    "versionup:minor": "npm version minor --git-tag-version",
+    "build": "npm run build --workspace packages/i18n && npm run build --workspace packages/doc && npm run build --workspace packages/render && npm run build --workspace packages/core && npm run build --workspace packages/input && npm run build --workspace packages/shelf && npm run build --workspace packages/flipview && npm run build --workspace packages/scrollview && npm run build --workspace packages/minjs",
     "pub": "npm run pub --ws --if-present --otp $npm_config_otp",
-    "sample:book": "node scripts/make-sample-book.mjs"
+    "sample:book": "node scripts/make-sample-book.mjs",
+    "version:set": "node scripts/set-version.mjs"
   }
 }

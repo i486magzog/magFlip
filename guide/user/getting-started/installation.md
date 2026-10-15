@@ -13,7 +13,7 @@ MagFlip은 두 가지 방법으로 사용할 수 있습니다.
 `<head>` 안에 아래 스크립트를 추가하세요.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.48/magflip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.6.0/magflip.min.js"></script>
 ```
 
 번들을 로드하면 `Book`, `BookShelfManager`, `BookShelf`, `FlipView` 등이 **전역(window)** 에 등록되고, 필요한 CSS도 자동으로 주입됩니다.

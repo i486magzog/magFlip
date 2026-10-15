@@ -13,6 +13,10 @@ The first step is to install the `core` and `flipview` packages:
 ```bash
 npm install --save-dev @magflip/core @magflip/flipview
 ```
+To lay several books out as covers or as a bookshelf, add `@magflip/shelf` (since 0.6.0 the shelf is no longer part of `core`):
+```bash
+npm install --save-dev @magflip/shelf
+```
 <span style="color: red; font-weight: bold;">[In Progress]</span> Then install any additional view plugins you plan to use:
 ```bash
 npm install --save-dev @magflip/scrollview
@@ -23,7 +27,7 @@ npm install --save-dev @magflip/scrollview
 Include the following lines of code in the `<head>` section of your page:<br>
 Please refer to the [sample code](./docs/examples/prebuild) for more details.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.48/magflip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.6.0/magflip.min.js"></script>
 ```
 
 <br>
@@ -42,7 +46,7 @@ The guides live in [`guide/`](./guide) (Markdown, rendered by a Docusaurus docs 
 ## Local development
 ```bash
 npm install
-npm run build:local    # build all packages WITHOUT bumping versions (npm run build bumps patch versions)
+npm run build:local    # build all packages for local checks (npm run build makes the release build)
 npm test               # unit tests
 npm run typecheck
 npm run serve          # http://localhost:8190/docs/examples/local/

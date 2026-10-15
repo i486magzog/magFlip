@@ -16,6 +16,12 @@ html, body {
   position: fixed;
   top: 0;
   left: 0;
+  /*
+   * Over the page, whatever was added to it after the viewer - a shelf made
+   * with no element of its own lands at the end of the body. Under the copy
+   * of a book that flies in (.book-object.is-flying, 1000).
+   */
+  z-index: 999;
   padding: 0;
   width: 100vw;
   height: 100vh;

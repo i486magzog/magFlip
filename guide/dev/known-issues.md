@@ -20,7 +20,6 @@ title: 알려진 이슈 / 기술 부채
 | 9 | `#mzZone*` | 확대하면 이벤트 영역이 화면 밖으로 나간다(1.5배에서 오른쪽 아래 zone x=1112, 창 너비 1024) | 확대 중 마우스 드래그 넘김 불가. `nextPage`/`prevPage`·키 입력은 정상 |
 | 10 | 책 객체 (`bookObject.css`, `getFaceAngle`) | 책등이 언제나 왼쪽이다. 오른쪽으로 넘기는 책(게시본 `readingDirection: 'rtl'`)도 책등이 왼쪽에 그려지고, core 의 `Book` 에는 읽는 방향이 없다 | 세로쓰기 책·아랍어 책의 책장 모습이 실제와 반대 |
 | 11 | `shelf/src/bookShelf.ts` | 가장 큰 책(`--mf-shelf-tallest`)은 `addBook`/`removeBook` 때만 다시 잰다. 책장에 놓은 뒤 `importPages` 로 판형이 바뀐 책은 반영되지 않는다 | 책장에서 키가 틀릴 수 있음. `importPages` 뒤에 `addBook` 하면 문제없음 |
-| 12 | `docs/examples/prebuild/magflip.html` | 공개 데모가 CDN `@magflip/minjs@0.5.48` 을 쓴다. 이 버전은 core 가 책장을 그리던 때라, 다음 버전으로 올릴 때 `new BookShelf(...)` 로 바꿔야 책이 보인다 | 버전을 올리기 전까지는 영향 없음 |
 | 13 | `docs/examples/local`, `prebuild` | 예제 페이지에 `<meta name="viewport">` 가 없다. 휴대폰(과 브라우저의 모바일 흉내)은 페이지를 980px 너비로 그린 뒤 줄여 보여 준다 | 휴대폰에서 책장이 휴대폰 너비로 줄바꿈하지 않고 책이 작게 보인다. 라이브러리가 아니라 예제의 문제지만, 넣기 전에 좁은 화면의 뷰어를 확인해야 한다 |
 
 ## 구조/가독성 관련
@@ -39,6 +38,7 @@ title: 알려진 이슈 / 기술 부채
 
 | 내용 | 해결 |
 | --- | --- |
+| 공개 CDN 데모(`prebuild/magflip.html`)가 core 가 책장을 그리던 0.5.48 에 기대고 있었음 | 0.6.0 에서 `new BookShelf({ manager })` 로 바꾸고 CDN 버전을 0.6.0 으로 올림 |
 | core 내부 `import ... from 'src/common/helper'` (baseUrl 의존 경로) | 상대 경로 `../common/helper` 로 변경. Jest 등 다른 도구에서도 해석 가능 |
 | `Book.importPages` 가 페이지마다 요소를 만들어서, 300쪽 책을 열면 DOM 300개와 surface 요청 300번이 한꺼번에 일어남 | `PageEl` 이 요소를 **처음 요구받을 때** 만든다(`element`/`contentEl` 이 getter, `hasElements` 로 확인). 뷰어는 창에 들어오는 페이지만 요구하므로 300쪽 책을 열 때 요청은 매니페스트 1개, 페이지 요소는 6개다. FlipView 는 `pageElOf()` 한 곳에서 요소를 얻고 그때 그림자를 붙인다 |
 | 책을 열지 않은 채 창 크기를 바꾸면 `getBoundingClientRect` 에서 예외 | `FlipView.updateDimension()` 이 책이 없으면 아무것도 하지 않는다 |

@@ -33,7 +33,7 @@
 
 ```bash
 npm install              # workspaces 링크 (node_modules/@magflip/* → packages/*)
-npm run build:local      # i18n → doc → render → core → input → shelf → flipview → scrollview → minjs 빌드. 버전 변경 없음
+npm run build:local      # i18n → doc → render → core → input → shelf → flipview → scrollview → minjs 빌드 (minjs 는 sourcemap 있는 dev 빌드)
 npm test                 # 전 패키지 (i18n·doc·render·input·shelf: Vitest, core·flipview: Jest)
 npm run sample:book      # docs/examples/local/sample-book 게시본 다시 생성
 npm run typecheck        # 모든 패키지 tsc --noEmit
@@ -43,7 +43,7 @@ npm run dev              # build:local + serve
 
 ## 반드시 지킬 것
 
-- **`npm run build` 를 로컬 확인용으로 실행하지 말 것.** 각 패키지 `prebuild` 가 `npm version patch` 로 package.json 버전을 올린다. 확인은 `build:local`, `build` 는 배포(release skill) 때만.
+- **모든 `@magflip/*` 패키지는 같은 버전을 쓴다.** 버전은 배포할 때 `npm run version:set -- x.y.z` 로만 바꾼다(패키지끼리 요구하는 범위도 `^x.y.z` 로 함께). 빌드는 버전을 바꾸지 않는다. 확인은 `build:local`, 배포용 빌드(minjs 압축)는 `npm run build`(release skill).
 - 빌드 순서가 중요: flipview/scrollview 는 빌드된 `packages/core/index.js` 를, minjs 는 모든 `index.js` 를 import 한다.
 - 빌드 산출물(`index.js`, `index.d.ts`, `index.css`, `dist/`, `types/`, `magflip.min.js`)은 git ignore 대상. `src/` 만 수정.
 - 패키지 내부 import 는 상대 경로. `src/...` (baseUrl) 경로 금지.

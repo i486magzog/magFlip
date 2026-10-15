@@ -42,11 +42,13 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A["npm run build (패키지)"] -->|prebuild| B["npm version patch<br/>0.5.49 → 0.5.50"]
-  C["npm run versionup:minor"] --> D["0.5.x → 0.6.0<br/>+ git tag"]
+  A["npm run version:set -- 0.7.0"] --> B["모든 packages/*/package.json<br/>version 0.7.0<br/>@magflip/* 범위 ^0.7.0"]
+  B --> C["npm install<br/>package-lock.json"]
 ```
 
-- 패키지마다 버전이 **독립적**입니다. (core 0.5.49, flipview 0.5.45 …)
+- **모든 `@magflip/*` 패키지가 같은 버전**을 씁니다. minjs 가 전부를 번들하고 늘 함께 배포하기 때문입니다.
+- 버전은 배포할 때 `npm run version:set` 으로만 바꿉니다. 빌드는 버전을 바꾸지 않습니다.
+- 0.x 에서는 기존 사용법을 깨는 변경이면 둘째 자리(0.6 → 0.7), 아니면 셋째 자리(0.6.0 → 0.6.1)를 올립니다. `^0.6.0` 은 0.6.x 만 받기 때문입니다.
 - 루트 `package.json` 버전은 배포되지 않습니다. (`private: true`)
 
 ## 배포 절차
@@ -57,25 +59,26 @@ sequenceDiagram
   participant Dev
   participant Repo as Git
   participant NPM as npm registry
-  Dev->>Dev: npm test && npm run typecheck && npm run build:local
+  Dev->>Dev: npm run version:set -- x.y.z && npm install
+  Dev->>Dev: README · prebuild 예제 · 빠른 시작의 CDN 버전 맞추기
+  Dev->>Dev: npm run typecheck && npm test && npm run build
   Dev->>Dev: 로컬 데모로 동작 확인
-  Dev->>Dev: npm run build (패키지별 patch 버전 증가)
+  Dev->>Repo: "Release x.y.z" 커밋 → dev/main
   Dev->>NPM: npm run pub --otp=<OTP>
-  Note over NPM: minjs 의 pub 은 README / prebuild 예제의<br/>CDN 버전을 먼저 갱신 (update_version.mjs)
-  Dev->>Repo: 버전 변경 커밋 ("Update versions")
+  Note over NPM: minjs 의 pub 은 README / prebuild 예제의<br/>CDN 버전을 한 번 더 맞춘다 (update_version.mjs)
+  Dev->>Repo: vx.y.z 태그 + GitHub Release, dev/main → main
 ```
 
 ```bash
-# 전체
-npm run build
-npm run pub --otp=123456
+npm run version:set -- 0.7.0 && npm install
+npm run build                 # 의존 순서로 전부, minjs 는 압축 빌드
+npm run pub --otp=123456      # 전부 배포
 
-# 개별 패키지
-npm run build:core
-npm run pub --workspace packages/core --otp=123456
+# OTP 가 중간에 만료되면 남은 패키지만
+npm run pub --workspace packages/shelf --otp=654321
 ```
 
-:::warning 배포 순서
-flipview / scrollview 는 core 를, minjs 는 모두를 **빌드 시점에 번들**합니다.
-core 를 수정했다면 core → flipview → scrollview → minjs 순서로 모두 다시 빌드·배포해야 CDN 번들에 반영됩니다.
+:::warning 빌드 순서
+flipview / scrollview / input / shelf 는 빌드된 core 를, render 는 doc 을, minjs 는 모두를 **빌드 시점에 번들**합니다.
+루트 `npm run build` 는 i18n → doc → render → core → input → shelf → flipview → scrollview → minjs 순서로 빌드합니다.
 :::

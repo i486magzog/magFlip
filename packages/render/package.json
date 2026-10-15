@@ -1,6 +1,6 @@
 {
   "name": "@magflip/render",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "title": "MagFlip(Magzog's flip book) Renderer Package",
   "description": "Renders a published MagFlip surface into DOM. Shared by the MagFlip viewers and book editors so that both draw a page the same way.",
   "type": "module",
@@ -32,14 +32,12 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "build:local": "tsc --noEmit && npx rollup -c",
-    "versionup:minor": "npm version minor --git-tag-version",
-    "prebuild": "npm version patch",
     "build": "tsc --noEmit && npx rollup -c",
     "build:watch": "npx rollup -cw",
     "pub": "npm publish --access public --otp=$npm_config_otp"
   },
   "dependencies": {
-    "@magflip/doc": "^0.1.0"
+    "@magflip/doc": "^0.6.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.3.0",

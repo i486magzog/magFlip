@@ -7,8 +7,8 @@ description: Build, type-check, test and run the MagFlip demo locally without bu
 
 ## 절대 규칙
 
-`npm run build`(루트 또는 패키지)를 실행하지 않는다. `prebuild` 가 `npm version patch` 로 버전을 올린다. 항상 `build:local` 을 쓴다.
-실수로 실행했다면 `git diff -- '*package.json' package-lock.json` 로 확인하고 사용자에게 알린 뒤 되돌린다.
+확인용 빌드는 항상 `build:local` 을 쓴다. `npm run build` 는 배포용(minjs 압축, sourcemap 없음)이다.
+빌드는 버전을 바꾸지 않는다. 버전은 배포할 때 `npm run version:set` 으로만 바꾼다(release skill).
 
 ## 절차 (저장소 루트)
 
