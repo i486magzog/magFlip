@@ -1,7 +1,6 @@
 # MagFlip ![npm version](https://img.shields.io/npm/v/@magflip/minjs)
 ***<span style="color:yellow">MagFlip</span>*** is *<u>Magzog</u>'s first open project, implementing a page-flipping effect for books.
-See [demo #1](https://magzogs.github.io/magFlip/examples/prebuild/magflip.html).
-[demo #2](https://magzogs.github.io/magFlip/examples/react-ts/dist/index.html).
+See [the demo](https://magzogs.github.io/magFlip/examples/prebuild/magflip.html).
 
 <span style="color:#888888">[*] "<u>Magzog</u> is a blend of 'magazine' and 'blog.' The idea is to combine printed formats like books, magazines, and newspapers with digital features."</span>
 

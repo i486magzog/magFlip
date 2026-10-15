@@ -15,7 +15,7 @@
 | `packages/flipview` | `@magflip/flipview` — FlipView(IBookView 구현), Flipping(상태·애니메이션·기하) | `packages/flipview/CLAUDE.md` |
 | `packages/scrollview` | `@magflip/scrollview` — 스크롤 뷰 (개발 중, 뷰 플러그인 템플릿) | `packages/scrollview/CLAUDE.md` |
 | `packages/minjs` | `@magflip/minjs` — 모든 패키지를 IIFE `magflip.min.js` 로 번들 | `packages/minjs/CLAUDE.md` |
-| `docs/examples` | `local/`(로컬 번들 테스트), `prebuild/`(CDN 공개 데모, GitHub Pages), `react-ts/` | `docs/examples/CLAUDE.md` |
+| `docs/examples` | `local/`(로컬 번들 테스트), `prebuild/`(CDN 공개 데모, GitHub Pages), `react-ts/`(React 코드 예제) | `docs/examples/CLAUDE.md` |
 | `scripts/serve.mjs` | 의존성 없는 로컬 정적 서버 | |
 | `guide` | `user/`(라이브러리를 쓰는 사람), `dev/`(MagFlip 을 개발하는 사람) 가이드. Docusaurus 형식 Markdown/MDX | `guide/dev/development/writing-docs.md` |
 | `docs/img/flip-math` | Flip 기하 그림 (README 와 `guide/dev/flipview/flip-geometry.md` 가 같이 쓴다) | |

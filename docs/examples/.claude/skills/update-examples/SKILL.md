@@ -10,8 +10,8 @@ description: Update MagFlip example pages in docs/examples (local test page, CDN
 | 예제 | 로드 방식 | 실행 |
 | --- | --- | --- |
 | `local/index.html` | `../../../packages/minjs/magflip.min.js` (로컬 빌드) | 루트 `npm run dev` → `/docs/examples/local/` |
-| `prebuild/magflip.html` | CDN `@magflip/minjs@x.y.z` | 공개 데모. 파일 경로 변경 금지. 버전 문자열은 배포 스크립트가 관리 |
-| `react-ts/` | npm 패키지 (`npm link` 로 로컬 연결 가능) | `cd docs/examples/react-ts && npm install && npm run dev` |
+| `prebuild/magflip.html` | CDN `@magflip/minjs@x.y.z` | 하나뿐인 공개 데모. 파일 경로 변경 금지. 버전 문자열은 배포 스크립트가 관리 |
+| `react-ts/` | npm 패키지 (`npm link` 로 로컬 연결 가능) | 코드 예제(공개 데모 아님). `cd docs/examples/react-ts && npm install && npm run dev`. `dist/index.html` 은 옛 데모 #2 주소용 넘김 페이지라 건드리지 않는다 |
 
 ## 규칙
 
