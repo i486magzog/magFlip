@@ -56,12 +56,13 @@ const Catalogue = ({ onClose }: { onClose: () => void }) => {
     else {
   
       if(pages.length === 0) {
+        const base = import.meta.env.BASE_URL;
         const tempPages = [];
         for(let i = 0; i < pageCnt; i++) {
           tempPages.push({
             id: `page${i}`,
             index: i,
-            image: `/resources/book2/page${i}.jpg`
+            image: `${base}resources/book2/page${i}.jpg`
           });
         }
         setPages(tempPages);
