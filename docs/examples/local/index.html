@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>MagFlip - Local Test</title>
+  <!--
+    This page loads the bundle built from the local source code.
+    1. npm run build:local
+    2. npm run serve
+    3. open http://localhost:8190/docs/examples/local/
+  -->
+  <script src="../../../packages/minjs/magflip.min.js"></script>
+  <style>
+    /* Grid or bookshelf. The page chooses; @magflip/shelf only lays the books out. */
+    #shelfLayout {
+      display: flex;
+      gap: 6px;
+      padding: 16px 28px 0;
+      font: 14px/1.4 system-ui, sans-serif;
+    }
+    #shelfLayout button[aria-pressed="true"] {
+      font-weight: 600;
+    }
+    #toolbar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 200;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    #buildGuide {
+      margin: 40px;
+      font-family: monospace;
+      color: #b00020;
+    }
+    /* Expanded view of a page that was designed wider than it is shown. */
+    #expandedOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.8);
+    }
+    #expandedStage {
+      position: relative;
+      width: 90%;
+      height: 80%;
+    }
+    #expandedClose {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    /* What a reader can press. A TV shows the same kind of hint. */
+    #keyHint {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      z-index: 200;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, .6);
+      color: #fff;
+      font: 13px/1.5 system-ui, sans-serif;
+    }
+    #keyHint kbd {
+      padding: 1px 5px;
+      border: 1px solid #888;
+      border-radius: 3px;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div id="shelfLayout" role="group" aria-label="Layout">
+    <button type="button" data-layout="grid">Grid</button>
+    <button type="button" data-layout="shelf">Shelf</button>
+  </div>
+  <div id="bookShelf"></div>
+  <!-- Sample images are shared with the prebuild example. -->
+  <script>
+    const RESOURCE_DIR = '../prebuild/resources';
+
+    function showBuildGuide() {
+      document.body.innerHTML =
+        '<pre id="buildGuide">magflip.min.js was not found.\n\n' +
+        'Run the following commands in the repository root:\n' +
+        '  npm run build:local\n  npm run serve</pre>';
+    }
+
+    /**
+     * Creates a Book whose pages are the pictures in resources/book{bookNum},
+     * page0.jpg ~ page{imageCnt-1}.jpg. A book with more pages than pictures
+     * shows them again, which gives the shelf a thick book to stand.
+     * @param options.id defaults to `book{bookNum}-{pageCnt}`.
+     * @param options.hasSpinePicture false leaves the spine without a picture,
+     *   so that it takes a color from the title.
+     */
+    function createSampleBook(bookNum, imageCnt, title, { pageCnt = imageCnt, id, hasSpinePicture = true } = {}) {
+      const pages = [];
+      for (let i = 0; i < pageCnt; i++) {
+        pages.push({ id: `page${i}`, index: i, image: `${RESOURCE_DIR}/book${bookNum}/page${i % imageCnt}.jpg` });
+      }
+
+      const cover = pages[0].image;
+      const book = new Book({
+        id: id ?? `book${bookNum}-${pageCnt}`,
+        title,
+        lastPageIndex: pageCnt - 1,
+        thumbnails: {
+          spine: hasSpinePicture ? cover : '',
+          small: cover,
+          medium: cover,
+          cover: { front: cover, back: cover },
+        },
+      });
+      book.importPages(pages, { width: 700, height: 700 });
+      return book;
+    }
+
+    /**
+     * More books, so that a row fills up and a narrow screen sends books on to
+     * the next shelf: [sample pictures, picture count, title, page count]. Their
+     * spines have no picture, as many books have none, and each takes a color
+     * from its title.
+     */
+    const MORE_BOOKS = [
+      [1, 6, '바다의 기억', 96],
+      [2, 10, 'City Lights', 48],
+      [3, 16, '봄날의 정원', 128],
+      [2, 10, 'The Long Road Home', 320],
+      [1, 6, '한밤의 도서관', 240],
+      [3, 16, 'Kitchen Notes', 72],
+      [2, 10, '작은 새의 노래', 36],
+      [1, 6, 'Mountains & Rivers', 180],
+      [3, 16, '여름 방학', 60],
+      [2, 10, 'Letters to Lisbon', 150],
+      [1, 6, '고양이 식당', 88],
+      [3, 16, 'Silent Harbor', 260],
+      [2, 10, '겨울 산책', 44],
+      [1, 6, 'Paper Moons', 120],
+      [3, 16, '별을 세는 밤', 210],
+      [2, 10, 'Northern Tales', 400],
+    ];
+
+    /** Lets the reader lay the shelf out as a grid or as a bookshelf. */
+    function addLayoutButtons(shelf) {
+      const group = document.getElementById('shelfLayout');
+      const showPressed = () => {
+        group.querySelectorAll('button').forEach((button) => {
+          button.setAttribute('aria-pressed', String(button.dataset.layout === shelf.layout));
+        });
+      };
+      group.addEventListener('click', (event) => {
+        const layout = event.target.dataset.layout;
+        if (!layout) { return; }
+        shelf.setLayout(layout);
+        showPressed();
+      });
+      showPressed();
+    }
+
+    /**
+     * Creates a Book from a book published with @magflip/doc.
+     * Its pages are drawn by @magflip/render instead of being plain images.
+     */
+    async function createPublishedBook(flipViewRef) {
+      // `?book=<manifest url>` points the viewer at another published book,
+      // for example one served by a local magBookServer.
+      const manifestUrl = new URLSearchParams(location.search).get('book') ?? './sample-book/book.json';
+      const source = await PublishedBookSource.load(manifestUrl, {
+        // A link inside a page points at a surface, so look up its page index.
+        onPageLink: (link) => {
+          const page = source.manifest.pages.find((candidate) => candidate.surfaceId === link.surfaceId);
+          if (page) { flipViewRef.view.moveTo(page.index); }
+        },
+      });
+      // Page data for every page, without downloading any of them: a page
+      // fetches its surface the first time the viewer draws it.
+      const pages = source.createPageDataList();
+      const cover = `${RESOURCE_DIR}/book1/page0.jpg`;
+      const book = new Book({
+        id: source.manifest.bookId,
+        title: source.manifest.meta.title,
+        lastPageIndex: source.pageCount - 1,
+        thumbnails: { spine: cover, small: cover, medium: cover, cover: { front: cover, back: cover } },
+      });
+      book.importPages(pages, source.manifest.pageSize);
+      return { book, source };
+    }
+
+    /** Shows the whole surface of an expandable page over the viewer. */
+    function showExpanded(bookViewer, source, pageIndex) {
+      const overlay = document.createElement('div');
+      overlay.id = 'expandedOverlay';
+      const stage = document.createElement('div');
+      stage.id = 'expandedStage';
+      const close = document.createElement('button');
+      close.id = 'expandedClose';
+      close.textContent = 'Close';
+      overlay.append(stage, close);
+      bookViewer.element.appendChild(overlay);
+
+      const renderer = source.renderExpanded(stage, pageIndex);
+      const remove = () => {
+        renderer?.destroy();
+        overlay.remove();
+      };
+      close.addEventListener('click', remove);
+      overlay.addEventListener('click', (event) => { if (event.target === overlay) { remove(); } });
+    }
+
+    /** Adds prev/next/move buttons, a zoom slider and the expand button to the viewer. */
+    function addToolbar(bookViewer, flipView, getPublishedSource) {
+      const toolbar = document.createElement('div');
+      toolbar.id = 'toolbar';
+      toolbar.className = 'do-not-remove';
+      toolbar.innerHTML = `
+        <button data-action="prev">Prev</button>
+        <button data-action="next">Next</button>
+        <input id="pageIndex" type="number" min="0" value="4" style="width:50px" />
+        <button data-action="move">Move</button>
+        <input id="zoomRange" type="range" min="0.5" max="2" step="0.01" value="1" />
+        <button data-action="expand">Expand</button>
+      `;
+      toolbar.addEventListener('click', (event) => {
+        const action = event.target.dataset.action;
+        if (action === 'prev') { flipView.prevPage(); }
+        if (action === 'next') { flipView.nextPage(); }
+        if (action === 'move') { flipView.moveTo(Number(document.getElementById('pageIndex').value)); }
+        if (action === 'expand') {
+          const source = getPublishedSource();
+          const pageIndex = flipView.openPageIndexes.find((index) => source?.isExpandable(index));
+          if (pageIndex === undefined) { alert('This page has nothing more to show.'); return; }
+          // The page may not have been drawn yet, and then its surface is not here.
+          source.loadPages(pageIndex, 1).then(() => showExpanded(bookViewer, source, pageIndex));
+        }
+      });
+      toolbar.querySelector('#zoomRange').addEventListener('input', (event) => {
+        bookViewer.setZoomLevel(Number(event.target.value));
+      });
+      bookViewer.element.appendChild(toolbar);
+    }
+
+    /** Shows which keys work, the way a TV app tells a reader what the remote does. */
+    function addKeyHint(bookViewer) {
+      const hint = document.createElement('div');
+      hint.id = 'keyHint';
+      hint.className = 'do-not-remove';
+      hint.innerHTML = `
+        <kbd>←</kbd> <kbd>→</kbd> turn &nbsp;
+        <kbd>Enter</kbd> use a link or video &nbsp;
+        <kbd>Esc</kbd> back &nbsp;
+        <kbd>↑</kbd> <kbd>↓</kbd> move around a zoomed page
+      `;
+      bookViewer.element.appendChild(hint);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof window.Book === 'undefined') {
+        showBuildGuide();
+        return;
+      }
+
+      // `?tv=1` hides the mouse toolbar, leaving the page as a TV sees it.
+      const isTvMode = new URLSearchParams(location.search).has('tv');
+      let controller;
+
+      const shelfManager = new BookShelfManager({
+        // The pages of a book exist once it is open, so the remote is wired here.
+        onViewerOpen: (book) => {
+          controller = new RemoteController({
+            view: flipView,
+            // A page builds itself when first shown; ask only for what is there.
+            getPageContentEl: (index) => {
+              const page = book.getPage(index);
+              return page && page.hasElements ? page.contentEl : undefined;
+            },
+            // Back means "close the book" here. An app may close an overlay first.
+            onBack: () => bookViewer.closeViewer(),
+          });
+          window.controller = controller;
+        },
+        onViewerClose: () => {
+          // A controller left behind would keep answering keys for a closed book.
+          controller?.destroy();
+          controller = undefined;
+          window.controller = undefined;
+        },
+      });
+      const bookViewer = shelfManager.getBookViewer();
+      const flipView = new FlipView();
+      // The published book links to its own pages, so it needs the view it is shown in.
+      const flipViewRef = { view: flipView };
+      let publishedSource;
+
+      bookViewer.registerView(flipView);
+      bookViewer.setCurView(flipView.id);
+
+      // The shelf lays the books out; pressing one opens it through the manager.
+      const shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
+      addLayoutButtons(shelf);
+
+      shelf.addBook(createSampleBook(1, 6, '도토리 속 도시'));
+      shelf.addBook(createSampleBook(2, 10, 'Street Portraits'));
+      shelf.addBook(createSampleBook(3, 16, '웨딩 데이'));
+      shelf.addBook(createSampleBook(2, 10, 'Portraits, The Complete Year', { pageCnt: 180 }));
+      shelf.addBook(createSampleBook(3, 16, 'Wedding Stories', { pageCnt: 64 }));
+      MORE_BOOKS.forEach(([bookNum, imageCnt, title, pageCnt], index) => {
+        shelf.addBook(createSampleBook(bookNum, imageCnt, title, { pageCnt, id: `more${index}`, hasSpinePicture: false }));
+      });
+
+      if (!isTvMode) { addToolbar(bookViewer, flipView, () => publishedSource); }
+      addKeyHint(bookViewer);
+
+      try {
+        const published = await createPublishedBook(flipViewRef);
+        publishedSource = published.source;
+        shelf.addBook(published.book);
+        window.publishedSource = published.source;
+        // Someone who arrived with `?book=` asked for that book - the editor's
+        // "뷰어에서 보기" link does - so open it rather than leaving them to
+        // find it on the shelf.
+        if (new URLSearchParams(location.search).has('book')) {
+          shelfManager.pickupAndView(published.book);
+        }
+      } catch (error) {
+        console.error('The published sample book could not be loaded.', error);
+      }
+
+      // Exposed for debugging in the browser console.
+      window.shelfManager = shelfManager;
+      window.shelf = shelf;
+      window.bookViewer = bookViewer;
+      window.flipView = flipView;
+    });
+  </script>
+</body>
+</html>

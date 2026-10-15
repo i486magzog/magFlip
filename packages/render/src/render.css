@@ -1,0 +1,88 @@
+/* The window a page is seen through. Everything outside the page is cut here. */
+.mf-page-window {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+/* Carries the scale between document px and displayed px. */
+.mf-page-fit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+.mf-surface {
+  position: relative;
+  overflow: visible;
+}
+.mf-el {
+  position: absolute;
+  box-sizing: border-box;
+}
+.mf-el-image,
+.mf-el-video,
+.mf-el-widget {
+  overflow: hidden;
+}
+.mf-el-image img,
+.mf-el-video video {
+  display: block;
+}
+.mf-el-group {
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+.mf-el-text {
+  display: flex;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.mf-text-body {
+  width: 100%;
+}
+.mf-text-p {
+  margin: 0;
+}
+/*
+ * A list item: each level indents by one marker width, and the marker hangs in
+ * the last one, so wrapped lines line up with the text rather than the marker.
+ * The editor draws its paragraphs with the same classes.
+ */
+.mf-text-li {
+  padding-inline-start: calc((var(--mf-list-level, 0) + 1) * 1.6em);
+}
+.mf-text-li::before {
+  content: attr(data-mf-marker);
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1.6em;
+  margin-inline-start: -1.6em;
+  padding-inline-end: 0.4em;
+  text-align: end;
+  white-space: nowrap;
+}
+.mf-link {
+  color: inherit;
+  text-decoration: inherit;
+}
+.mf-surface .mf-el-widget:not(:has(iframe)) {
+  border: 1px dashed currentColor;
+  opacity: 0.5;
+}
+.mf-surface .mf-el-widget:not(:has(iframe))::after {
+  content: attr(data-widget-type);
+  display: block;
+  padding: 4px 6px;
+  font: 12px/1.4 system-ui, sans-serif;
+  word-break: break-all;
+}
+.mf-surface .mf-el-shape svg {
+  display: block;
+  overflow: visible;
+}

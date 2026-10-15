@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "id": "cover",
+  "kind": "single",
+  "trimRect": {
+    "x": 0,
+    "y": 0,
+    "width": 600,
+    "height": 900
+  },
+  "visibleRect": {
+    "x": 0,
+    "y": 0,
+    "width": 600,
+    "height": 900
+  },
+  "isExpandable": false,
+  "background": null,
+  "nodes": [
+    {
+      "id": "coverPhoto",
+      "type": "image",
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "width": 600,
+      "height": 900,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "assetId": "img0",
+      "fit": "cover",
+      "crop": null,
+      "alt": "",
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "coverScrim",
+      "type": "shape",
+      "opacity": 1,
+      "x": 0,
+      "y": 520,
+      "width": 600,
+      "height": 380,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "shape": "rectangle",
+      "path": null,
+      "fill": {
+        "kind": "linearGradient",
+        "angle": 0,
+        "stops": [
+          {
+            "offset": 0,
+            "color": "#000000cc"
+          },
+          {
+            "offset": 1,
+            "color": "#00000000"
+          }
+        ]
+      },
+      "stroke": null,
+      "cornerRadius": 0,
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "coverTitle",
+      "type": "text",
+      "opacity": 1,
+      "x": 48,
+      "y": 640,
+      "width": 504,
+      "height": 200,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "Magzog"
+              },
+              {
+                "text": " Sample",
+                "marks": {
+                  "fontWeight": 300
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 64,
+        "fontWeight": 700,
+        "isItalic": false,
+        "color": "#ffffff",
+        "lineHeight": 1.1,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    }
+  ],
+  "assets": {
+    "img0": {
+      "id": "img0",
+      "kind": "image",
+      "mimeType": "image/jpeg",
+      "byteSize": 0,
+      "width": 1000,
+      "height": 1414,
+      "url": "../prebuild/resources/book1/page0.jpg"
+    }
+  }
+}

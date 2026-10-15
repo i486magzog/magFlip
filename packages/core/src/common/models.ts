@@ -59,11 +59,34 @@ export enum BookType {
   Newspaper = "Newspaper",
 }
 /**
+ * What a book's covers are made of.
+ */
+export enum BookCover {
+  /**
+   * The covers are paper like the pages, and turn like them.
+   */
+  Soft = "Soft",
+  /**
+   * The covers are thick boards. The first page and the one after it are the
+   * two sides of the front board, and the last page and the one before it are
+   * the two sides of the back board: a board turns as one stiff piece.
+   */
+  Hard = "Hard",
+}
+/**
  * Book status.
  */
 export enum BookStatus {
   Open = "Open",
   Close = "Close",
+}
+/**
+ * A face of a closed book: its two covers, and the spine that joins them.
+ */
+export enum BookFace {
+  Front = "Front",
+  Spine = "Spine",
+  Back = "Back",
 }
 /**
  * Flipping event status.
@@ -179,6 +202,24 @@ export interface IBox {
   width: number,
   height:number
 }
+/**
+ * Where a closed book is drawn on the screen, and which of its faces the
+ * reader sees there. A book moving between two places turns from one face to
+ * the other on the way.
+ */
+export interface IClosedBookPlace {
+  /**
+   * The face the reader sees, in viewport pixels (as `getBoundingClientRect`
+   * measures it).
+   */
+  box: IBox;
+  face: BookFace;
+  /**
+   * True while the book is pulled toward the reader, as it is under the
+   * pointer or when it has the keyboard focus.
+   */
+  isRaised?: boolean;
+}
 
 export interface IBookData {
   id: string;
@@ -186,6 +227,10 @@ export interface IBookData {
   title?: string;
   author?: string;
   type?: BookType;
+  /**
+   * What the covers are made of. Soft by default.
+   */
+  cover?: BookCover;
   publication?: IPublication;
   lastPageIndex: number;
   labels?:{ [n:number|string]: IPageLabelData };
@@ -220,6 +265,14 @@ export interface IBook extends IBookData {
 }
 
 export interface IBookEl {
+  /**
+   * The book closed, seen from outside: covers, a spine with the title on it,
+   * and a thickness. Whoever shows books to choose from places this element.
+   */
+  readonly objectEl: HTMLElement;
+  /**
+   * @deprecated Use `objectEl`. The book no longer knows where it is placed.
+   */
   readonly elementOnShelf: HTMLElement;
   readonly element: HTMLElement;
   readonly pageContainerEl: HTMLElement;
@@ -297,9 +350,18 @@ export interface IPage extends IPageData, IPageEl {
  * Element of the page.
  */
 export interface IPageEl {
+  /**
+   * The element of the page. Asking for it builds the page the first time,
+   * which for a published book also downloads what it shows.
+   */
   readonly element: HTMLElement;
   readonly contentContainerEl: HTMLElement;
   readonly contentEl: HTMLElement;
+  /**
+   * True once the elements of this page were built. Code that walks every page
+   * of a book should check this instead of reaching for `element`.
+   */
+  readonly hasElements: boolean;
   resetPageEls():void;
 }
 /**
@@ -314,6 +376,12 @@ export interface IPageData {
   ignore?: boolean; // ignore the page when displaying the book
   content?: any;
   image?: string;
+  /**
+   * Draws the page into the content element of the page.
+   * Takes the place of `content` and `image` when it is set, which is how
+   * `@magflip/render` shows a published book without core knowing its format.
+   */
+  render?: (contentEl: HTMLElement) => void;
 }
 
 export interface IBookView {
@@ -327,4 +395,38 @@ export interface IBookView {
   nextPage(offsetY?:number):void;
   prevPage(offsetY?:number):void;
   moveTo(pageIndex:number, offsetY?:number):void;
+  /**
+   * Indexes of the pages the reader is looking at. Empty without a book.
+   */
+  readonly openPageIndexes: number[];
+  /**
+   * True while a page is moving to another place. `nextPage`, `prevPage` and
+   * `moveTo` do nothing while this is true.
+   */
+  readonly isFlipping: boolean;
+  /**
+   * Calls the listener each time a page move finishes and the pages have settled.
+   * @returns A function that removes the listener.
+   */
+  onFlipEnd(listener:() => void):() => void;
+  /**
+   * How large the book is drawn. 1 is the size that fits the viewer.
+   */
+  readonly zoomLevel: number;
+  /**
+   * Moves the book by that many screen pixels, for a reader who zoomed in and
+   * wants to see another part of the page. The book is never pushed off the
+   * screen, so a move that would do that is refused.
+   * @returns whether the book moved.
+   */
+  pan(dx:number, dy:number):boolean;
+  /**
+   * Where the open book would lie if it were closed now, and which cover would
+   * face the reader. The viewer flies a book to this place when it is opened
+   * and away from it when it is closed.
+   *
+   * A view that never shows a closed book leaves this out, and books open and
+   * close there without moving.
+   */
+  getClosedBookPlace?():IClosedBookPlace|undefined;
 }
