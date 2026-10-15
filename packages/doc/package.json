@@ -1,6 +1,6 @@
 {
   "name": "@magflip/doc",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "title": "MagFlip(Magzog's flip book) Document Model Package",
   "description": "Document model shared by book editors, servers and the MagFlip viewers: types, validation, book layout, publishing and the Yjs mapping.",
   "type": "module",
@@ -46,8 +46,6 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "build:local": "tsc --noEmit && npx rollup -c",
-    "versionup:minor": "npm version minor --git-tag-version",
-    "prebuild": "npm version patch",
     "build": "tsc --noEmit && npx rollup -c",
     "build:watch": "npx rollup -cw",
     "pub": "npm publish --access public --otp=$npm_config_otp"

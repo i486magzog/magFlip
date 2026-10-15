@@ -26,17 +26,16 @@ npm install
 
 npm workspaces 가 `packages/*` 를 `node_modules/@magflip/*` 에 **심볼릭 링크**합니다. 그래서 flipview 는 로컬 core 빌드 결과를 그대로 사용합니다.
 
-## 2. 빌드 (버전 변경 없음)
+## 2. 빌드
 
 ```bash
 npm run build:local
 ```
 
-`core → flipview → scrollview → minjs` 순서로 빌드합니다. 순서가 중요합니다. (flipview 는 빌드된 `@magflip/core/index.js` 를 import)
+`i18n → doc → render → core → input → shelf → flipview → scrollview → minjs` 순서로 빌드합니다. 순서가 중요합니다. (flipview 는 빌드된 `@magflip/core/index.js` 를 import)
 
-:::danger `npm run build` 와의 차이
-각 패키지의 `build` 스크립트에는 `prebuild: npm version patch` 가 걸려 있어 **실행할 때마다 package.json 버전이 올라갑니다**.
-로컬 확인용으로는 반드시 `build:local` 을 사용하세요. `build` 는 [배포](./build-and-release.md) 때만 사용합니다.
+:::info `npm run build` 와의 차이
+`build:local` 은 minjs 를 sourcemap 이 있는 개발 빌드로 만들고, `npm run build` 는 [배포](./build-and-release.md)용 압축 빌드로 만듭니다. 둘 다 버전은 바꾸지 않습니다.
 :::
 
 ## 3. 브라우저에서 확인

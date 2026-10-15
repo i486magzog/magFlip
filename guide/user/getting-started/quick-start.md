@@ -18,7 +18,7 @@ HTML 파일 하나로 Flip Book을 띄워 봅니다.
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.48/magflip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.6.0/magflip.min.js"></script>
 </head>
 <body>
   <script>
@@ -56,10 +56,6 @@ HTML 파일 하나로 Flip Book을 띄워 봅니다.
 ```
 
 브라우저에서 열면 책장에 책등이 보이고, 누르면 책이 빠져나와 뷰어로 날아가 표지부터 열립니다. 격자·책장과 책의 모습은 [책 고르기](../guides/bookshelf.mdx)를 보세요.
-
-:::info 배포 버전
-책장(`BookShelf`)은 `@magflip/shelf` 로 옮겨졌습니다. 위 코드의 CDN 버전(0.5.48)에는 아직 없으므로, 그 버전에서는 (4) 대신 `shelfManager.importBookToShelf(book)` 만 부르면 core 가 예전 책장을 그립니다.
-:::
 
 ## 3. 무슨 일이 일어났나요?
 

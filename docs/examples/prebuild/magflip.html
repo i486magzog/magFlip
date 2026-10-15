@@ -1,91 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8" />
     <title>Magzog</title>
-    <style>
-      #bookShelf .book, 
-      #bookShelf .book-holder, 
-      #bookShelf .book-on-shelf {
-        height: 200px !important;
-        width: 200px !important;
-      }
-    </style>
-      <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.5.48/magflip.min.js"></script> 
+      <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.6.0/magflip.min.js"></script>
       <!-- Use for local test -->
       <!-- <script src="../../../packages/minjs/magflip.min.js"></script>  -->
     <script>
-    <!--
     var shelfManager;
     var bookViewer;
+    var shelf;
     document.addEventListener('DOMContentLoaded', function () {
-      const pages = [
-        {
-            id: "page0",
-            index: 0,
-            image: './resources/book1/page0.jpg'
-        },
-        {
-            id: "page1",
-            index: 1,
-            image: './resources/book1/page1.jpg'
-        },
-        {
-            id: "page2",
-            index: 2,
-            image: './resources/book1/page2.jpg'
-        },
-        {
-            id: "page3",
-            index: 3,
-            image: './resources/book1/page3.jpg'
-        },
-        {
-            id: "page4",
-            index: 4,
-            image: './resources/book1/page4.jpg'
-        },
-        {
-            id: "page5",
-            index: 5,
-            image: './resources/book1/page5.jpg'
-        },
-      ];
-
-      const book = new Book({ 
-        id: 'mybook1', 
-        lastPageIndex: 5,
-        thumbnails: {
-          spine: pages[0].image,
-          small: pages[0].image,
-          medium: pages[0].image,
-          cover: {
-            front: pages[0].image,
-            back: pages[0].image,
-          }
-        }
-      })
-      book.importPages(pages, { width: 700, height: 700 });
-      // Import Book
+      // The manager opens books in the viewer; the flip view turns their pages.
       shelfManager = new BookShelfManager();
       bookViewer = shelfManager.getBookViewer();
-      shelfManager.importBookToShelf(book);
-      shelfManager.importBookToShelf(getSampleBook(2, 10));
-      shelfManager.importBookToShelf(getSampleBook(3, 16));
-
       const view = new FlipView();
-      bookViewer.registerView(new FlipView());
-      bookViewer.setCurView(view.id)
-      // bookManager.loadAndAddBooks();
+      bookViewer.registerView(view);
+      bookViewer.setCurView(view.id);
+
+      // The shelf lays the books out. Pressing one flies it to the viewer.
+      shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
+      shelf.addBook(getSampleBook(1, 6));
+      shelf.addBook(getSampleBook(2, 10));
+      shelf.addBook(getSampleBook(3, 16));
 
       // Optional
       window.shelfManager = shelfManager;
       window.bookViewer = bookViewer;
+      window.shelf = shelf;
       addZoomRange(bookViewer);
     });
-
-    window.onload = function () {
-      console.log('All resources including images are loaded');
-    };
 
     function addZoomRange(bookViewer){
       const viewerEl = bookViewer.element;
@@ -102,6 +46,7 @@
       });
     }
 
+    /** A book of `pageCnt` pictures from resources/book{bookNum}/, its first page as the cover. */
     function getSampleBook(bookNum, pageCnt){
       const pages = [];
       for(let i=0;i<pageCnt;i++){
@@ -111,8 +56,8 @@
           image: `./resources/book${bookNum}/page${i}.jpg`
         })
       }
-      const book = new Book({ 
-        id: 'mybook' + bookNum, 
+      const book = new Book({
+        id: 'mybook' + bookNum,
         lastPageIndex: pageCnt-1,
         thumbnails: {
           spine: pages[0].image,
@@ -127,7 +72,6 @@
       book.importPages(pages, { width: 700, height: 700 });
       return book;
     }
-    -->
   </script>
 
   <style>

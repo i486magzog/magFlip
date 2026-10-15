@@ -1,6 +1,6 @@
 {
   "name": "@magflip/input",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "title": "MagFlip(Magzog's flip book) Input Package",
   "description": "Turns key presses of a keyboard or a TV remote into book navigation: key mapping, a queue for turns asked during a turn, and focus movement by direction.",
   "type": "module",
@@ -34,14 +34,12 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "build:local": "tsc --noEmit && npx rollup -c",
-    "versionup:minor": "npm version minor --git-tag-version",
-    "prebuild": "npm version patch",
     "build": "tsc --noEmit && npx rollup -c",
     "build:watch": "npx rollup -cw",
     "pub": "npm publish --access public --otp=$npm_config_otp"
   },
   "dependencies": {
-    "@magflip/core": "^0.5.49"
+    "@magflip/core": "^0.6.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.3.0",
