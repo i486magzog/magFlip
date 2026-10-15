@@ -1,0 +1,141 @@
+---
+sidebar_position: 2
+title: 폴더 구조
+---
+
+import FileTree from '@site/src/components/FileTree';
+
+# 폴더 구조
+
+## 저장소 전체
+
+<FileTree nodes={[
+  { name: 'magFlip/', children: [
+    { name: 'CLAUDE.md', note: 'Claude Code용 프로젝트 가이드 (패키지별 CLAUDE.md 도 있음)', highlight: true },
+    { name: '.claude/skills/', note: '저장소 공통 skill: local-dev, release' },
+    { name: 'package.json', note: 'workspaces 루트 · build:local / test / serve / sample:book 스크립트', highlight: true },
+    { name: 'scripts/', children: [
+      { name: 'serve.mjs', note: '의존성 없는 로컬 정적 서버 (npm run serve)' },
+    ]},
+    { name: 'packages/', note: 'npm 으로 배포되는 라이브러리들', highlight: true, children: [
+      { name: 'i18n/', note: '@magflip/i18n — 앱들의 화면 말 (로케일·카탈로그)' },
+      { name: 'doc/', note: '@magflip/doc — 편집기·서버·뷰어 공용 문서 모델' },
+      { name: 'render/', note: '@magflip/render — 게시본을 DOM 으로 그리는 공용 렌더러' },
+      { name: 'core/', note: '@magflip/core — 모델, 책 한 권(책 객체·비행), 뷰어, 공통 유틸' },
+      { name: 'input/', note: '@magflip/input — 키보드·리모컨 입력' },
+      { name: 'shelf/', note: '@magflip/shelf — 책 고르기 화면 (격자·책장)' },
+      { name: 'flipview/', note: '@magflip/flipview — Flip 효과 뷰 플러그인' },
+      { name: 'scrollview/', note: '@magflip/scrollview — 스크롤 뷰 플러그인 (개발 중)' },
+      { name: 'minjs/', note: '@magflip/minjs — 브라우저용 단일 번들' },
+    ]},
+    { name: 'docs/', children: [
+      { name: 'examples/', children: [
+        { name: 'local/', note: '로컬 빌드 번들로 동작하는 테스트 페이지', highlight: true },
+        { name: 'prebuild/', note: 'CDN 번들 예제 (GitHub Pages 공개 데모) + 샘플 이미지' },
+        { name: 'react-ts/', note: 'React + Vite 예제 앱' },
+      ]},
+      { name: 'img/flip-math/', note: 'Flip 기하 그림 (README · flip-geometry 문서)' },
+    ]},
+    { name: 'guide/', note: '이 문서들 (Docusaurus 형식 Markdown/MDX)', highlight: true, children: [
+      { name: 'user/', note: '라이브러리 사용자 가이드' },
+      { name: 'dev/', note: 'MagFlip 개발자 가이드' },
+    ]},
+  ]},
+]} />
+
+이 문서들은 `guide/` 에 있고, Docusaurus 문서 사이트가 그대로 읽어 보여 줍니다. 패키지를 쓰는 쪽은 [MagFlip 개발 가이드 소개](../intro.md#패키지를-쓰는-쪽)를 보세요.
+
+## 패키지 내부 공통 구조
+
+모든 TypeScript 패키지는 같은 모양을 가집니다.
+
+<FileTree nodes={[
+  { name: 'packages/<name>/', children: [
+    { name: 'src/', note: '✏️ 소스 코드 — 여기만 수정합니다', highlight: true, children: [
+      { name: 'index.ts', note: '공개 API 진입점 (export * + CSS import)' },
+    ]},
+    { name: 'CLAUDE.md', note: '패키지별 작업 가이드' },
+    { name: '.claude/skills/', note: '패키지 전용 skill' },
+    { name: 'index.js', note: '🔨 빌드 결과 (ESM) · git ignore' },
+    { name: 'index.d.ts', note: '🔨 빌드 결과 (타입) · git ignore' },
+    { name: 'index.css', note: '🔨 빌드 결과 (core 만 추출) · git ignore' },
+    { name: 'dist/', note: '🔨 tsc 중간 결과 · git ignore' },
+    { name: 'rollup.config.js', note: 'index.d.ts / index.js 두 개의 번들 설정' },
+    { name: 'tsconfig.json' },
+    { name: 'package.json', note: 'build / build:local / typecheck 스크립트' },
+  ]},
+]} />
+
+## packages/core
+
+<FileTree nodes={[
+  { name: 'src/', children: [
+    { name: 'common/', note: 'DOM·상태에 의존하지 않는 공통 코드', children: [
+      { name: 'models.ts', note: '인터페이스와 enum (IBookData, IPageData, IBookView, Zone, EventStatus …)', highlight: true },
+      { name: 'dimension.ts', note: 'ISize, SizeExt(대각선 포함), BookSize' },
+      { name: 'shape.ts', note: 'Point, Line, Rect (코너/중앙 좌표 getter)' },
+      { name: 'mzMath.ts', note: '각도·거리·수선의 발·요소 위치 계산' },
+      { name: 'event.ts', note: 'MZEvent — 간단한 이벤트 emitter' },
+      { name: 'helper.ts', note: 'deepMerge' },
+      { name: 'bookObjectMetrics.ts', note: '책 객체의 두께·면의 각도·자세 (getBookPose)' },
+      { name: 'flightPath.ts', note: '제자리 ↔ 뷰어 비행의 프레임 계산' },
+    ]},
+    { name: 'core/', note: '런타임 객체', children: [
+      { name: 'base.ts', note: 'Base extends MZEvent' },
+      { name: 'bookShelfManager.ts', note: '책을 들고 있다가 뷰어로 엶, 비행 시작 (진입점)', highlight: true },
+      { name: 'bookViewer.ts', note: '#bookViewer DOM, 뷰 등록/선택, 줌, 닫기, 흐려지며 사라짐', highlight: true },
+      { name: 'book.ts / bookEl.ts', note: '책 데이터 / 뷰어 속 책 DOM' },
+      { name: 'bookObjectEl.ts', note: '책 객체 — 밖에서 본 닫힌 책 (3D 상자)' },
+      { name: 'bookFlight.ts', note: '날아가는 복사본 (Web Animations)' },
+      { name: 'page.ts / pageEl.ts', note: '페이지 데이터 / 페이지 DOM' },
+      { name: 'pageLabel.ts / pageLabelEl.ts', note: '라벨 데이터 / 라벨 DOM' },
+      { name: 'core.css', note: '뷰어 기본 스타일' },
+      { name: 'bookObject.css', note: '책 객체의 면·자세·비행' },
+    ]},
+    { name: 'index.ts' },
+  ]},
+]} />
+
+## packages/shelf
+
+<FileTree nodes={[
+  { name: 'src/', children: [
+    { name: 'bookShelf.ts', note: 'BookShelf, ShelfLayout — 책 객체를 슬롯에 놓고 면을 고름', highlight: true },
+    { name: 'shelf.css', note: '격자(grid)·책장(flex-wrap + 선반 그라디언트) 배치' },
+    { name: 'index.ts' },
+  ]},
+  { name: '__tests__/', note: 'Vitest + happy-dom (core 는 소스로 alias)' },
+]} />
+
+## packages/flipview
+
+<FileTree nodes={[
+  { name: 'src/', children: [
+    { name: 'flipView.ts', note: 'IBookView 구현 · DOM/SVG 생성 · 마우스 이벤트 · 그림자 렌더링 · 페이지 이동', highlight: true },
+    { name: 'flipManager.ts', note: 'class Flipping — 이벤트 상태, 애니메이션, flip() 기하 계산', highlight: true },
+    { name: 'pageWindow.ts', note: '6칸 페이지 윈도우 (moveLeft / moveRight)' },
+    { name: 'flipData.ts', note: 'flip() 계산 결과 (page2 위치/회전, mask 좌표, shadow)' },
+    { name: 'flipDiagonals.ts / flipDiagonal.ts', note: '마우스 제한 영역(Area 1~4) 계산' },
+    { name: 'flipActionLine.ts', note: '드래그 기준 수평선 (left/center/right 점)' },
+    { name: 'gutter.ts', note: '책 가운데 접히는 선 (Rect)' },
+    { name: 'flipView.css', note: 'nth-child 기반 페이지 배치, z-index, 그림자, zone 크기' },
+  ]},
+  { name: '__tests__/', note: 'Jest 단위 테스트 (core 소스를 직접 import)' },
+  { name: 'jest.config.cjs' },
+]} />
+
+## "무엇을 고치려면 어디로?"
+
+| 하고 싶은 일 | 파일 |
+| --- | --- |
+| 책/페이지 데이터에 필드 추가 | `core/src/common/models.ts` → `core/src/core/book.ts` 또는 `page.ts` |
+| 페이지 DOM 구조 변경 | `core/src/core/pageEl.ts` (+ `flipview/src/flipView.css`) |
+| 책 한 권의 모습 (표지·책등·두께·호버) | `core/src/core/bookObjectEl.ts`, `bookObject.css`, `common/bookObjectMetrics.ts` |
+| 책이 뷰어로 날아가는 경로·시간 | `core/src/common/flightPath.ts`, `core/bookFlight.ts`, `bookShelfManager.ts` 의 `*_FLIGHT_DURATION` |
+| 격자·책장 배치, 선반 모양 | `shelf/src/bookShelf.ts`, `shelf.css` |
+| 넘김 애니메이션 속도/곡선 | `flipview/src/flipManager.ts` (`animateFlip`, `animateReadyToFlip`), `flipView.ts` (`autoFlip`) |
+| 접힘 모양 계산 | `flipview/src/flipManager.ts` `flip()` |
+| 그림자 | `flipview/src/flipView.ts` `setShadow1/3/5/6`, `flipView.css` |
+| 마우스 반응 영역 크기 | `flipview/src/flipView.css` `#mzZone*` |
+| 새 뷰 플러그인 | `packages/scrollview` 를 복사해서 시작 |
+| 번들 구성 | `packages/minjs/src/index.js`, `rollup.config.js` |

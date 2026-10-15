@@ -1,0 +1,77 @@
+{
+  "name": "@magflip/doc",
+  "version": "0.1.0",
+  "title": "MagFlip(Magzog's flip book) Document Model Package",
+  "description": "Document model shared by book editors, servers and the MagFlip viewers: types, validation, book layout, publishing and the Yjs mapping.",
+  "type": "module",
+  "author": {
+    "name": "Shinkee Cho",
+    "email": "sing@magzog.com",
+    "url": "https://github.com/i486magzog"
+  },
+  "license": "MIT",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./authoring": {
+      "types": "./authoring.d.ts",
+      "import": "./authoring.js"
+    },
+    "./yjs": {
+      "types": "./yjs.d.ts",
+      "import": "./yjs.js"
+    }
+  },
+  "sideEffects": false,
+  "keywords": [
+    "magflip",
+    "magzog",
+    "book",
+    "editor",
+    "document-model",
+    "yjs"
+  ],
+  "homepage": "https://github.com/i486magzog/magFlip",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i486magzog/magFlip.git",
+    "directory": "packages/doc"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build:local": "tsc --noEmit && npx rollup -c",
+    "versionup:minor": "npm version minor --git-tag-version",
+    "prebuild": "npm version patch",
+    "build": "tsc --noEmit && npx rollup -c",
+    "build:watch": "npx rollup -cw",
+    "pub": "npm publish --access public --otp=$npm_config_otp"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "rollup": "^4.24.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2",
+    "vitest": "^5.0.0",
+    "yjs": "^13.6.32"
+  },
+  "dependencies": {
+    "fractional-indexing": "^4.0.0",
+    "zod": "^4.6.5"
+  },
+  "peerDependencies": {
+    "yjs": "^13.6.0"
+  },
+  "peerDependenciesMeta": {
+    "yjs": {
+      "optional": true
+    }
+  }
+}

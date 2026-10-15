@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "panorama",
+  "kind": "spread",
+  "trimRect": {
+    "x": 0,
+    "y": 0,
+    "width": 1200,
+    "height": 900
+  },
+  "visibleRect": {
+    "x": 0,
+    "y": 0,
+    "width": 1200,
+    "height": 900
+  },
+  "isExpandable": false,
+  "background": null,
+  "nodes": [
+    {
+      "id": "master:leftNumber",
+      "type": "text",
+      "opacity": 1,
+      "x": 48,
+      "y": 820,
+      "width": 120,
+      "height": 40,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 20,
+        "fontWeight": 400,
+        "isItalic": false,
+        "color": "#9ca3af",
+        "lineHeight": 1.5,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "middle",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": true,
+      "children": []
+    },
+    {
+      "id": "master:rightNumber",
+      "type": "text",
+      "opacity": 1,
+      "x": 1032,
+      "y": 820,
+      "width": 120,
+      "height": 40,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "end",
+            "inlines": [
+              {
+                "text": "2"
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 20,
+        "fontWeight": 400,
+        "isItalic": false,
+        "color": "#9ca3af",
+        "lineHeight": 1.5,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "middle",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": true,
+      "children": []
+    },
+    {
+      "id": "panoramaPhoto",
+      "type": "image",
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "width": 1200,
+      "height": 900,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "assetId": "img1",
+      "fit": "cover",
+      "crop": null,
+      "alt": "",
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "panoramaCaption",
+      "type": "text",
+      "opacity": 1,
+      "x": 340,
+      "y": 700,
+      "width": 520,
+      "height": 120,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "center",
+            "inlines": [
+              {
+                "text": "One image over two pages. It crosses the gutter because both pages are one surface."
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 28,
+        "fontWeight": 400,
+        "isItalic": false,
+        "color": "#ffffff",
+        "lineHeight": 1.4,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    }
+  ],
+  "assets": {
+    "img1": {
+      "id": "img1",
+      "kind": "image",
+      "mimeType": "image/jpeg",
+      "byteSize": 0,
+      "width": 1000,
+      "height": 1414,
+      "url": "../prebuild/resources/book1/page1.jpg"
+    }
+  }
+}

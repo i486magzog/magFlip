@@ -1,0 +1,55 @@
+{
+  "name": "@magflip/render",
+  "version": "0.1.0",
+  "title": "MagFlip(Magzog's flip book) Renderer Package",
+  "description": "Renders a published MagFlip surface into DOM. Shared by the MagFlip viewers and book editors so that both draw a page the same way.",
+  "type": "module",
+  "author": {
+    "name": "Shinkee Cho",
+    "email": "sing@magzog.com",
+    "url": "https://github.com/i486magzog"
+  },
+  "license": "MIT",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
+  "keywords": [
+    "magflip",
+    "magzog",
+    "book",
+    "renderer"
+  ],
+  "homepage": "https://github.com/i486magzog/magFlip",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i486magzog/magFlip.git",
+    "directory": "packages/render"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build:local": "tsc --noEmit && npx rollup -c",
+    "versionup:minor": "npm version minor --git-tag-version",
+    "prebuild": "npm version patch",
+    "build": "tsc --noEmit && npx rollup -c",
+    "build:watch": "npx rollup -cw",
+    "pub": "npm publish --access public --otp=$npm_config_otp"
+  },
+  "dependencies": {
+    "@magflip/doc": "^0.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "happy-dom": "^20.0.0",
+    "rollup": "^4.24.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2",
+    "vitest": "^5.0.0"
+  }
+}

@@ -31,6 +31,8 @@
   },
   "scripts": {
     "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "build:local": "tsc && npx rollup -c",
     "versionup:minor": "npm version minor --git-tag-version",
     "prebuild": "npm version patch",
     "build": "tsc && npx rollup -c",

@@ -13,24 +13,51 @@ type PageElements = {
  */
 export class PageEl extends Base {
   /**
-   * Returns the element of this page.
+   * The data this page was created from. Kept because the elements are built
+   * from it later, not in the constructor.
    */
-  readonly element: HTMLElement;
+  protected readonly pageData: IPageData;
   /**
-   * Returns the content container element of this page.
+   * The elements of this page, once they were needed.
    */
-  readonly contentContainerEl: HTMLElement;
-  /**
-   * Returns the content element of this page.
-   */
-  readonly contentEl: HTMLElement;
+  private pageEls: PageElements | undefined;
 
   
   constructor(page:IPageData) {
     super();
-    ({ element:this.element,
-      contentContainerEl:this.contentContainerEl,
-      contentEl: this.contentEl } = this.createPageElement(page));
+    this.pageData = page;
+  }
+  /**
+   * Returns the element of this page.
+   */
+  get element():HTMLElement { return this.getPageEls().element; }
+  /**
+   * Returns the content container element of this page.
+   */
+  get contentContainerEl():HTMLElement { return this.getPageEls().contentContainerEl; }
+  /**
+   * Returns the content element of this page.
+   */
+  get contentEl():HTMLElement { return this.getPageEls().contentEl; }
+  /**
+   * Returns whether the elements of this page were built.
+   *
+   * A book can hold thousands of pages while only the handful in the window
+   * has elements, so anything that walks every page should ask this before
+   * reaching for one.
+   */
+  get hasElements():boolean { return this.pageEls !== undefined; }
+  /**
+   * Returns the elements of this page, building them the first time they are
+   * asked for.
+   *
+   * Building a page means drawing its content, which for a published book also
+   * downloads it. Doing that for every page of a long book when the book is
+   * opened is what this defers: a page is built when a view puts it on screen.
+   */
+  private getPageEls():PageElements {
+    if(!this.pageEls){ this.pageEls = this.createPageElement(this.pageData); }
+    return this.pageEls;
   }
   /**
    * Creates the elements of this page.
@@ -77,8 +104,11 @@ export class PageEl extends Base {
       contentContainerEl.className = `content-container`;
       const contentEl = document.createElement('div');
       contentEl.className = `content`;
-      contentEl.innerHTML = page.content || '';
-      contentEl.innerHTML += page.image ? `<img src="${page.image}"/>` : '';
+      if(page.render){ page.render(contentEl); }
+      else {
+        contentEl.innerHTML = page.content || '';
+        contentEl.innerHTML += page.image ? `<img src="${page.image}"/>` : '';
+      }
       contentContainerEl.appendChild(contentEl)
       pageEl.appendChild(contentContainerEl);
       
@@ -91,6 +121,10 @@ export class PageEl extends Base {
   }
 
   resetPageEls(){
+    // A page that was never shown has nothing to reset, and building it here
+    // would undo the point of building it late.
+    if(!this.pageEls){ return; }
+
     const children = Array.from(this.element.children);
     children.forEach(child => {
       if(child === this.contentContainerEl){

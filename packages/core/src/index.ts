@@ -8,10 +8,12 @@ export * from './common/helper';
 export * from './core/base';
 export * from './core/book';
 export * from './core/bookEl';
-export * from './core/bookShelf';
+export * from './core/bookObjectEl';
+export * from './core/bookFlight';
 export * from './core/bookShelfManager';
 export * from './core/bookViewer';
 export * from './core/page';
 export * from './core/pageEl';
 
 import './core/core.css';
+import './core/bookObject.css';
