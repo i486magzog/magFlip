@@ -24,11 +24,14 @@
 
       // The shelf lays the books out. Pressing one flies it to the viewer.
       const shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
-      shelf.addBook(getSampleBook(1, 6));
-      shelf.addBook(getSampleBook(2, 10, getSampleLabels(flipView)));
-      shelf.addBook(getSampleBook(3, 16));
+      // Each title says what to try in that book.
+      shelf.addBook(getSampleBook(1, 6, 'Click or Drag a Corner'));
+      const catalogue = getSampleBook(2, 10, 'Label Tabs Catalogue', getSampleLabels(flipView));
+      shelf.addBook(catalogue);
+      shelf.addBook(getSampleBook(3, 16, 'Prev, Next, Move & Zoom'));
 
       addToolbar(bookViewer, flipView);
+      addCatalogueButton(shelfManager, catalogue);
 
       // Optional
       window.shelfManager = shelfManager;
@@ -62,6 +65,15 @@
       bookViewer.element.appendChild(toolbar);
     }
 
+    /** Opens a book straight from a button on the page, without going to the shelf. */
+    function addCatalogueButton(shelfManager, book){
+      const button = document.createElement('button');
+      button.id = 'catalogueButton';
+      button.textContent = 'CATALOGUE';
+      button.addEventListener('click', () => { shelfManager.pickupAndView(book); });
+      document.body.appendChild(button);
+    }
+
     /** One label for each page from page 2 on, keyed by the page index. */
     function getSampleLabels(flipView){
       const labels = {};
@@ -81,7 +93,7 @@
     }
 
     /** A book of `pageCnt` pictures from resources/book{bookNum}/, its first page as the cover. */
-    function getSampleBook(bookNum, pageCnt, labels){
+    function getSampleBook(bookNum, pageCnt, title, labels){
       const pages = [];
       for(let i=0;i<pageCnt;i++){
         pages.push({
@@ -92,6 +104,7 @@
       }
       const book = new Book({
         id: 'mybook' + bookNum,
+        title,
         lastPageIndex: pageCnt-1,
         labels,
         thumbnails: {
@@ -121,6 +134,18 @@
     }
     #pageIndex {
       width: 50px;
+    }
+    #catalogueButton {
+      position: fixed;
+      right: 2rem;
+      bottom: 3vh;
+      width: 75px;
+      height: 75px;
+      border: 0;
+      background: #444;
+      color: #fff;
+      font-size: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
