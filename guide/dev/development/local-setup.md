@@ -16,8 +16,6 @@ flowchart LR
   I["npm install<br/>(루트)"] --> B["npm run build:local"]
   B --> T["npm test"]
   B --> S["npm run serve<br/>localhost:8190"]
-  I2["magBookDocs<br/>npm install"] --> D["npm start<br/>localhost:3107"]
-  B -.-> D
 ```
 
 ## 1. 설치
@@ -87,16 +85,8 @@ npm link ../../../packages/core ../../../packages/flipview
 npm run dev
 ```
 
-## 6. 문서 사이트
+## 6. 문서
 
-문서는 옆 저장소 **magBookDocs** 에 있습니다. magBookFlip 과 같은 폴더(`magBook/`)에 clone 해 둡니다.
-
-```bash
-cd ../magBookDocs
-npm install              # 최초 1회
-npm run build:magflip    # ../magBookFlip 에서 build:local (Live Demo 용 번들)
-npm start                # 데모 복사 → http://localhost:3107
-npm run build            # 정적 빌드 (깨진 링크가 있으면 실패)
-```
-
-magBookFlip 이 다른 곳에 있으면 `MAGFLIP_DIR=/path/to/magBookFlip npm start` 로 데모를 복사할 위치를 알려 줍니다.
+문서는 `guide/{user,dev}` 의 Markdown/MDX 이고, 이 저장소에서는 따로 빌드하지 않습니다.
+Docusaurus 문서 사이트가 `guide/` 를 그대로 읽고, Live Demo 를 위해 `packages/minjs/magflip.min.js` 와 `docs/examples/local` 을 복사해 갑니다 → 데모를 보려면 먼저 `npm run build:local` 을 실행하세요.
+작성 규칙은 [문서 작성 가이드](./writing-docs.md)를 보세요.

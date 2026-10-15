@@ -2,7 +2,7 @@
   "name": "@magflip/i18n",
   "version": "0.1.0",
   "title": "MagFlip(Magzog's flip book) Internationalization Package",
-  "description": "The language of the interface, shared by MagBookEditor, MagBookServer and MagBookTV: locales, message catalogs, interpolation, plurals and Intl formatting.",
+  "description": "The language of the interface, shared by the apps built on MagFlip: locales, message catalogs, interpolation, plurals and Intl formatting.",
   "type": "module",
   "author": {
     "name": "Shinkee Cho",

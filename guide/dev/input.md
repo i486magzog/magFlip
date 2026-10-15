@@ -5,7 +5,7 @@ title: "@magflip/input 내부"
 
 # `@magflip/input` 내부
 
-키 입력을 책 조작으로 바꾸는 패키지입니다(`magBookFlip/packages/input`). 사용법은 [리모컨·키보드로 읽기](../user/guides/remote-control.md).
+키 입력을 책 조작으로 바꾸는 패키지입니다(`packages/input`). 사용법은 [리모컨·키보드로 읽기](../user/guides/remote-control.md).
 
 의존은 **`@magflip/core` 하나**뿐이고, 뷰에는 `IBookView` 규약으로만 접근합니다. 그래서 FlipView 가 아닌 다른 뷰에도 그대로 붙습니다.
 

@@ -43,5 +43,5 @@ npm run pub --otp=<OTP>
 ## 마무리
 
 - 변경된 `package.json`, `package-lock.json`, `README.md`, `docs/examples/prebuild/magflip.html` 을 `Update versions` 로 커밋.
-- `../magBookDocs/docs/magflip/user/getting-started/*.md` 의 CDN 버전 예시가 오래됐으면 갱신.
+- `guide/user/getting-started/*.md` 의 CDN 버전 예시가 오래됐으면 갱신.
 - `docs/examples/prebuild/magflip.html` 이 새 CDN 버전을 가리키게 되면, core 책장에 기대던 코드를 `new BookShelf({ manager })` 로 바꾼다(known-issues #12). 빠른 시작 문서의 "배포 버전" 안내도 지운다.

@@ -64,5 +64,5 @@ doFlip();
 - [ ] `npm run typecheck`
 - [ ] `npm test` (계산 로직을 바꿨다면 테스트 추가)
 - [ ] `npm run build:local` 후 `docs/examples/local` 에서 드래그 / Next / Prev / moveTo / Zoom 확인
-- [ ] 공개 API 가 바뀌었다면 `magBookDocs/docs/magflip/user/reference/api.md` 갱신
-- [ ] 구조가 바뀌었다면 `magBookDocs/docs/magflip/dev` 의 다이어그램과 해당 패키지 `CLAUDE.md` 갱신
+- [ ] 공개 API 가 바뀌었다면 `guide/user/reference/api.md` 갱신
+- [ ] 구조가 바뀌었다면 `guide/dev` 의 다이어그램과 해당 패키지 `CLAUDE.md` 갱신

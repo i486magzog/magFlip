@@ -36,15 +36,15 @@ flowchart TD
 
 ## 오른쪽 아래 모서리를 잡았을 때
 
-![Flip effect from right bottom 1](/img/flip-math/flipEffectRightBottom1.png)
+![Flip effect from right bottom 1](../../../docs/img/flip-math/flipEffectRightBottom1.png)
 
 - 점 `f, g, h, i` : page2(뒷면)에 씌우는 mask polygon
 - 점 `j, k, l, m` : page1(앞면)에서 잘라낼 mask polygon
 - `A = a`, `B = b`, `C = c`, `D = d` 가 코드의 변수명과 대응합니다.
 
-![Flip effect from right bottom 2](/img/flip-math/flipEffectRightBottom2.png)
+![Flip effect from right bottom 2](../../../docs/img/flip-math/flipEffectRightBottom2.png)
 
-![Flip effect from right bottom 3](/img/flip-math/flipEffectRightBottom3.png)
+![Flip effect from right bottom 3](../../../docs/img/flip-math/flipEffectRightBottom3.png)
 
 ## Mask 모양 분기
 
@@ -72,10 +72,10 @@ flowchart TD
 | 3 (오른쪽) | FlipActionLine 오른쪽 끝 바깥 | 오른쪽 끝 점으로 |
 | 4 (왼쪽) | FlipActionLine 왼쪽 끝 바깥 | 왼쪽 끝 점으로 |
 
-![Mouse point area 1](/img/flip-math/mousePointArea1.png)
-![Mouse point area 2](/img/flip-math/mousePointArea2.png)
-![Mouse point area 3](/img/flip-math/mousePointArea3.png)
-![Mouse point area 4](/img/flip-math/mousePointArea4.png)
+![Mouse point area 1](../../../docs/img/flip-math/mousePointArea1.png)
+![Mouse point area 2](../../../docs/img/flip-math/mousePointArea2.png)
+![Mouse point area 3](../../../docs/img/flip-math/mousePointArea3.png)
+![Mouse point area 4](../../../docs/img/flip-math/mousePointArea4.png)
 
 ## 그림자
 

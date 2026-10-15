@@ -2,7 +2,7 @@
   "name": "@magflip/render",
   "version": "0.1.0",
   "title": "MagFlip(Magzog's flip book) Renderer Package",
-  "description": "Renders a published MagFlip surface into DOM. Shared by the MagFlip viewers and MagBookEditor so that both draw a page the same way.",
+  "description": "Renders a published MagFlip surface into DOM. Shared by the MagFlip viewers and book editors so that both draw a page the same way.",
   "type": "module",
   "author": {
     "name": "Shinkee Cho",

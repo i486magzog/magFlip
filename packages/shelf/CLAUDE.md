@@ -23,7 +23,7 @@ __tests__/bookShelf.test.ts   Vitest + happy-dom, core 는 소스로 alias (vite
   - 빌드의 cssnano(svgo)가 SVG 를 줄인다(`rect` → `path`, id 이름 바꿈). 결을 고치면 빌드된 `index.css` 에서 필터가 남았는지 보고, 브라우저에서 1:1 크기로 본다.
 - 책 사이 간격은 0. 틈이 있으면 포인터가 틈을 지날 때 빠져나온 책이 들어갔다 다시 나온다. 포인터를 받는 곳이 책의 자리라는 것은 core 의 규칙이다(`bookObject.css`).
 - 책마다의 높이는 CSS 가 계산한다: `--mf-book-trim-height`(core 가 책에 씀) ÷ `--mf-shelf-tallest`(여기서 컨테이너에 씀). 가장 큰 책이 바뀔 때만 JS 가 개입하고, 그때는 `.is-resizing` 으로 전환 없이 적용한다.
-- **화면 말을 넣지 않는다.** 제목은 책의 내용이라 번역하지 않고, 격자/책장 전환 버튼은 앱이 만든다(규칙: `../magBookDocs/docs/magflip/dev/i18n.md`).
+- **화면 말을 넣지 않는다.** 제목은 책의 내용이라 번역하지 않고, 격자/책장 전환 버튼은 앱이 만든다(규칙: `guide/dev/i18n.md`).
 - 내부 계산 함수를 export 하지 않는다 — minjs 가 모든 export 를 `window` 에 올린다.
 
 ## 명령
@@ -38,5 +38,5 @@ CSS 는 `index.css` 로 추출된다. npm 으로 쓰는 앱은 `import '@magflip
 
 ## 문서
 
-- 사용법: `../magBookDocs/docs/magflip/user/guides/bookshelf.mdx`
-- 내부(core ↔ shelf 경계, 자세·비행): `../magBookDocs/docs/magflip/dev/book-object.md`
+- 사용법: `guide/user/guides/bookshelf.mdx`
+- 내부(core ↔ shelf 경계, 자세·비행): `guide/dev/book-object.md`

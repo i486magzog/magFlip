@@ -10,7 +10,7 @@ import FileTree from '@site/src/components/FileTree';
 ## 저장소 전체
 
 <FileTree nodes={[
-  { name: 'magBookFlip/', children: [
+  { name: 'magFlip/', children: [
     { name: 'CLAUDE.md', note: 'Claude Code용 프로젝트 가이드 (패키지별 CLAUDE.md 도 있음)', highlight: true },
     { name: '.claude/skills/', note: '저장소 공통 skill: local-dev, release' },
     { name: 'package.json', note: 'workspaces 루트 · build:local / test / serve / sample:book 스크립트', highlight: true },
@@ -19,7 +19,7 @@ import FileTree from '@site/src/components/FileTree';
     ]},
     { name: 'packages/', note: 'npm 으로 배포되는 라이브러리들', highlight: true, children: [
       { name: 'i18n/', note: '@magflip/i18n — 앱들의 화면 말 (로케일·카탈로그)' },
-      { name: 'doc/', note: '@magflip/doc — Editor·Server·뷰어 공용 문서 모델' },
+      { name: 'doc/', note: '@magflip/doc — 편집기·서버·뷰어 공용 문서 모델' },
       { name: 'render/', note: '@magflip/render — 게시본을 DOM 으로 그리는 공용 렌더러' },
       { name: 'core/', note: '@magflip/core — 모델, 책 한 권(책 객체·비행), 뷰어, 공통 유틸' },
       { name: 'input/', note: '@magflip/input — 키보드·리모컨 입력' },
@@ -34,11 +34,16 @@ import FileTree from '@site/src/components/FileTree';
         { name: 'prebuild/', note: 'CDN 번들 예제 (GitHub Pages 공개 데모) + 샘플 이미지' },
         { name: 'react-ts/', note: 'React + Vite 예제 앱' },
       ]},
+      { name: 'img/flip-math/', note: 'Flip 기하 그림 (README · flip-geometry 문서)' },
+    ]},
+    { name: 'guide/', note: '이 문서들 (Docusaurus 형식 Markdown/MDX)', highlight: true, children: [
+      { name: 'user/', note: '라이브러리 사용자 가이드' },
+      { name: 'dev/', note: 'MagFlip 개발자 가이드' },
     ]},
   ]},
 ]} />
 
-문서 사이트는 이 저장소가 아니라 옆의 **magBookDocs** 저장소에 있습니다. `magBook/` 아래 저장소 구성은 [MagFlip 개발 가이드 소개](../intro.md#magbook-저장소-구성)를 보세요.
+이 문서들은 `guide/` 에 있고, Docusaurus 문서 사이트가 그대로 읽어 보여 줍니다. 패키지를 쓰는 쪽은 [MagFlip 개발 가이드 소개](../intro.md#패키지를-쓰는-쪽)를 보세요.
 
 ## 패키지 내부 공통 구조
 

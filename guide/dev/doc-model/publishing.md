@@ -15,7 +15,7 @@ flowchart TB
   v -->|에러가 하나라도 있으면| stop["게시 중단"]
 ```
 
-작은 책은 `publishBookBundle(bundle, options)` 한 번으로 끝납니다. 수천 페이지 책은 한 번에 담을 수 없으므로 나눠서 게시합니다 — magBookServer 가 실제로 하는 방식입니다.
+작은 책은 `publishBookBundle(bundle, options)` 한 번으로 끝납니다. 수천 페이지 책은 한 번에 담을 수 없으므로 나눠서 게시합니다 — 아래는 Cloudflare Workers 서버에서 나눠 게시하는 예입니다.
 
 ```mermaid
 sequenceDiagram

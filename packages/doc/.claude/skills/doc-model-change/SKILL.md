@@ -8,7 +8,7 @@ description: Change the MagFlip document model shared by editor, server and view
 ## 1. 어디를 건드리는지 먼저 확인
 
 ```bash
-grep -rn "<이름>" packages/doc/src packages/doc/__tests__ ../magBookDocs/docs/magflip/dev/doc-model
+grep -rn "<이름>" packages/doc/src packages/doc/__tests__ guide/dev/doc-model
 ```
 
 편집본(`model/`) → 스키마(`schema/`) → 게시본(`model/published.ts`, `publish/`) → 협업(`collab/`) 순으로 영향이 퍼진다.
@@ -46,4 +46,4 @@ npm run typecheck && npm test          # 저장소 전체
 
 ## 6. 문서
 
-`../magBookDocs/docs/magflip/dev/doc-model/` 의 해당 문서와 `packages/doc/CLAUDE.md` 파일 지도를 함께 갱신한다.
+`guide/dev/doc-model/` 의 해당 문서와 `packages/doc/CLAUDE.md` 파일 지도를 함께 갱신한다.

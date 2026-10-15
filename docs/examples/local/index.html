@@ -170,7 +170,7 @@
      */
     async function createPublishedBook(flipViewRef) {
       // `?book=<manifest url>` points the viewer at another published book,
-      // for example one served by a local magBookServer.
+      // for example one served by a local publishing server.
       const manifestUrl = new URLSearchParams(location.search).get('book') ?? './sample-book/book.json';
       const source = await PublishedBookSource.load(manifestUrl, {
         // A link inside a page points at a surface, so look up its page index.

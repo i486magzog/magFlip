@@ -2,7 +2,7 @@
   "name": "@magflip/doc",
   "version": "0.1.0",
   "title": "MagFlip(Magzog's flip book) Document Model Package",
-  "description": "Document model shared by MagBookEditor, MagBookServer and the MagFlip viewers: types, validation, book layout, publishing and the Yjs mapping.",
+  "description": "Document model shared by book editors, servers and the MagFlip viewers: types, validation, book layout, publishing and the Yjs mapping.",
   "type": "module",
   "author": {
     "name": "Shinkee Cho",

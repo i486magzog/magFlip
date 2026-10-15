@@ -7,17 +7,16 @@ title: 문서 작성 가이드
 
 ## 어느 폴더에 쓰나?
 
-문서는 magBookDocs 저장소에 있고, 제품(`magflip`, `editor`, `server`, `tv`)마다 사용·개발 두 폴더로 나뉩니다.
+문서는 이 저장소의 `guide/` 에 있고, 사용·개발 두 폴더로 나뉩니다. Docusaurus 문서 사이트가 이 폴더를 그대로 읽어 보여 줍니다.
 
 ```mermaid
 flowchart TD
-  P{어느 제품?} --> Q{누가 읽나요?}
-  Q -->|제품 사용자| U["docs/제품/user/<br/>→ /제품/user"]
-  Q -->|제품 개발자| D["docs/제품/dev/<br/>→ /제품/dev"]
-  Q -->|Claude Code| C["각 저장소의 CLAUDE.md · .claude/skills/"]
+  Q{누가 읽나요?} -->|라이브러리 사용자| U["guide/user/"]
+  Q -->|MagFlip 개발자| D["guide/dev/"]
+  Q -->|Claude Code| C["CLAUDE.md · .claude/skills/"]
 ```
 
-여러 제품이 함께 쓰는 내용은 **코드의 주인** 쪽에 씁니다. 예를 들어 `@magflip/doc` 문서 모델은 magBookFlip 저장소 코드이므로 `magflip/dev/doc-model/` 에 두고, Editor·Server 문서는 그곳으로 링크합니다.
+여러 앱이 함께 쓰는 패키지(예: `@magflip/doc` 문서 모델)의 설명도 **코드가 있는 이 저장소**에 씁니다. 그 패키지를 쓰는 앱의 문서는 이곳으로 링크합니다.
 
 | 사용자 문서 | 개발자 문서 |
 | --- | --- |
@@ -30,7 +29,7 @@ flowchart TD
 1. 해당 폴더에 `.md` (컴포넌트를 쓰면 `.mdx`) 파일 생성
 2. front matter 에 `title`, `sidebar_position` 지정
 3. 새 폴더라면 `_category_.json` 추가 → 사이드바는 자동 생성
-4. magBookDocs 에서 `npm run build` 로 깨진 링크 확인
+4. 다른 문서는 상대 경로(`../user/intro.md`)로 링크하고, 문서 사이트 빌드로 깨진 링크를 확인 (깨진 링크가 있으면 빌드가 실패한다)
 
 ```md
 ---
@@ -48,9 +47,9 @@ title: 새 문서
 | 상태 전이 | ` ```mermaid stateDiagram-v2 ` |
 | 클래스 관계 | ` ```mermaid classDiagram ` |
 | 격자 배치 (Zone, 슬롯) | ` ```mermaid block-beta ` |
-| 폴더 트리 | `<FileTree nodes={[...]} />` (`@site/src/components/FileTree`) |
-| 실제 동작 | `<DemoFrame />` (`@site/src/components/DemoFrame`) |
-| 수학 그림 | magBookDocs `static/img/flip-math/` 이미지 |
+| 폴더 트리 | `<FileTree nodes={[...]} />` (`@site/src/components/FileTree`, 문서 사이트가 제공) |
+| 실제 동작 | `<DemoFrame />` (`@site/src/components/DemoFrame`, 문서 사이트가 제공) |
+| 수학 그림 | 이 저장소의 `docs/img/flip-math/` 이미지를 상대 경로로 |
 
 :::tip MDX 주의
 `.md` 본문에 `<`, `{` 를 그대로 쓰면 MDX 파싱 에러가 날 수 있습니다. 코드 스팬(`` `<div>` ``)으로 감싸세요.

@@ -1,6 +1,6 @@
 # @magflip/doc
 
-MagFlip 의 문서 모델. MagBookEditor(편집), MagBookServer(저장·게시), MagFlip 뷰어(표시)가 같은 책 데이터를 쓰도록 타입·검증·계산을 한곳에 모은 패키지입니다.
+MagFlip 의 문서 모델. 편집기(만들기), 서버(저장·게시), MagFlip 뷰어(보여 주기)가 같은 책 데이터를 쓰도록 타입·검증·계산을 한곳에 모은 패키지입니다.
 
 - **타입과 스키마** — `IBookDoc`, `ISurfaceDoc`, `IElement` 와 zod 스키마
 - **페이지 레이아웃** — surface 순서에서 페이지 index·좌우·쪽번호 계산

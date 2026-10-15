@@ -81,7 +81,7 @@ CRDT 는 "두 변경을 모두 살리는" 것이 목적이라, 의미상 불가�
 
 이런 상태는 **쓰기를 막는 대신 읽을 때 같은 규칙으로 복구**합니다([요소와 텍스트](./elements-and-text.md#z-order-와-그룹)의 표). 모든 클라이언트가 같은 입력에서 같은 트리를 만들기 때문에 화면이 갈라지지 않고, 문제는 `IDocProblem` 으로 보고되어 에디터가 알려줄 수 있습니다.
 
-## 구현된 모습 (magBookServer · MagBookEditor)
+## 구현 예 (Cloudflare Workers 서버 · 웹 편집기)
 
 ```mermaid
 sequenceDiagram

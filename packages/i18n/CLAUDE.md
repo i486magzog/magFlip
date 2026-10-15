@@ -1,6 +1,6 @@
 # @magflip/i18n — CLAUDE.md
 
-화면에 나오는 **말의 언어**를 다루는 공용 코드. Editor·Server·TV 가 같이 쓴다.
+화면에 나오는 **말의 언어**를 다루는 공용 코드. 편집기·서버·TV 앱처럼 여러 앱이 같이 쓴다.
 아무 패키지에도 의존하지 않는다(`@magflip/doc` 보다도 아래). DOM 을 쓰지 않으므로 Workers 에서도 돈다.
 
 **말 자체(카탈로그)는 여기 없다.** 각 앱이 자기 `i18n/messages/` 에 갖는다 — 에디터 문구를 서버가 알 필요가 없다.
@@ -31,7 +31,7 @@ src/
 
 1. `locale.ts` 의 `LOCALES` 와 `LOCALE_NAMES` 에 추가 (이름은 그 언어로 쓴 제 이름).
 2. 각 앱의 `i18n/messages/<코드>.ts` 를 만들고 `messages/index.ts` 의 `TRANSLATIONS` 에 등록. 다 못 채워도 된다.
-3. 서버 `src/i18n/` 의 위젯 등록부처럼 데이터로 나가는 문자열에 그 언어 칸을 채운다.
+3. 서버의 위젯 등록부처럼 데이터로 나가는 문자열(`ILocalizedText`)이 있으면 그 언어 칸을 채운다.
 4. 복수형이 영어와 다른 언어라면 `IPluralMessage` 의 나머지 칸(`few`·`many` 등)을 쓴다. 이름은 `Intl.PluralRules` 가 돌려주는 그대로.
 
 ## 명령
@@ -45,5 +45,5 @@ npm run build:local -w packages/i18n   # index.js / index.d.ts (버전 안 올�
 ## 변경 체크리스트
 
 1. `npm test -w packages/i18n && npm run build:local -w packages/i18n`
-2. 소비하는 쪽(`../../magBookEditor`, `../../magBookServer`, `../../magBookTV`)은 `file:` 링크로 **빌드 산출물**을 본다 → 여기서 build:local 을 먼저 돌려야 반영된다.
-3. 문서: `../../magBookDocs/docs/magflip/dev/i18n.md`
+2. `file:` 링크로 이 패키지를 쓰는 앱은 **빌드 산출물**을 본다 → 여기서 build:local 을 먼저 돌려야 반영된다.
+3. 문서: `guide/dev/i18n.md`

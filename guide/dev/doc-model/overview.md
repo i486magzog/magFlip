@@ -5,12 +5,12 @@ title: 문서 모델 개요
 
 # 문서 모델 개요
 
-`@magflip/doc` 는 **MagBookEditor · MagBookServer · MagFlip 뷰어가 공유하는 책 데이터 형식**입니다.
+`@magflip/doc` 는 **편집기 · 서버 · MagFlip 뷰어가 공유하는 책 데이터 형식**입니다.
 편집기에서 만든 책이 서버를 거쳐 뷰어에서 같은 모습으로 보이려면, 세 곳이 같은 타입과 같은 규칙을 써야 합니다. 그 규칙을 한 패키지에 모았습니다.
 
 ```mermaid
 flowchart LR
-  editor["MagBookEditor<br/>편집"] -->|Yjs| server["MagBookServer<br/>Cloudflare Workers"]
+  editor["편집기"] -->|Yjs| server["서버<br/>예: Cloudflare Workers"]
   server -->|게시 JSON| viewer["MagFlip 뷰어<br/>flipview"]
   doc["<b>@magflip/doc</b><br/>타입 · 검증 · 레이아웃<br/>마스터 · 게시 · Yjs 매핑"] -.-> editor
   doc -.-> server

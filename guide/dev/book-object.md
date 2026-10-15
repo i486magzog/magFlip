@@ -24,7 +24,7 @@ flowchart BT
   core["@magflip/core<br/>Book.objectEl · BookObjectEl<br/>BookFlight · BookShelfManager"]
   shelf["@magflip/shelf<br/>BookShelf · ShelfLayout"]
   flip["@magflip/flipview<br/>FlipView.getClosedBookPlace()"]
-  tv["magBookTV<br/>자기 책장(카드 격자)"]
+  tv["TV 앱<br/>자기 책장(카드 격자)"]
   shelf -->|import| core
   flip -->|import| core
   tv -.->|core 만. objectEl 을 쓰지 않음| core

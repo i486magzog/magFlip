@@ -33,6 +33,6 @@ flowchart TD
 | `packages/minjs/.claude/skills/` | `bundle-check` | 번들 구성 변경·검증 |
 | `docs/examples/.claude/skills/` | `update-examples` | 예제 페이지 수정 |
 
-문서 사이트는 옆 저장소 **magBookDocs** 에 있고, 그 저장소의 `CLAUDE.md` 와 `write-docs` skill 이 문서 작성 규칙을 담습니다.
+문서는 `guide/` 에 있고, 작성 규칙은 [문서 작성 가이드](./writing-docs.md)에 있습니다.
 
-구조를 바꾸면 **코드 → magBookDocs 의 `docs/magflip/dev` → CLAUDE.md → skill** 순서로 함께 갱신하세요.
+구조를 바꾸면 **코드 → `guide/dev` → CLAUDE.md → skill** 순서로 함께 갱신하세요.

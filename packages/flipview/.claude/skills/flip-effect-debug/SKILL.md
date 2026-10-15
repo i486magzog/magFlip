@@ -5,7 +5,7 @@ description: Debug or change the page flip effect in @magflip/flipview — fold 
 
 # Flip 효과 디버깅 / 수정
 
-먼저 `packages/flipview/CLAUDE.md` 와 `../magBookDocs/docs/magflip/dev/flipview/*.md` 를 읽는다.
+먼저 `packages/flipview/CLAUDE.md` 와 `guide/dev/flipview/*.md` 를 읽는다.
 
 ## 1. 증상 → 위치
 
@@ -42,4 +42,4 @@ description: Debug or change the page flip effect in @magflip/flipview — fold 
 
 - `npm test -w packages/flipview`, `npm run typecheck`
 - 브라우저: 6개 zone 호버·드래그, 스냅백/넘김, Next/Prev, moveTo 앞/뒤, Zoom 0.5/2, 첫·마지막 페이지.
-- 동작/흐름이 바뀌면 `../magBookDocs/docs/magflip/dev/flipview/*.md` 다이어그램, 버그 해결 시 `known-issues.md` 갱신.
+- 동작/흐름이 바뀌면 `guide/dev/flipview/*.md` 다이어그램, 버그 해결 시 `known-issues.md` 갱신.

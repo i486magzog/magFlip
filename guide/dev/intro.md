@@ -8,31 +8,29 @@ title: 개발자 가이드 소개
 MagFlip **자체를 개발·유지보수**하는 사람을 위한 문서입니다.
 라이브러리를 _사용_하는 방법은 [사용자 가이드](../user/intro.md)를 참고하세요.
 
-## magBook 저장소 구성
+## 패키지를 쓰는 쪽
 
-MagFlip 제품군은 같은 폴더(`magBook/`)에 나란히 놓인 다섯 저장소입니다. 이 문서는 그중 **magBookFlip** 을 다룹니다.
+MagFlip 은 한 저장소(npm workspaces)에 든 여러 패키지입니다. 앱은 필요한 패키지만 npm 으로 설치하고, 이 저장소와 함께 개발할 때는 `file:` 링크로 `packages/*` 를 가리킵니다.
 
 ```mermaid
 flowchart LR
-  subgraph magflip["magBookFlip"]
+  subgraph magflip["magFlip"]
     doc["@magflip/doc<br/>문서 모델"]
     render["@magflip/render<br/>렌더러"]
     viewer["core · flipview · minjs<br/>뷰어"]
   end
-  editor["magBookEditor"] -->|"file: 링크"| doc
-  editor -->|"file: 링크"| render
-  server["magBookServer"] -->|"file: 링크"| doc
-  tv["magBookTV<br/>(계획)"] -.->|"file: 링크"| viewer
-  docs["magBookDocs<br/>이 문서 사이트"]
+  editor["책 편집기"] --> doc
+  editor --> render
+  server["저장·게시 서버"] --> doc
+  page["웹 페이지 · TV 앱"] --> viewer
 ```
 
-| 저장소 | 역할 | 문서 |
-| --- | --- | --- |
-| magBookFlip | 뷰어 라이브러리, 공용 문서 모델·렌더러 | 이 가이드 |
-| magBookEditor | 책 편집기 | [Editor 개발 가이드](/editor/dev/intro) |
-| magBookServer | 동시 편집 방·저장·게시 | [Server 개발 가이드](/server/dev/intro) |
-| magBookTV | TV 앱 | [TV 개발 가이드](/tv/dev/intro) |
-| magBookDocs | 문서 사이트 | [문서 작성 가이드](./development/writing-docs.md) |
+| 쓰는 쪽 | 패키지 |
+| --- | --- |
+| 웹 페이지에 뷰어를 넣을 때 | `core` + `flipview` (또는 CDN 번들 `minjs`) |
+| 책 편집기 | `doc` + `render` (+ `i18n`) |
+| 저장·게시 서버 | `doc` (+ `i18n`) |
+| 리모컨으로 읽는 TV 앱 | `core` + `flipview` + `input` |
 
 ## 이 문서를 읽는 순서
 
