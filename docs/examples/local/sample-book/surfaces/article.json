@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "id": "article",
+  "kind": "single",
+  "trimRect": {
+    "x": 0,
+    "y": 0,
+    "width": 600,
+    "height": 900
+  },
+  "visibleRect": {
+    "x": 0,
+    "y": 0,
+    "width": 600,
+    "height": 900
+  },
+  "isExpandable": false,
+  "background": {
+    "kind": "solid",
+    "color": "#f7f4ee"
+  },
+  "nodes": [
+    {
+      "id": "master:rightNumber",
+      "type": "text",
+      "opacity": 1,
+      "x": 432,
+      "y": 820,
+      "width": 120,
+      "height": 40,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "end",
+            "inlines": [
+              {
+                "text": "4"
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 20,
+        "fontWeight": 400,
+        "isItalic": false,
+        "color": "#9ca3af",
+        "lineHeight": 1.5,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "middle",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": true,
+      "children": []
+    },
+    {
+      "id": "rule",
+      "type": "shape",
+      "opacity": 1,
+      "x": 64,
+      "y": 150,
+      "width": 472,
+      "height": 4,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "shape": "line",
+      "path": null,
+      "fill": null,
+      "stroke": {
+        "color": "#c2410c",
+        "width": 4,
+        "dash": []
+      },
+      "cornerRadius": 0,
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "articleTitle",
+      "type": "text",
+      "opacity": 1,
+      "x": 64,
+      "y": 180,
+      "width": 472,
+      "height": 120,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "Elements on a page"
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 44,
+        "fontWeight": 700,
+        "isItalic": false,
+        "color": "#1f2937",
+        "lineHeight": 1.2,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "articleBody",
+      "type": "text",
+      "opacity": 1,
+      "x": 64,
+      "y": 320,
+      "width": 472,
+      "height": 360,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "Text, shapes, images and links are drawn by "
+              },
+              {
+                "text": "@magflip/render",
+                "marks": {
+                  "fontWeight": 700,
+                  "color": "#c2410c"
+                }
+              },
+              {
+                "text": ", the same code the editor will use. Page numbers come from the master page, so this page never stores its own number."
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 22,
+        "fontWeight": 400,
+        "isItalic": false,
+        "color": "#374151",
+        "lineHeight": 1.6,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "backToCover",
+      "type": "text",
+      "opacity": 1,
+      "x": 64,
+      "y": 700,
+      "width": 300,
+      "height": 48,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "Back to the cover →",
+                "marks": {
+                  "link": {
+                    "kind": "page",
+                    "surfaceId": "cover",
+                    "surfaceX": 0
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 22,
+        "fontWeight": 600,
+        "isItalic": false,
+        "color": "#1d4ed8",
+        "lineHeight": 1.5,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    }
+  ],
+  "assets": {}
+}

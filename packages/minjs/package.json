@@ -30,6 +30,7 @@
   },
   "jsdelivr": "magflip.min.js",
   "scripts": {
+    "build:local": "BUILD=dev npx rollup -c",
     "versionup:minor": "npm version minor --git-tag-version",
     "prebuild": "npm version patch",
     "build:dev": "BUILD=dev npx rollup -c",

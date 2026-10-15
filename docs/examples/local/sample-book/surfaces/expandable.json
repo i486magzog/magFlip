@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "expandable",
+  "kind": "single",
+  "trimRect": {
+    "x": 0,
+    "y": 0,
+    "width": 600,
+    "height": 900
+  },
+  "visibleRect": {
+    "x": 0,
+    "y": 0,
+    "width": 1200,
+    "height": 900
+  },
+  "isExpandable": true,
+  "background": null,
+  "nodes": [
+    {
+      "id": "master:leftNumber",
+      "type": "text",
+      "opacity": 1,
+      "x": 48,
+      "y": 820,
+      "width": 120,
+      "height": 40,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "3"
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 20,
+        "fontWeight": 400,
+        "isItalic": false,
+        "color": "#9ca3af",
+        "lineHeight": 1.5,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "middle",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": true,
+      "children": []
+    },
+    {
+      "id": "expandablePhoto",
+      "type": "image",
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "width": 1200,
+      "height": 900,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "assetId": "img2",
+      "fit": "cover",
+      "crop": null,
+      "alt": "",
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "expandableHint",
+      "type": "text",
+      "opacity": 1,
+      "x": 48,
+      "y": 96,
+      "width": 504,
+      "height": 160,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "This page is twice as wide as it is shown. Press Expand."
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 30,
+        "fontWeight": 600,
+        "isItalic": false,
+        "color": "#ffffff",
+        "lineHeight": 1.3,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    },
+    {
+      "id": "expandableExtra",
+      "type": "text",
+      "opacity": 1,
+      "x": 648,
+      "y": 96,
+      "width": 504,
+      "height": 160,
+      "rotation": 0,
+      "isFlippedX": false,
+      "isFlippedY": false,
+      "content": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "align": "start",
+            "inlines": [
+              {
+                "text": "Here is the part only the expanded view shows."
+              }
+            ]
+          }
+        ]
+      },
+      "style": {
+        "fontFamily": "sans-serif",
+        "fontSize": 30,
+        "fontWeight": 600,
+        "isItalic": false,
+        "color": "#ffffff",
+        "lineHeight": 1.3,
+        "letterSpacing": 0
+      },
+      "verticalAlign": "top",
+      "sizing": "autoHeight",
+      "fill": null,
+      "padding": 0,
+      "isFromMaster": false,
+      "children": []
+    }
+  ],
+  "assets": {
+    "img2": {
+      "id": "img2",
+      "kind": "image",
+      "mimeType": "image/jpeg",
+      "byteSize": 0,
+      "width": 1000,
+      "height": 1414,
+      "url": "../prebuild/resources/book1/page2.jpg"
+    }
+  }
+}

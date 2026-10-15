@@ -1,7 +1,18 @@
-import { Book, BookEvent, deepMerge, DeepRequired, EventStatus, IBookView, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
+import { Book, BookCover, BookEvent, BookFace, deepMerge, DeepRequired, EventStatus, IBookView, IClosedBookPlace, IPage, IPageData, ISize, IZoneEventParams, Line, MZMath, PageType, Point, Rect, Zone } from '@magflip/core';
 import { FlipData } from './flipData';
 import { Flipping as FlipManager } from './flipManager';
 import { Gutter } from './gutter';
+import { clampPan, IPanOffset } from './panning';
+/**
+ * A hard-cover board that only follows the mouse (it is not being turned yet)
+ * rises this share of the angle the mouse points at.
+ */
+const HARD_LIFT_SCALE = 0.4;
+/**
+ * Eases a turn in and out, so a board starts and lands gently.
+ * @param t Progress from 0 to 1.
+ */
+const easeInOut = (t:number) => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -49,7 +60,15 @@ export class FlipView implements IBookView {
   /**
    * Zoom level of the viewer.
    */
-  private zoomLevel:number = 1;
+  private _zoomLevel:number = 1;
+  /**
+   * How large the book is drawn. 1 is the size that fits the viewer.
+   */
+  get zoomLevel():number { return this._zoomLevel; }
+  /**
+   * How far the book was moved from the middle, in screen pixels.
+   */
+  private panOffset:IPanOffset = { x: 0, y: 0 };
   /**
    * This id is unique string for FlipView object.
    */
@@ -115,6 +134,15 @@ export class FlipView implements IBookView {
    */
   private isSpreadOpen:boolean = false;
   /**
+   * Returns the indexes of the pages the reader is looking at: two when the
+   * book is open, one while it shows a cover, none without a book.
+   */
+  get openPageIndexes():number[] {
+    if(!this.book){ return []; }
+    return [this.curOpenLeftPageIndex, this.curOpenLeftPageIndex+1]
+      .filter(index => index >= 0 && index <= this.bookLastPageIndex);
+  }
+  /**
    * Gets whether the book is ready to open.
    */
   private get isReadyToOpen(){ return this.curOpenLeftPageIndex < 0; }
@@ -123,20 +151,33 @@ export class FlipView implements IBookView {
    */
   private get isClosed(){ return this.curOpenLeftPageIndex >= this.bookLastPageIndex; }
   /**
-   * Gets whether the page is flipping. (Includes auto-filp and draggring).
+   * True while a page is being dragged or is turning.
+   * `nextPage`, `prevPage` and `moveTo` do nothing while this is true.
+   * A corner that only follows the mouse does not count.
    */
-  private get isFlipping(){ return ( this.flipManager.eventStatus & EventStatus.AutoFlip
+  get isFlipping():boolean { return this.flipManager.isTurningPage; }
+  /**
+   * Calls the listener each time a page turn or a drag finishes and the pages
+   * have settled, including a drag that snaps back without turning the page.
+   * @param listener Called with no arguments. Read `openPageIndexes` for the new pages.
+   * @returns A function that removes the listener.
+   */
+  onFlipEnd(listener:() => void):() => void { return this.flipManager.onFlipEnd(listener); }
+  /**
+   * Gets whether a page is off its resting place. (Includes a corner following the mouse, dragging and turning).
+   */
+  private get isPageLifted(){ return ( this.flipManager.eventStatus & EventStatus.AutoFlip
     || this.flipManager.eventStatus & EventStatus.Flipping
-    || this.flipManager.eventStatus & EventStatus.Dragging ); 
+    || this.flipManager.eventStatus & EventStatus.Dragging );
   };
   /**
    * Gets whether the left page is flipping.
    */
-  private get isLeftPageFlipping(){ return this.isFlipping && this.flipManager.eventZone & Zone.Left; };
+  private get isLeftPageFlipping(){ return this.isPageLifted && this.flipManager.eventZone & Zone.Left; };
   /**
    * Gets whether the right page is flipping.
    */
-  private get isRightPageFlipping(){ return this.isFlipping && this.flipManager.eventZone & Zone.Right; };
+  private get isRightPageFlipping(){ return this.isPageLifted && this.flipManager.eventZone & Zone.Right; };
   /**
    * Gets whether the first page(index is 0) is Opening.
    */
@@ -153,6 +194,15 @@ export class FlipView implements IBookView {
    * Gets whether the last page is closing.
    */
   private get isLastPageClosing(){ return this.isRightPageFlipping && this.getActivePage(2)?.index == this.bookLastPageIndex; }
+  /**
+   * Gets whether the sheet that is turning is a board of a hard-cover book:
+   * the front cover with the inside of it, or the inside of the back cover with the back cover.
+   */
+  private get isHardSheetTurning(){
+    if(this.book?.cover !== BookCover.Hard){ return false; }
+    const index = this.getActivePage(1)?.index;
+    return index !== undefined && (index <= 1 || index >= this.bookLastPageIndex - 1);
+  }
   /**
    * Returns the instance of Page with sequence of active page.
    * @param activePageNum The number of active opened top page is 1 and behind page is 2, 3.
@@ -214,9 +264,12 @@ export class FlipView implements IBookView {
   /**
    * Inits variables and properties when a new book opens.
    */
-  private init(){ 
+  private init(){
     this.curOpenLeftPageIndex = -1;
     this.bookLastPageIndex = 0;
+    // A new book starts in the middle, whatever the reader did to the last one.
+    this.panOffset = { x: 0, y: 0 };
+    this.applyContainerTransform();
   }
   /**
    * Creates the viewer related elements.
@@ -412,8 +465,15 @@ export class FlipView implements IBookView {
     if(sh2El){ sh2El.remove(); }
     const gutterShadow = document.createElement('div');
     gutterShadow.className = "shadow2";
+
+    // A hard-cover board darkens as it stands up and shades the pages beside it.
+    const hardShadeEl = page.contentContainerEl.getElementsByClassName('hard-shade')[0];
+    if(hardShadeEl){ hardShadeEl.remove(); }
+    const hardShade = document.createElement('div');
+    hardShade.className = "hard-shade";
     
     page.contentContainerEl.appendChild(gutterShadow)
+    page.contentContainerEl.appendChild(hardShade)
     pageEl.appendChild(page.contentContainerEl);
     pageEl.appendChild(sh6Svg);
     pageEl.appendChild(sh3Svg);
@@ -425,8 +485,25 @@ export class FlipView implements IBookView {
   private appendShadowEl4AllPage(){
     const pages = this.book?.getPages();
     for(const index in pages){
-      this.appendShadowElIntoPageEl(pages[index]);
+      // A page that has not been shown yet has no element to decorate, and
+      // building one here would load every page of the book at once.
+      // `pageElOf` gives it its shadows when it is first shown.
+      const page = pages[index];
+      if(page.hasElements){ this.appendShadowElIntoPageEl(page); }
     }
+  }
+  /**
+   * Returns the element of a page, and gives it its shadows the first time.
+   *
+   * A page builds its element when it is first asked for, so this is the
+   * moment it becomes something the reader can see - and the moment its
+   * shadows belong to. Every page element that enters the DOM comes from here.
+   */
+  private pageElOf(page:IPage):HTMLElement {
+    const isFirstTime = !page.hasElements;
+    const pageEl = page.element;
+    if(isFirstTime){ this.appendShadowElIntoPageEl(page); }
+    return pageEl;
   }
   /**
    * 
@@ -475,10 +552,64 @@ export class FlipView implements IBookView {
    * @param zoomLevel 
    */
   zoom(zoomLevel:number){
-    this.zoomLevel = zoomLevel;
-    this.bookContainerEl.style.transform = `scale(${this.zoomLevel})`;
+    this._zoomLevel = zoomLevel;
+    // Zooming out can leave the book hanging off the screen, so the move it
+    // was given is measured against its new size.
+    this.panOffset = this.clampedPan(this.panOffset);
+    this.applyContainerTransform();
+    // setViewer() ends in updateDimension(), which measures the gutter again.
     this.setViewer();
-    // this.updateDimension();
+  }
+  /**
+   * Moves the book by that many screen pixels, within the screen.
+   * @returns whether the book moved.
+   */
+  pan(dx:number, dy:number):boolean {
+    if(!this.book){ return false; }
+
+    const next = this.clampedPan({ x: this.panOffset.x + dx, y: this.panOffset.y + dy });
+    if(next.x === this.panOffset.x && next.y === this.panOffset.y){ return false; }
+
+    this.panOffset = next;
+    this.applyContainerTransform();
+    // Every flip coordinate is read off the screen, and the gutter is the one
+    // that is kept rather than measured per frame - so it is measured again.
+    this.updateDimension();
+    return true;
+  }
+  /**
+   * Where the book lies closed - or would, if it were closed now - and which
+   * cover faces the reader. A book shut from an open spread comes to rest on
+   * its right page, front cover up.
+   */
+  getClosedBookPlace():IClosedBookPlace|undefined {
+    if(!this.book){ return undefined; }
+
+    const rect = this.book.element.getBoundingClientRect();
+    if(!rect.width || !rect.height){ return undefined; }
+
+    const box = { x: rect.left, y: rect.top, width: rect.width, height: rect.height };
+    if(this.isReadyToOpen){ return { box, face: BookFace.Front }; }
+    if(this.isClosed){ return { box, face: BookFace.Back }; }
+    return { box: { ...box, x: box.x + box.width / 2, width: box.width / 2 }, face: BookFace.Front };
+  }
+  /**
+   * Writes the move and the zoom as one transform. The move comes first so
+   * that its pixels are screen pixels, whatever the zoom is.
+   */
+  private applyContainerTransform(){
+    const { x, y } = this.panOffset;
+    this.bookContainerEl.style.transform = `translate(${x}px, ${y}px) scale(${this._zoomLevel})`;
+  }
+  /**
+   * Returns the move, cut down to what keeps the book on the screen.
+   */
+  private clampedPan(pan:IPanOffset):IPanOffset {
+    const bookEl = this.book?.element;
+    const bookSize = bookEl
+      ? { width: bookEl.offsetWidth * this._zoomLevel, height: bookEl.offsetHeight * this._zoomLevel }
+      : { width: 0, height: 0 };
+    return clampPan(pan, bookSize, { width: window.innerWidth, height: window.innerHeight });
   }
   /**
    * Gets pages from book.
@@ -505,6 +636,10 @@ export class FlipView implements IBookView {
    * Update dimension of the book viewer element.
    */
   private updateDimension(){
+    // A resize with no book attached has nothing to lay out, and the three
+    // methods below all reach for the book element.
+    if(!this.book){ return; }
+
     if(this.curOpenLeftPageIndex < 0){ this.setReadyToOpenForward(); } 
     else if(this.curOpenLeftPageIndex >= this.book!.lastPageIndex){ this.setReadyToOpenBackward(); }
     else { this.setSpreadOpen(); }
@@ -526,15 +661,15 @@ export class FlipView implements IBookView {
         const page0 = book?.getPage(targetLeftPageIndex-2, true)!;
         this.flipManager.loadPageToWindow(2, page0);
         this.flipManager.loadPageToWindow(3, page1);
-        book?.prependPageEl(page1.element);
-        book?.prependPageEl(page0.element);
+        book?.prependPageEl(this.pageElOf(page1));
+        book?.prependPageEl(this.pageElOf(page0));
       } else {
         const page4 = book?.getPage(targetLeftPageIndex+2, true)!;
         const page5 = book?.getPage(targetLeftPageIndex+3, true)!;
         this.flipManager.loadPageToWindow(2, page4);
         this.flipManager.loadPageToWindow(3, page5);
-        book?.appendPageEl(page4.element);
-        book?.appendPageEl(page5.element);
+        book?.appendPageEl(this.pageElOf(page4));
+        book?.appendPageEl(this.pageElOf(page5));
       }
     }
 
@@ -543,13 +678,13 @@ export class FlipView implements IBookView {
 
     if(isForward){
       this.flipManager.moveRight(newPage1, newPage2);
-      book?.appendPageEl(newPage1.element);
-      book?.appendPageEl(newPage2.element);
+      book?.appendPageEl(this.pageElOf(newPage1));
+      book?.appendPageEl(this.pageElOf(newPage2));
     }
     else {
       this.flipManager.moveLeft(newPage1, newPage2);
-      book?.prependPageEl(newPage2.element);
-      book?.prependPageEl(newPage1.element);
+      book?.prependPageEl(this.pageElOf(newPage2));
+      book?.prependPageEl(this.pageElOf(newPage1));
     }
 
     book?.removePageEl(removedPage1.element);
@@ -572,8 +707,8 @@ export class FlipView implements IBookView {
       const removedPage2 = book?.getPage(this.curOpenLeftPageIndex+3);
       book?.removePageEl(removedPage1.element);
       book?.removePageEl(removedPage2.element);
-      book?.appendPageEl(newPage1.element);
-      book?.appendPageEl(newPage2.element);
+      book?.appendPageEl(this.pageElOf(newPage1));
+      book?.appendPageEl(this.pageElOf(newPage2));
       this.flipManager.loadPageToWindow(4, newPage1);
       this.flipManager.loadPageToWindow(5, newPage2);
     }
@@ -582,8 +717,8 @@ export class FlipView implements IBookView {
       const removedPage2 = book?.getPage(this.curOpenLeftPageIndex-1, true);
       book?.removePageEl(removedPage1.element);
       book?.removePageEl(removedPage2.element);
-      book?.prependPageEl(newPage2.element);
-      book?.prependPageEl(newPage1.element);
+      book?.prependPageEl(this.pageElOf(newPage2));
+      book?.prependPageEl(this.pageElOf(newPage1));
       this.flipManager.loadPageToWindow(1, newPage2);
       this.flipManager.loadPageToWindow(0, newPage1);
     }
@@ -746,11 +881,11 @@ export class FlipView implements IBookView {
       const page = book.getPage(i);
       if(page){
         this.flipManager.loadPageToWindow(winIdx, page);
-        book.appendPageEl(page.element);
+        book.appendPageEl(this.pageElOf(page));
       } else {
         const emptyPage = book.createEmptyPage(i);
         this.flipManager.loadPageToWindow(winIdx, emptyPage);
-        book.appendPageEl(emptyPage.element);
+        book.appendPageEl(this.pageElOf(emptyPage));
       }
     }
   }
@@ -947,6 +1082,9 @@ export class FlipView implements IBookView {
     const zoomLevel = this.zoomLevel;
     const page2El = this.activePage2El;
     if(!page2El){ return; }
+    const isHardSheet = this.isHardSheetTurning;
+    this.bookContainerEl.classList.toggle('hard-sheet-turning', isHardSheet);
+    if(isHardSheet){ this.turnHardSheet(mouseGP); return; }
     const pageWH = { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel }
     const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
 
@@ -986,6 +1124,24 @@ export class FlipView implements IBookView {
     cssVar.setProperty('--page2-rotate', `${flipData.page2.rotate}rad`)
   }
   /**
+   * Turns a hard-cover board to where the mouse is. The board stays flat and turns
+   * around the gutter in 3D (flipView.css); the masks and paper shadows are not used.
+   * @param mouseGP The point the board's outer edge is over.
+   */
+  private turnHardSheet(mouseGP:Point){
+    const page1El = this.activePage1El;
+    if(!page1El){ return; }
+    const zoomLevel = this.zoomLevel;
+    const pageWidth = page1El.offsetWidth * zoomLevel;
+    let angle = this.flipManager.getHardSheetAngle(mouseGP, pageWidth, !!this.isLeftPageFlipping);
+    if(this.flipManager.eventStatus & EventStatus.AutoFlip){ angle *= HARD_LIFT_SCALE; }
+
+    const cssVar = document.documentElement.style;
+    cssVar.setProperty('--hard-gutter', `${(this.flipManager.gutter.left - this.pageContainerRect.left) / zoomLevel}px`);
+    cssVar.setProperty('--hard-angle', `${angle}rad`);
+    cssVar.setProperty('--hard-lift', `${Math.sin(angle)}`);
+  }
+  /**
    * Sets the status of viewer as Auto Flipping.
    */
   private setViewerToAutoFlip(){
@@ -996,7 +1152,7 @@ export class FlipView implements IBookView {
    * Unsets the status of viewer as Auto Flipping.
    */
   private unsetViewerToAutoFlip(){
-    this.bookContainerEl.classList.remove('left-page-flipping', 'right-page-flipping');
+    this.bookContainerEl.classList.remove('left-page-flipping', 'right-page-flipping', 'hard-sheet-turning');
   }
   /**
    * Sets the status of viewer as the status Flipping by dragging.
@@ -1010,7 +1166,7 @@ export class FlipView implements IBookView {
    * Unsets the status of viewer as the status Flipping by dragging.
    */
   private unsetViewerToFlip(){
-    this.bookContainerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`);
+    this.bookContainerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`, 'hard-sheet-turning');
   }
   /**
    * This is the mouseenter event handler on the 6 event zones.
@@ -1046,10 +1202,12 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
     if(!this.pageContainerRect){ return; }
 
+    this.unsetViewerToAutoFlip();
     this.flipManager.eventStatus = EventStatus.Dragging;
     this.flipManager.eventZone = param.zone;
     
     const viewport = { x:event.clientX, y:event.clientY };
+    this.flipManager.mouseDownGP = viewport;
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, this.zoomLevel);
     this.flipPage( viewport );
@@ -1107,7 +1265,8 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
 
     const viewport = { x:event.clientX, y:event.clientY };
-    const dataToFlip = this.flipManager.getInfoToFlip(viewport);
+    const dataToFlip = this.flipManager.getInfoToRelease(viewport);
+    this.flipManager.mouseDownGP = undefined;
 
     if(dataToFlip.isSnappingBack){ this.flipManager.eventStatus = EventStatus.SnappingBack; }
     else { this.flipManager.eventStatus = dataToFlip.isFlippingForward ? EventStatus.FlippingForward : EventStatus.FlippingBackward; }
@@ -1123,7 +1282,7 @@ export class FlipView implements IBookView {
           this.shiftPages(dataToFlip.isFlippingForward)
         }
         this.unsetViewerToFlip();
-        this.flipManager.eventStatus = EventStatus.None;
+        this.flipManager.finishFlip();
       }
     );
   }
@@ -1209,25 +1368,40 @@ export class FlipView implements IBookView {
     //
     // Mouse Down on Zone
     //
-    if(this.flipManager.eventStatus & EventStatus.Flipping){ return; }
+    if(this.isFlipping){ return; }
     if(!this.activePage2El){ return }
     if(!this.pageContainerRect){ return; }
 
+    // A corner the mouse lifted may still be up, often on the other side. Its class
+    // would stay on and draw that page beside the turning one, apart from its shadow.
+    this.unsetViewerToAutoFlip();
     this.flipManager.eventStatus = EventStatus.Flipping;
     this.flipManager.curMouseGP = startGP;
     this.flipManager.eventZone = startZone;
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(startZone, startGP, this.pageContainerRect, this.zoomLevel);
+    // Draw the starting fold now. The flipping class is already on, and when this
+    // is called from a frame callback the first `animate` only runs a frame later,
+    // so that frame would be painted with the last flip's fold: the next spread flashes.
+    this.flipPage(startGP);
 
-    const startTime = performance.now(); // 애니메이션 시작 시간
-    const duration = 500; // 애니메이션 지속 시간 (밀리초)
+    const startTime = performance.now();
+    const duration = this.config.autoFlip.duration;
+    // A board turns by its angle, eased; a paper page follows a curved path across.
+    const isHardSheet = this.isHardSheetTurning;
+    const isLeftPage = !!this.isLeftPageFlipping;
+    const pageWidth = (this.activePage1El?.offsetWidth || 0) * this.zoomLevel;
 
     const animate = (currentTime:number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1); // 진행 비율 (0에서 1 사이)
-      const x = startGP.x + (endGP.x - startGP.x) * progress;
-      const y = startGP.y + offsetY * Math.sin(progress * Math.PI);
-      this.flipPage({x, y}); // 좌표 이동
+      if(isHardSheet){
+        this.flipPage(this.flipManager.getHardSheetPoint(Math.PI * easeInOut(progress), pageWidth, isLeftPage));
+      } else {
+        const x = startGP.x + (endGP.x - startGP.x) * progress;
+        const y = startGP.y + offsetY * Math.sin(progress * Math.PI);
+        this.flipPage({x, y}); // 좌표 이동
+      }
   
       if (progress < 1) {
         requestAnimationFrame(animate); // 다음 프레임 요청
@@ -1236,7 +1410,7 @@ export class FlipView implements IBookView {
         // if(!this.activePage2El){ return }
         this.shiftPages(isMovingForward, targetLeftPageIndex);
         this.unsetViewerToFlip();
-        this.flipManager.eventStatus = EventStatus.None;
+        this.flipManager.finishFlip();
       }
     }
   
@@ -1262,7 +1436,12 @@ export class FlipView implements IBookView {
     })
     document.addEventListener('mouseup', this.documentMouseUp.bind(this));
     document.addEventListener('mousemove', this.documentMouseMove.bind(this));
-    window.addEventListener('resize', () => { this.updateDimension(); });
+    window.addEventListener('resize', () => {
+      // A bigger window may leave the book moved further than it may now be.
+      this.panOffset = this.clampedPan(this.panOffset);
+      this.applyContainerTransform();
+      this.updateDimension();
+    });
   }
   /**
    * 

@@ -1,7 +1,7 @@
 # MagFlip ![npm version](https://img.shields.io/npm/v/@magflip/minjs)
 ***<span style="color:yellow">MagFlip</span>*** is *<u>Magzog</u>'s first open project, implementing a page-flipping effect for books.
-See [demo #1](https://i486magzog.github.io/magFlip/examples/prebuild/magflip.html).
-[demo #2](https://i486magzog.github.io/magFlip/examples/react-ts/dist/index.html).
+See [demo #1](https://magzogs.github.io/magFlip/examples/prebuild/magflip.html).
+[demo #2](https://magzogs.github.io/magFlip/examples/react-ts/dist/index.html).
 
 <span style="color:#888888">[*] "<u>Magzog</u> is a blend of 'magazine' and 'blog.' The idea is to combine printed formats like books, magazines, and newspapers with digital features."</span>
 
@@ -29,16 +29,38 @@ Please refer to the [sample code](./docs/examples/prebuild) for more details.
 <br>
 <br>
 
+## Documentation
+The guides live in [`guide/`](./guide) (Markdown, rendered by a Docusaurus docs site).
+
+| Guide | Path | For |
+| --- | --- | --- |
+| User Guide | [`guide/user`](./guide/user) | People who use MagFlip in their web pages |
+| Developer Guide | [`guide/dev`](./guide/dev) | People who develop MagFlip itself (architecture, document model, flip math, build & release) |
+
+<br>
+
+## Local development
+```bash
+npm install
+npm run build:local    # build all packages WITHOUT bumping versions (npm run build bumps patch versions)
+npm test               # unit tests
+npm run typecheck
+npm run serve          # http://localhost:8190/docs/examples/local/
+```
+
+<br>
+<br>
+
 ## Flip Effect in math
-![Flip Effect from the corner on right bottom 1](./docs/resources/flipEffectRightBottom1.png)
-![Flip Effect from the corner on right bottom 2](./docs/resources/flipEffectRightBottom2.png)
-![Flip Effect from the corner on right bottom 3](./docs/resources/flipEffectRightBottom3.png)
+![Flip Effect from the corner on right bottom 1](./docs/img/flip-math/flipEffectRightBottom1.png)
+![Flip Effect from the corner on right bottom 2](./docs/img/flip-math/flipEffectRightBottom2.png)
+![Flip Effect from the corner on right bottom 3](./docs/img/flip-math/flipEffectRightBottom3.png)
 
 <br>
 <br>
 
 ## The location of the mouse cursor
-![The Areas of Mouse Cursor Point1](./docs/resources/mousePointArea1.png)
-![The Areas of Mouse Cursor Point2](./docs/resources/mousePointArea2.png)
-![The Areas of Mouse Cursor Point3](./docs/resources/mousePointArea3.png)
-![The Areas of Mouse Cursor Point4](./docs/resources/mousePointArea4.png)
+![The Areas of Mouse Cursor Point1](./docs/img/flip-math/mousePointArea1.png)
+![The Areas of Mouse Cursor Point2](./docs/img/flip-math/mousePointArea2.png)
+![The Areas of Mouse Cursor Point3](./docs/img/flip-math/mousePointArea3.png)
+![The Areas of Mouse Cursor Point4](./docs/img/flip-math/mousePointArea4.png)

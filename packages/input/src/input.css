@@ -1,0 +1,13 @@
+/**
+ * The element the reader stands on. Marked with a class instead of real focus,
+ * so that focus never moves into a widget iframe (see bookNavigator.ts).
+ *
+ * A TV is watched from across a room, so the ring is thick and sits outside
+ * the element, where a picture cannot swallow it. Override the two variables
+ * to match your own design.
+ */
+.mf-focused {
+  outline: var(--mf-focus-width, 4px) solid var(--mf-focus-color, #4da3ff);
+  outline-offset: var(--mf-focus-offset, 3px);
+  box-shadow: 0 0 0 calc(var(--mf-focus-width, 4px) + var(--mf-focus-offset, 3px)) rgba(0, 0, 0, 0.35);
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "bookId": "sample",
+  "version": 1,
+  "publishedAt": "2026-09-14T08:14:02.839Z",
+  "meta": {
+    "title": "MagFlip Sample",
+    "author": "Magzog",
+    "description": "Published with @magflip/doc.",
+    "language": "en"
+  },
+  "pageSize": {
+    "width": 600,
+    "height": 900
+  },
+  "readingDirection": "ltr",
+  "pageCount": 5,
+  "pages": [
+    {
+      "index": 0,
+      "surfaceId": "cover",
+      "surfaceX": 0,
+      "side": "right",
+      "number": null
+    },
+    {
+      "index": 1,
+      "surfaceId": "panorama",
+      "surfaceX": 0,
+      "side": "left",
+      "number": 1
+    },
+    {
+      "index": 2,
+      "surfaceId": "panorama",
+      "surfaceX": 600,
+      "side": "right",
+      "number": 2
+    },
+    {
+      "index": 3,
+      "surfaceId": "expandable",
+      "surfaceX": 0,
+      "side": "left",
+      "number": 3
+    },
+    {
+      "index": 4,
+      "surfaceId": "article",
+      "surfaceX": 0,
+      "side": "right",
+      "number": 4
+    }
+  ],
+  "surfaces": {
+    "cover": {
+      "id": "cover",
+      "kind": "single",
+      "isExpandable": false
+    },
+    "panorama": {
+      "id": "panorama",
+      "kind": "spread",
+      "isExpandable": false
+    },
+    "expandable": {
+      "id": "expandable",
+      "kind": "single",
+      "isExpandable": true
+    },
+    "article": {
+      "id": "article",
+      "kind": "single",
+      "isExpandable": false
+    }
+  },
+  "fonts": []
+}

@@ -5,6 +5,15 @@ import { PageWindow } from './pageWindow';
 import { FlipDiagonals } from './flipDiagonals';
 import { FlipActionLine } from './flipActionLine';
 /**
+ * Name of the event `Flipping.finishFlip` emits.
+ */
+const FLIP_END_EVENT = 'flipEnd';
+/**
+ * How far (px) the mouse may move between going down on a page and coming up
+ * for the release to count as a click.
+ */
+const CLICK_DISTANCE = 4;
+/**
  * Flipping class
  */
 export class Flipping extends PageWindow {
@@ -21,7 +30,30 @@ export class Flipping extends PageWindow {
    */
   get eventStatus(){ return this._eventStatus; }
   /**
-   * The area representing the flipping region. 
+   * True while a page is being dragged or is turning.
+   * A corner that only follows the mouse (`EventStatus.AutoFlip`) does not count.
+   */
+  get isTurningPage():boolean {
+    return (this._eventStatus & (EventStatus.Flipping | EventStatus.Dragging)) !== 0;
+  }
+  /**
+   * Ends a page turn or a drag: resets the status and tells the flip-end listeners.
+   * Call it after the pages have settled, so that a listener can start the next turn.
+   */
+  finishFlip(){
+    this.eventStatus = EventStatus.None;
+    this.emitEvent(FLIP_END_EVENT);
+  }
+  /**
+   * Adds a listener that `finishFlip` calls.
+   * @returns A function that removes the listener.
+   */
+  onFlipEnd(listener:() => void):() => void {
+    this.addEventListener(FLIP_END_EVENT, listener);
+    return () => { this.removeEventListener(FLIP_END_EVENT, listener); };
+  }
+  /**
+   * The area representing the flipping region.
    * The width is the same as the opened book width.
    */
   flipGRect:Rect = new Rect();
@@ -58,6 +90,10 @@ export class Flipping extends PageWindow {
    * The opposite corner to the active corner during the flip.
    */
   activeCornerOppositeGP:Point = new Point();
+  /**
+   * Where the mouse went down to drag the page, until it comes up again.
+   */
+  mouseDownGP?:Point;
   /**
    * Diagonal values used to calculate flipping geometry.
    * The diagonals are depends on the dragging corner point.
@@ -215,6 +251,41 @@ export class Flipping extends PageWindow {
       isSnappingBack: isSnappingBack,
       isFlippingForward: isForward,
     }
+  }
+  /**
+   * Retrieves the information to flip when the mouse comes up on a dragged page.
+   * A click (the mouse came up where it went down) turns the page all the way across,
+   * as a drag past the gutter does; otherwise the page goes to the corner closer to the mouse.
+   * @param mouseGP The position of the mouse pointer when it came up.
+   * @returns An object containing the target corner, snap-back status, and flip direction.
+   */
+  getInfoToRelease(mouseGP:Point){
+    const isClick = this.mouseDownGP !== undefined && MZMath.getLength(mouseGP, this.mouseDownGP) < CLICK_DISTANCE;
+    return this.getInfoToFlip(isClick ? this.activeCornerOppositeGP : mouseGP);
+  }
+  /**
+   * The angle a hard-cover board stands at when its outer edge is over the mouse:
+   * 0 lying on its own side of the gutter, π lying on the other side.
+   * A board does not bend, so only how far the mouse is from the gutter counts.
+   * @param mouseGP The position of the mouse pointer.
+   * @param pageWidth The width of a page on the screen.
+   * @param isLeftPage Whether the board lies on the left of the gutter.
+   * @returns The angle in radians, from 0 to π.
+   */
+  getHardSheetAngle(mouseGP:Point, pageWidth:number, isLeftPage:boolean):number {
+    const reach = isLeftPage ? this.gutter.left - mouseGP.x : mouseGP.x - this.gutter.left;
+    return Math.acos(Math.max(-1, Math.min(1, reach / pageWidth)));
+  }
+  /**
+   * The point over a hard-cover board's outer edge when it stands at that angle,
+   * on the bottom of the gutter. The inverse of `getHardSheetAngle`.
+   * @param angle The angle in radians, from 0 to π.
+   * @param pageWidth The width of a page on the screen.
+   * @param isLeftPage Whether the board lies on the left of the gutter.
+   */
+  getHardSheetPoint(angle:number, pageWidth:number, isLeftPage:boolean):Point {
+    const reach = pageWidth * Math.cos(angle);
+    return { x: this.gutter.left + (isLeftPage ? -reach : reach), y: this.gutter.bottom };
   }
   /**
    * Animates the page flip action, gradually moving from the start point to the target point,

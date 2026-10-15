@@ -3,8 +3,14 @@
 /**/dist
 !/docs/examples/react-ts/dist
 /**/types
+/**/.env*
 
 /packages/minjs/magflip.min.*
 /packages/*/index.d.ts
 /packages/*/index.js
 /packages/*/index.css
+/packages/doc/yjs.js
+/packages/doc/yjs.d.ts
+/packages/doc/authoring.js
+/packages/doc/authoring.d.ts
+/packages/doc/chunks

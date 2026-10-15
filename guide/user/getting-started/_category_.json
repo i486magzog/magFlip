@@ -1,0 +1,5 @@
+{
+  "label": "시작하기",
+  "position": 3,
+  "link": { "type": "generated-index", "description": "MagFlip을 설치하고 첫 Flip Book을 띄워 봅니다." }
+}
