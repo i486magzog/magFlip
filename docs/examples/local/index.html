@@ -99,8 +99,10 @@
      * @param options.id defaults to `book{bookNum}-{pageCnt}`.
      * @param options.hasSpinePicture false leaves the spine without a picture,
      *   so that it takes a color from the title.
+     * @param options.cover `BookCover.Hard` turns the covers as stiff boards.
+     * @param options.labels Label tabs, keyed by the page index.
      */
-    function createSampleBook(bookNum, imageCnt, title, { pageCnt = imageCnt, id, hasSpinePicture = true } = {}) {
+    function createSampleBook(bookNum, imageCnt, title, { pageCnt = imageCnt, id, hasSpinePicture = true, cover: coverType, labels } = {}) {
       const pages = [];
       for (let i = 0; i < pageCnt; i++) {
         pages.push({ id: `page${i}`, index: i, image: `${RESOURCE_DIR}/book${bookNum}/page${i % imageCnt}.jpg` });
@@ -110,7 +112,9 @@
       const book = new Book({
         id: id ?? `book${bookNum}-${pageCnt}`,
         title,
+        cover: coverType,
         lastPageIndex: pageCnt - 1,
+        labels,
         thumbnails: {
           spine: hasSpinePicture ? cover : '',
           small: cover,
@@ -120,6 +124,27 @@
       });
       book.importPages(pages, { width: 700, height: 700 });
       return book;
+    }
+
+    /**
+     * Label tabs A~H on pages 2~9. A tab sticks out on the side its page is on,
+     * and pressing it turns to that page.
+     */
+    function createSampleLabels(flipView) {
+      const colors = ['#B74628', '#A6876D', '#92B53E', '#ECAD74', '#FBC33C', '#4C8CB5', '#7C3795', '#DBBC99'];
+      const labels = {};
+      colors.forEach((backgroundColor, index) => {
+        const pageIndex = index + 2;
+        labels[pageIndex] = {
+          index,
+          pageIndex,
+          content: String.fromCharCode(65 + index),
+          backgroundColor,
+          opacity: 0.5,
+          onClick: (pageIndex) => flipView.moveTo(pageIndex),
+        };
+      });
+      return labels;
     }
 
     /**
@@ -306,10 +331,10 @@
       addLayoutButtons(shelf);
 
       shelf.addBook(createSampleBook(1, 6, '도토리 속 도시'));
-      shelf.addBook(createSampleBook(2, 10, 'Street Portraits'));
+      shelf.addBook(createSampleBook(2, 10, 'Street Portraits', { labels: createSampleLabels(flipView) }));
       shelf.addBook(createSampleBook(3, 16, '웨딩 데이'));
       shelf.addBook(createSampleBook(2, 10, 'Portraits, The Complete Year', { pageCnt: 180 }));
-      shelf.addBook(createSampleBook(3, 16, 'Wedding Stories', { pageCnt: 64 }));
+      shelf.addBook(createSampleBook(3, 16, 'Wedding Stories', { pageCnt: 64, cover: BookCover.Hard }));
       MORE_BOOKS.forEach(([bookNum, imageCnt, title, pageCnt], index) => {
         shelf.addBook(createSampleBook(bookNum, imageCnt, title, { pageCnt, id: `more${index}`, hasSpinePicture: false }));
       });

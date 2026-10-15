@@ -26,9 +26,10 @@
       const shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
       // Each title says what to try in that book.
       shelf.addBook(getSampleBook(1, 6, 'Click or Drag a Corner'));
-      const catalogue = getSampleBook(2, 10, 'Label Tabs Catalogue', getSampleLabels(flipView));
+      const catalogue = getSampleBook(2, 10, 'Label Tabs Catalogue', { labels: getSampleLabels(flipView) });
       shelf.addBook(catalogue);
       shelf.addBook(getSampleBook(3, 16, 'Prev, Next, Move & Zoom'));
+      shelf.addBook(getSampleBook(1, 6, 'Hardcover Boards', { id: 'hardcover', cover: BookCover.Hard }));
 
       addToolbar(bookViewer, flipView);
       addCatalogueButton(shelfManager, catalogue);
@@ -92,8 +93,12 @@
       return labels;
     }
 
-    /** A book of `pageCnt` pictures from resources/book{bookNum}/, its first page as the cover. */
-    function getSampleBook(bookNum, pageCnt, title, labels){
+    /**
+     * A book of `pageCnt` pictures from resources/book{bookNum}/, its first page as the cover.
+     * @param options.labels Label tabs, keyed by the page index.
+     * @param options.cover `BookCover.Hard` turns the covers as stiff boards.
+     */
+    function getSampleBook(bookNum, pageCnt, title, { id = 'mybook' + bookNum, labels, cover } = {}){
       const pages = [];
       for(let i=0;i<pageCnt;i++){
         pages.push({
@@ -103,8 +108,9 @@
         })
       }
       const book = new Book({
-        id: 'mybook' + bookNum,
+        id,
         title,
+        cover,
         lastPageIndex: pageCnt-1,
         labels,
         thumbnails: {

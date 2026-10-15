@@ -262,6 +262,9 @@
   --hard-gutter: 0px;
   --hard-angle: 0rad;
   --hard-lift: 0;
+  --hard-reach: 0%;
+  --hard-cast-own: 0;
+  --hard-cast-far: 0;
 }
 #bookViewer.flip-view .page > .content-container > .hard-shade { display: none; }
 
@@ -330,24 +333,38 @@
   opacity: calc(var(--hard-lift) * .3);
   pointer-events: none;
 }
-/* ...and shades the pages on both sides of the gutter while it stands. */
+/* ...and shades the pages on both sides of the gutter while it stands. The page it leans
+   over also takes its shadow, from the gutter to a little past its edge (`--cast`). */
 #bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(6) > .content-container > .hard-shade,
-#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .content-container > .hard-shade {
-  display: block;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 60%);
-  opacity: var(--hard-lift);
-  pointer-events: none;
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(1) > .content-container > .hard-shade {
+  --cast: var(--hard-cast-own);
 }
 #bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .content-container > .hard-shade {
+  --cast: var(--hard-cast-far);
+}
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(6) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(4) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .content-container > .hard-shade,
 #bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(1) > .content-container > .hard-shade {
+  --shade-to: right;
   display: block;
   position: absolute;
   inset: 0;
-  background: linear-gradient(to left, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 60%);
-  opacity: var(--hard-lift);
+  background:
+    linear-gradient(to var(--shade-to),
+      rgba(0, 0, 0, calc(var(--cast) * .45)) 0,
+      rgba(0, 0, 0, calc(var(--cast) * .3)) var(--hard-reach),
+      rgba(0, 0, 0, 0) calc(var(--hard-reach) + 6% + 14% * var(--hard-lift))),
+    linear-gradient(to var(--shade-to),
+      rgba(0, 0, 0, calc(var(--hard-lift) * .35)) 0,
+      rgba(0, 0, 0, 0) 40%);
   pointer-events: none;
+}
+/* The pages on the left of the gutter are shaded from their right edge. */
+#bookViewer.flip-view #bookContainer.right-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(3) > .content-container > .hard-shade,
+#bookViewer.flip-view #bookContainer.left-page-flipping.hard-sheet-turning .book > .container > .page:nth-child(1) > .content-container > .hard-shade {
+  --shade-to: left;
 }
 
 /****************
@@ -493,14 +510,15 @@
   right: var(--mz-label-offset-x);
 }
 
-#bookViewer #bookContainer.ready-to-open.front .page-label {
-  top: 0;
-  right: var(--mz-label-offset-x);
+/* The label of a page already read sticks out on the left (FlipView `placeLabels`). */
+#bookViewer .page-label.left {
+  right: unset;
+  left: var(--mz-label-offset-x);
 }
 
-#bookViewer #bookContainer.ready-to-open.end .page-label {
-  top: 0;
-  left: var(--mz-label-offset-x);
+/* A label whose page is being turned over hides until the turn ends, then shows on its new side. */
+#bookViewer .page-label.hidden-while-flipping {
+  visibility: hidden;
 }
 
 #bookViewer .page-label::before {
@@ -530,12 +548,7 @@
   border-radius: var(--mz-label-border-radius-right);
 }
 
-#bookViewer #bookContainer.ready-to-open.front .page-label-content {
-  padding-left: calc(var(--mz-label-offset-x) + 5px);
-  border-radius: var(--mz-label-border-radius-right);
-}
-
-#bookViewer #bookContainer.ready-to-open.end .page-label-content {
+#bookViewer .page-label.left .page-label-content {
   left: unset;
   right: 0;
   padding: var(--mz-label-padding);
@@ -549,7 +562,7 @@
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-#bookViewer #bookContainer.ready-to-open.end .page-label-content:hover {
+#bookViewer .page-label.left .page-label-content:hover {
   opacity: 1 !important;
   transform: translateX(-10px);
 }

@@ -155,6 +155,7 @@ new FlipView(config?: IFlipViewConfig)
 
 | config | 기본값 | 설명 |
 | --- | --- | --- |
+| `flipOnClick` | `true` | 페이지 모서리·가장자리를 클릭하면 넘깁니다. `false` 면 클릭으로는 넘어가지 않고(제자리로 돌아감), 마우스를 올리면 모서리가 들리는 것과 끌어서 넘기기는 그대로입니다. |
 | `autoFlip.duration` | `500` | `nextPage` / `prevPage` / `moveTo` 가 한 번 넘기는 시간(ms) |
 | `autoFlip.forward.offsetY` | `100` | `nextPage` 곡선 높이(px) |
 | `autoFlip.backward.offsetY` | `-100` | `prevPage` 곡선 높이(px) |

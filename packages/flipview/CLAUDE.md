@@ -27,7 +27,9 @@
 - 좌표는 뷰포트 기준(`...GP`). SVG/CSS 에 쓸 때 `/ zoomLevel`.
 - `#bookContainer` transform 은 `translate(pan) scale(zoom)`. 이동 단위는 화면 픽셀. **책을 옮기면 `updateDimension()` 을 불러 `gutter` 를 다시 재야 한다**(안 그러면 접힘이 옛 가운데 선 기준으로 계산된다). `zoom()` 은 `setViewer()` 안에서 이미 부른다.
 - `pivot` = 오른쪽 +1 / 왼쪽 -1 로 공식을 좌우 재사용.
-- 하드커버(`book.cover === BookCover.Hard`): 0·1번과 마지막 두 쪽이 판지. 판이 넘어갈 때 `flipPage()` 는 마스크 대신 `turnHardSheet()` 로 각도(`--hard-angle`, `Flipping.getHardSheetAngle`)만 쓰고, `#bookContainer.hard-sheet-turning` 의 CSS(flipView.css "Hard cover")가 page1/page2 를 책등 축으로 `rotateY` 한다. 그늘은 `.hard-shade`. `autoFlip` 은 판이면 각도를 이징으로 움직인다.
+- 하드커버(`book.cover === BookCover.Hard`): 0·1번과 마지막 두 쪽이 판지. 판이 넘어갈 때 `flipPage()` 는 마스크 대신 `turnHardSheet()` 로 각도(`--hard-angle`, `Flipping.getHardSheetAngle`)만 쓰고, `#bookContainer.hard-sheet-turning` 의 CSS(flipView.css "Hard cover")가 page1/page2 를 책등 축으로 `rotateY` 한다. 그늘은 `.hard-shade`: 책등 쪽 그늘(`--hard-lift`)에 더해, 판이 기운 쪽 페이지에 판의 그림자(`--hard-reach` 까지, `--hard-cast-own`/`--hard-cast-far`). `autoFlip` 은 판이면 각도를 이징으로 움직인다.
+- 라벨: core 의 `book.labelEls`(`{ pageIndex, element }`). `placeLabels()` 가 `pageIndex <= curOpenLeftPageIndex` 면 `.left`, 아니면 `.right` 를 붙인다(`updateDimension()` 에서, 넘기는 중이면 건너뜀). 넘김이 시작될 때(드래그 mousedown, `autoFlip`) `hideLabelsTurnedOver(현재 왼쪽, 목표 왼쪽)` 가 그 사이 페이지의 라벨에 `.hidden-while-flipping`, 넘김·스냅백이 끝나면 `placeLabels()` 로 다시 보인다.
+- `config.flipOnClick`(기본 true): `documentMouseUp` 이 `getInfoToRelease(viewport, flipOnClick)` 로 넘긴다. false 면 클릭도 보통 놓기처럼 가까운 모서리로(대개 제자리) 간다.
 
 ## 작업 규칙
 

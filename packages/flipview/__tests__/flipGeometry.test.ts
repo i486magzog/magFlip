@@ -87,6 +87,12 @@ describe('Flipping.getInfoToRelease', () => {
     expect(info.isSnappingBack).toBe(true);
   });
 
+  test('lets a click go back when turning on a click is off', () => {
+    const info = createFlipping({ x: 390, y: 590 }).getInfoToRelease({ x: 392, y: 591 }, false);
+
+    expect(info.isSnappingBack).toBe(true);
+  });
+
   test('follows the mouse when it was not pressed on the page', () => {
     const flipping = createFlipping({ x: 390, y: 590 });
     flipping.mouseDownGP = undefined;

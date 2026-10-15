@@ -28,6 +28,11 @@ type FlipViewerElements = {
   mask2Shape: SVGPolygonElement;
 }
 export interface IFlipViewConfig {
+  /**
+   * Whether a click on a page corner or edge turns the page. Defaults to true.
+   * False leaves the page where it was after a click; a drag still turns it.
+   */
+  flipOnClick?: boolean;
   autoFlip?: {
     duration?: number;
     forward?: {
@@ -47,6 +52,7 @@ export type RequiredFlipViewConfig = DeepRequired<IFlipViewConfig>;
  */
 export class FlipView implements IBookView {
   private config:RequiredFlipViewConfig = {
+    flipOnClick: true,
     autoFlip: {
       duration: 500,
       forward: {
@@ -643,6 +649,33 @@ export class FlipView implements IBookView {
     if(this.curOpenLeftPageIndex < 0){ this.setReadyToOpenForward(); } 
     else if(this.curOpenLeftPageIndex >= this.book!.lastPageIndex){ this.setReadyToOpenBackward(); }
     else { this.setSpreadOpen(); }
+    // A turn puts the labels back itself when it ends.
+    if(!this.flipManager.isTurningPage){ this.placeLabels(); }
+  }
+  /**
+   * Puts each label on the side of the book its page is on, and shows them all:
+   * the label of a page already read sticks out on the left, one still to come on the right.
+   */
+  private placeLabels(){
+    this.book?.labelEls.forEach(({ pageIndex, element }) => {
+      const isLeft = pageIndex <= this.curOpenLeftPageIndex;
+      element.classList.toggle('left', isLeft);
+      element.classList.toggle('right', !isLeft);
+      element.classList.remove('hidden-while-flipping');
+    });
+  }
+  /**
+   * Hides the labels that change sides when the open spread goes from one to another:
+   * those of the pages turned over in between. `placeLabels` shows them again on their new side.
+   * @param fromLeftPageIndex The left page of the spread the turn starts from.
+   * @param toLeftPageIndex The left page of the spread the turn ends at.
+   */
+  private hideLabelsTurnedOver(fromLeftPageIndex:number, toLeftPageIndex:number){
+    const low = Math.min(fromLeftPageIndex, toLeftPageIndex);
+    const high = Math.max(fromLeftPageIndex, toLeftPageIndex);
+    this.book?.labelEls.forEach(({ pageIndex, element }) => {
+      element.classList.toggle('hidden-while-flipping', pageIndex > low && pageIndex <= high);
+    });
   }
   /**
    * Shifts pages related the flip effect directly.
@@ -1136,10 +1169,17 @@ export class FlipView implements IBookView {
     let angle = this.flipManager.getHardSheetAngle(mouseGP, pageWidth, !!this.isLeftPageFlipping);
     if(this.flipManager.eventStatus & EventStatus.AutoFlip){ angle *= HARD_LIFT_SCALE; }
 
+    // The board's shadow falls on the page it leans over: its own side until it stands up,
+    // the far side after. It reaches as far as the board does, and spreads as the board rises.
+    const reach = Math.cos(angle);
+    const lift = Math.sin(angle);
     const cssVar = document.documentElement.style;
     cssVar.setProperty('--hard-gutter', `${(this.flipManager.gutter.left - this.pageContainerRect.left) / zoomLevel}px`);
     cssVar.setProperty('--hard-angle', `${angle}rad`);
-    cssVar.setProperty('--hard-lift', `${Math.sin(angle)}`);
+    cssVar.setProperty('--hard-lift', `${lift}`);
+    cssVar.setProperty('--hard-reach', `${Math.abs(reach) * 100}%`);
+    cssVar.setProperty('--hard-cast-own', `${reach > 0 ? lift : 0}`);
+    cssVar.setProperty('--hard-cast-far', `${reach < 0 ? lift : 0}`);
   }
   /**
    * Sets the status of viewer as Auto Flipping.
@@ -1208,6 +1248,8 @@ export class FlipView implements IBookView {
     
     const viewport = { x:event.clientX, y:event.clientY };
     this.flipManager.mouseDownGP = viewport;
+    const curLeftPageIndex = this.curOpenLeftPageIndex;
+    this.hideLabelsTurnedOver(curLeftPageIndex, param.zone & Zone.Left ? curLeftPageIndex - 2 : curLeftPageIndex + 2);
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, this.zoomLevel);
     this.flipPage( viewport );
@@ -1265,7 +1307,7 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
 
     const viewport = { x:event.clientX, y:event.clientY };
-    const dataToFlip = this.flipManager.getInfoToRelease(viewport);
+    const dataToFlip = this.flipManager.getInfoToRelease(viewport, this.config.flipOnClick !== false);
     this.flipManager.mouseDownGP = undefined;
 
     if(dataToFlip.isSnappingBack){ this.flipManager.eventStatus = EventStatus.SnappingBack; }
@@ -1282,6 +1324,7 @@ export class FlipView implements IBookView {
           this.shiftPages(dataToFlip.isFlippingForward)
         }
         this.unsetViewerToFlip();
+        this.placeLabels();
         this.flipManager.finishFlip();
       }
     );
@@ -1376,6 +1419,8 @@ export class FlipView implements IBookView {
     // would stay on and draw that page beside the turning one, apart from its shadow.
     this.unsetViewerToAutoFlip();
     this.flipManager.eventStatus = EventStatus.Flipping;
+    const curLeftPageIndex = this.curOpenLeftPageIndex;
+    this.hideLabelsTurnedOver(curLeftPageIndex, targetLeftPageIndex ?? (isMovingForward ? curLeftPageIndex + 2 : curLeftPageIndex - 2));
     this.flipManager.curMouseGP = startGP;
     this.flipManager.eventZone = startZone;
     this.setViewerToFlip();
@@ -1410,6 +1455,7 @@ export class FlipView implements IBookView {
         // if(!this.activePage2El){ return }
         this.shiftPages(isMovingForward, targetLeftPageIndex);
         this.unsetViewerToFlip();
+        this.placeLabels();
         this.flipManager.finishFlip();
       }
     }

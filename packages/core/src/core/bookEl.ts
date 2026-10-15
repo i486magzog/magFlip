@@ -10,6 +10,13 @@ interface IBookElElements {
   // labelRightSubContainerEl: HTMLElement;
 }
 /**
+ * A label's element and the page it marks.
+ */
+export interface IPageLabelElement {
+  pageIndex: number;
+  element: HTMLElement;
+}
+/**
  * Book element management class
  */
 export class BookEl extends Base {
@@ -37,6 +44,11 @@ export class BookEl extends Base {
    * Returns the label container element.
    */
   readonly labelContainerEl: HTMLElement;
+  /**
+   * Returns the labels' elements, each with the page it marks.
+   * A view decides which side of the book each one sticks out of.
+   */
+  readonly labelEls: IPageLabelElement[] = [];
   /**
    * Returns the left sub container element.
    */
@@ -117,18 +129,20 @@ export class BookEl extends Base {
   private addLabelEl(label:IPageLabelData){ 
     const labelEl = new PageLabelEl(label);
     this.labelContainerEl.appendChild(labelEl.element);
+    this.labelEls.push({ pageIndex: label.pageIndex, element: labelEl.element });
   }
   /**
    * Clears the children elements of the page container's element.
    */
   private clearPageEls() { this.pageContainerEl.innerHTML = ""; }
   /**
-   * 
+   * Removes what a view added to the book, keeping the pages' container and the labels,
+   * which the book made itself and needs the next time it opens.
    */
   protected resetBookEls(){ 
     const children = Array.from(this.element.children);
     children.forEach(child => {
-      if(child !== this.pageContainerEl){ this.element.removeChild(child); }
+      if(child !== this.pageContainerEl && child !== this.labelContainerEl){ this.element.removeChild(child); }
     });
     this.clearPageEls(); 
   }
