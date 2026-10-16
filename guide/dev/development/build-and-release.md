@@ -63,10 +63,10 @@ sequenceDiagram
   Dev->>Dev: README · prebuild 예제 · 빠른 시작의 CDN 버전 맞추기
   Dev->>Dev: npm run typecheck && npm test && npm run build
   Dev->>Dev: 로컬 데모로 동작 확인
-  Dev->>Repo: "Release x.y.z" 커밋 → dev/main
+  Dev->>Repo: "Release x.y.z" 커밋 → claude
   Dev->>NPM: npm run pub --otp=<OTP>
   Note over NPM: minjs 의 pub 은 README / prebuild 예제의<br/>CDN 버전을 한 번 더 맞춘다 (update_version.mjs)
-  Dev->>Repo: vx.y.z 태그 + GitHub Release, dev/main → main
+  Dev->>Repo: vx.y.z 태그 + GitHub Release, claude → main
 ```
 
 ```bash

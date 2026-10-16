@@ -16,13 +16,13 @@ description: Publish MagFlip packages (@magflip/core, shelf, flipview, scrollvie
 
 ## 절차
 
-1. `git status` 가 깨끗한지 확인 (브랜치 `dev/main`).
+1. `git status` 가 깨끗한지 확인 (브랜치 `claude`).
 2. `npm run version:set -- x.y.z && npm install`
 3. CDN 버전 문자열을 맞춘다: `README.md`, `docs/examples/prebuild/magflip.html`, `guide/user/getting-started/*.md` 의 `@magflip/minjs@x.y.z`. (minjs 의 `pub` 도 앞의 둘을 고치지만, 미리 맞춰 두면 배포 뒤 작업 트리가 깨끗하다.)
 4. `npm run typecheck && npm test && npm run build` — 루트 `build` 는 의존 순서(i18n → doc → render → core → input → shelf → flipview → scrollview → minjs)로 빌드하고, minjs 는 압축 빌드(`BUILD=prod`)다.
 5. local-dev skill 의 브라우저 확인 항목 + `prebuild/magflip.html` 을 로컬 번들로 열어 확인(파일 안의 local test 줄).
 6. 패키지마다 `npm pack --dry-run` 으로 버전과 들어갈 파일 확인.
-7. `Release x.y.z` 로 커밋하고, 사용자 확인 뒤 `dev/main` 에 push.
+7. `Release x.y.z` 로 커밋하고, 사용자 확인 뒤 `claude` 에 push.
 8. 사용자가 터미널에서:
 
 ```bash
@@ -36,4 +36,4 @@ OTP 는 30초마다 바뀐다. 중간에 만료되어 실패하면, 이미 배�
 
 - `npm view @magflip/<name> version` 으로 모든 패키지가 새 버전인지 확인.
 - `vx.y.z` 태그를 만들고 GitHub Release 를 쓴다(바뀐 점, 깨지는 변경, 패키지 목록). 태그는 사용자 확인 뒤 push.
-- `dev/main` → `main` PR. GitHub Pages(`main:/docs`)의 CDN 데모는 합친 뒤에 새 버전을 쓴다.
+- `claude` → `main` PR. GitHub Pages(`main:/docs`)의 CDN 데모는 합친 뒤에 새 버전을 쓴다.
