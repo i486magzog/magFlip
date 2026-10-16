@@ -2,10 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => ({
-  // dev 서버: '/' (로컬 테스트 정상)
-  // build: GitHub Pages 실제 경로
-  base: command === 'serve' ? '/' : '/magFlip/examples/react-ts/dist/',
+export default defineConfig({
+  // dist/ only holds the page that sends the old demo address to the demo.
+  build: {
+    outDir: 'build',
+  },
   plugins: [
     react(),
   ],
@@ -14,4 +15,4 @@ export default defineConfig(({ command }) => ({
       followSymlinks: true,      
     },
   },
-}))
+})

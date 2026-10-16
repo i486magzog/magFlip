@@ -2,52 +2,103 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Magzog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MagFlip Demo</title>
       <script src="https://cdn.jsdelivr.net/npm/@magflip/minjs@0.6.0/magflip.min.js"></script>
       <!-- Use for local test -->
       <!-- <script src="../../../packages/minjs/magflip.min.js"></script>  -->
     <script>
-    var shelfManager;
-    var bookViewer;
-    var shelf;
+    /** Colored tabs on the side of a book. Pressing one turns to its page. */
+    const SAMPLE_LABELS = [
+      ['A', '#B74628'], ['B', '#A6876D'], ['C', '#92B53E'], ['D', '#ECAD74'],
+      ['E', '#FBC33C'], ['F', '#4C8CB5'], ['G', '#7C3795'], ['H', '#DBBC99'],
+    ];
+
     document.addEventListener('DOMContentLoaded', function () {
       // The manager opens books in the viewer; the flip view turns their pages.
-      shelfManager = new BookShelfManager();
-      bookViewer = shelfManager.getBookViewer();
-      const view = new FlipView();
-      bookViewer.registerView(view);
-      bookViewer.setCurView(view.id);
+      const shelfManager = new BookShelfManager();
+      const bookViewer = shelfManager.getBookViewer();
+      const flipView = new FlipView();
+      bookViewer.registerView(flipView);
+      bookViewer.setCurView(flipView.id);
 
       // The shelf lays the books out. Pressing one flies it to the viewer.
-      shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
-      shelf.addBook(getSampleBook(1, 6));
-      shelf.addBook(getSampleBook(2, 10));
-      shelf.addBook(getSampleBook(3, 16));
+      const shelf = new BookShelf({ manager: shelfManager, layout: ShelfLayout.Shelf });
+      // Each title says what to try in that book.
+      shelf.addBook(getSampleBook(1, 6, 'Click or Drag a Corner'));
+      const catalogue = getSampleBook(2, 10, 'Label Tabs Catalogue', { labels: getSampleLabels(flipView) });
+      shelf.addBook(catalogue);
+      shelf.addBook(getSampleBook(3, 16, 'Prev, Next, Move & Zoom'));
+      shelf.addBook(getSampleBook(1, 6, 'Hardcover Boards', { id: 'hardcover', cover: BookCover.Hard }));
+
+      addToolbar(bookViewer, flipView);
+      addCatalogueButton(shelfManager, catalogue);
 
       // Optional
       window.shelfManager = shelfManager;
       window.bookViewer = bookViewer;
+      window.flipView = flipView;
       window.shelf = shelf;
-      addZoomRange(bookViewer);
     });
 
-    function addZoomRange(bookViewer){
-      const viewerEl = bookViewer.element;
-      const input = document.createElement('input');
-      input.type = 'range';
-      input.id = 'zoomRange';
-      input.min = '0.5';
-      input.max = '2';
-      input.value = '1';
-      input.step = '0.01';
-      viewerEl.appendChild(input);
-      input.addEventListener('input', (event) => {
-        bookViewer.setZoomLevel(Number(input.value));
+    /** Adds prev/next/move buttons and a zoom slider to the viewer. */
+    function addToolbar(bookViewer, flipView){
+      const toolbar = document.createElement('div');
+      toolbar.id = 'toolbar';
+      // The viewer keeps elements with this class when it opens a book.
+      toolbar.className = 'do-not-remove';
+      toolbar.innerHTML = `
+        <button data-action="prev">Prev</button>
+        <button data-action="next">Next</button>
+        <input id="pageIndex" type="number" min="0" value="4" />
+        <button data-action="move">Move</button>
+        <input id="zoomRange" type="range" min="0.5" max="2" step="0.01" value="1" />
+      `;
+      toolbar.addEventListener('click', (event) => {
+        const action = event.target.dataset.action;
+        if(action === 'prev'){ flipView.prevPage(); }
+        if(action === 'next'){ flipView.nextPage(); }
+        if(action === 'move'){ flipView.moveTo(Number(document.getElementById('pageIndex').value)); }
       });
+      toolbar.querySelector('#zoomRange').addEventListener('input', (event) => {
+        bookViewer.setZoomLevel(Number(event.target.value));
+      });
+      bookViewer.element.appendChild(toolbar);
     }
 
-    /** A book of `pageCnt` pictures from resources/book{bookNum}/, its first page as the cover. */
-    function getSampleBook(bookNum, pageCnt){
+    /** Opens a book straight from a button on the page, without going to the shelf. */
+    function addCatalogueButton(shelfManager, book){
+      const button = document.createElement('button');
+      button.id = 'catalogueButton';
+      button.textContent = 'CATALOGUE';
+      button.addEventListener('click', () => { shelfManager.pickupAndView(book); });
+      document.body.appendChild(button);
+    }
+
+    /** One label for each page from page 2 on, keyed by the page index. */
+    function getSampleLabels(flipView){
+      const labels = {};
+      SAMPLE_LABELS.forEach(([content, backgroundColor], index) => {
+        const pageIndex = index + 2;
+        labels[pageIndex] = {
+          index,
+          pageIndex,
+          type: PageLabelType.Default,
+          content,
+          backgroundColor,
+          opacity: 0.5,
+          onClick: (pageIndex) => { flipView.moveTo(pageIndex); },
+        };
+      });
+      return labels;
+    }
+
+    /**
+     * A book of `pageCnt` pictures from resources/book{bookNum}/, its first page as the cover.
+     * @param options.labels Label tabs, keyed by the page index.
+     * @param options.cover `BookCover.Hard` turns the covers as stiff boards.
+     */
+    function getSampleBook(bookNum, pageCnt, title, { id = 'mybook' + bookNum, labels, cover } = {}){
       const pages = [];
       for(let i=0;i<pageCnt;i++){
         pages.push({
@@ -57,8 +108,11 @@
         })
       }
       const book = new Book({
-        id: 'mybook' + bookNum,
+        id,
+        title,
+        cover,
         lastPageIndex: pageCnt-1,
+        labels,
         thumbnails: {
           spine: pages[0].image,
           small: pages[0].image,
@@ -75,10 +129,29 @@
   </script>
 
   <style>
-    #zoomRange {
+    #toolbar {
       position: absolute;
       top: 10px;
-      right: 100px;
+      left: 10px;
+      z-index: 200;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    #pageIndex {
+      width: 50px;
+    }
+    #catalogueButton {
+      position: fixed;
+      right: 2rem;
+      bottom: 3vh;
+      width: 75px;
+      height: 75px;
+      border: 0;
+      background: #444;
+      color: #fff;
+      font-size: 10px;
+      cursor: pointer;
     }
   </style>
 </head>

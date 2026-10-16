@@ -3,16 +3,26 @@ import { FlipData } from './flipData';
 import { Flipping as FlipManager } from './flipManager';
 import { Gutter } from './gutter';
 import { clampPan, IPanOffset } from './panning';
+import { getFoldClip, toClipPath } from './foldClip';
 /**
  * A hard-cover board that only follows the mouse (it is not being turned yet)
  * rises this share of the angle the mouse points at.
  */
 const HARD_LIFT_SCALE = 0.4;
 /**
+ * How far (px) past the edges of a page its tabs may reach while it folds.
+ */
+const TAB_CLIP_MARGIN = 200;
+/**
  * Eases a turn in and out, so a board starts and lands gently.
  * @param t Progress from 0 to 1.
  */
 const easeInOut = (t:number) => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
+/**
+ * The sheet a page is printed on: the front cover and the page after it are sheet 0,
+ * pages 2 and 3 sheet 1, and so on. A page on the right of a spread is the front of its sheet.
+ */
+const getSheetIndex = (pageIndex:number) => Math.floor(pageIndex / 2);
 /**
  * This is an object type used to reference Elements related to the Viewer.
  */
@@ -28,6 +38,11 @@ type FlipViewerElements = {
   mask2Shape: SVGPolygonElement;
 }
 export interface IFlipViewConfig {
+  /**
+   * Whether a click on a page corner or edge turns the page. Defaults to true.
+   * False leaves the page where it was after a click; a drag still turns it.
+   */
+  flipOnClick?: boolean;
   autoFlip?: {
     duration?: number;
     forward?: {
@@ -47,6 +62,7 @@ export type RequiredFlipViewConfig = DeepRequired<IFlipViewConfig>;
  */
 export class FlipView implements IBookView {
   private config:RequiredFlipViewConfig = {
+    flipOnClick: true,
     autoFlip: {
       duration: 500,
       forward: {
@@ -489,7 +505,10 @@ export class FlipView implements IBookView {
       // building one here would load every page of the book at once.
       // `pageElOf` gives it its shadows when it is first shown.
       const page = pages[index];
-      if(page.hasElements){ this.appendShadowElIntoPageEl(page); }
+      if(page.hasElements){
+        this.appendShadowElIntoPageEl(page);
+        this.appendTabsIntoPageEl(page);
+      }
     }
   }
   /**
@@ -502,7 +521,10 @@ export class FlipView implements IBookView {
   private pageElOf(page:IPage):HTMLElement {
     const isFirstTime = !page.hasElements;
     const pageEl = page.element;
-    if(isFirstTime){ this.appendShadowElIntoPageEl(page); }
+    if(isFirstTime){
+      this.appendShadowElIntoPageEl(page);
+      this.appendTabsIntoPageEl(page);
+    }
     return pageEl;
   }
   /**
@@ -643,6 +665,121 @@ export class FlipView implements IBookView {
     if(this.curOpenLeftPageIndex < 0){ this.setReadyToOpenForward(); } 
     else if(this.curOpenLeftPageIndex >= this.book!.lastPageIndex){ this.setReadyToOpenBackward(); }
     else { this.setSpreadOpen(); }
+    // A turn puts the labels back itself when it ends.
+    if(!this.flipManager.isTurningPage){ this.placeLabels(); }
+  }
+  /**
+   * Places the labels of the label container, which stand for the sheets that have no page in
+   * the viewer, so that every label is always in sight: on the left once its sheet is turned,
+   * on the right before. A sheet with a page in the viewer shows its labels on that page
+   * (`appendTabsIntoPageEl`), so its labels here are put away.
+   */
+  private placeLabels(){
+    const leftPageIndex = this.curOpenLeftPageIndex;
+    const sheetsInViewer = new Set(this.flipManager.windows
+      .map(window => window.page?.index)
+      .filter((index):index is number => index !== undefined)
+      .map(getSheetIndex));
+    this.book?.labelEls.forEach(({ pageIndex, element }) => {
+      const sheetIndex = getSheetIndex(pageIndex);
+      // The back of a sheet, its left-hand page, lies on the left once the sheet is turned.
+      const isLeft = 2 * sheetIndex + 1 <= leftPageIndex;
+      element.classList.toggle('left', isLeft);
+      element.classList.toggle('right', !isLeft);
+      element.classList.toggle('in-page', sheetsInViewer.has(sheetIndex));
+      element.classList.remove('hidden-while-flipping');
+    });
+  }
+  /**
+   * Gives a page the labels of its sheet, at its outer edge: the right side of a page on the
+   * right of a spread (even index), the left side of one on the left. They are part of the page,
+   * so they lift and turn with it.
+   *
+   * A label is stuck to one face, as a tab on a real page: the page it marks shows all of it,
+   * lying over the page's edge, and the other face of the sheet shows only the part that sticks
+   * out past the edge. So a label is always in sight, and it is plain which page it is on.
+   */
+  private appendTabsIntoPageEl(page:IPage){
+    const book = this.book;
+    if(!book){ return; }
+    const pageEl = page.element;
+    pageEl.querySelector(':scope > .page-tabs')?.remove();
+
+    const sheetIndex = getSheetIndex(page.index);
+    const labels = book.labelEls.filter(({ pageIndex }) => getSheetIndex(pageIndex) === sheetIndex);
+    if(labels.length === 0){ return; }
+
+    const side = page.index % 2 === 0 ? 'right' : 'left';
+    const tabsEl = document.createElement('div');
+    tabsEl.className = 'page-tabs';
+    const backTabsEl = document.createElement('div');
+    backTabsEl.className = `page-tabs-back ${side}`;
+    labels.forEach(({ pageIndex, data }) => {
+      const labelEl = book.createLabelEl(data);
+      labelEl.classList.add(side);
+      (pageIndex === page.index ? tabsEl : backTabsEl).appendChild(labelEl);
+    });
+    // The other face's labels go first, so the page's own lie over them where they meet.
+    tabsEl.prepend(backTabsEl);
+    pageEl.appendChild(tabsEl);
+  }
+  /**
+   * Cuts the tabs of a folding sheet along the fold: the page keeps the part of its tabs that
+   * has not folded over, and the flap (the back of the sheet) shows the part of its own tabs
+   * that has come over.
+   */
+  private clipTabs(flipData:FlipData, zoomLevel:number){
+    const page1El = this.activePage1El;
+    const page2El = this.activePage2El;
+    if(!page1El || !page2El){ return; }
+    const pageSize = { width: page1El.offsetWidth, height: page1El.offsetHeight };
+    const unzoom = (point:Point) => ({ x: point.x / zoomLevel, y: point.y / zoomLevel });
+    // The corner being turned, on page 1, and the same corner on the back of the sheet, page 2.
+    // The masks are drawn as if a bottom corner were turned, so they cannot tell which side folds.
+    const page1Rect = page1El.getBoundingClientRect();
+    const corner = unzoom({
+      x: this.flipManager.activeCornerGP.x - page1Rect.left,
+      y: this.flipManager.activeCornerGP.y - page1Rect.top,
+    });
+    const cornerOnBack = { x: pageSize.width - corner.x, y: corner.y };
+
+    // The fold line runs through k and l of page 1's mask, and through g and h of page 2's.
+    // Page 1 keeps the side away from the corner; the flap shows the side with it.
+    const page1Clip = getFoldClip(
+      unzoom(flipData.mask.page1.p2), unzoom(flipData.mask.page1.p3),
+      corner, false, pageSize, TAB_CLIP_MARGIN);
+    const page2Clip = getFoldClip(
+      unzoom(flipData.mask.page2.p2), unzoom(flipData.mask.page2.p3),
+      cornerOnBack, true, pageSize, TAB_CLIP_MARGIN);
+
+    this.setTabsClip(page1El, toClipPath(page1Clip));
+    this.setTabsClip(page2El, toClipPath(page2Clip));
+  }
+  /**
+   * Sets the clip of a page's tabs; an empty value shows them whole.
+   */
+  private setTabsClip(pageEl:HTMLElement, clipPath:string){
+    const tabsEl = pageEl.querySelector(':scope > .page-tabs') as HTMLElement | null;
+    if(tabsEl){ tabsEl.style.clipPath = clipPath; }
+  }
+  /**
+   * Shows the tabs of every page whole again, after a fold.
+   */
+  private clearTabsClip(){
+    this.bookContainerEl.querySelectorAll<HTMLElement>('.page-tabs').forEach(tabsEl => { tabsEl.style.clipPath = ''; });
+  }
+  /**
+   * Hides the labels that change sides when the open spread goes from one to another:
+   * those of the pages turned over in between. `placeLabels` shows them again on their new side.
+   * @param fromLeftPageIndex The left page of the spread the turn starts from.
+   * @param toLeftPageIndex The left page of the spread the turn ends at.
+   */
+  private hideLabelsTurnedOver(fromLeftPageIndex:number, toLeftPageIndex:number){
+    const low = Math.min(fromLeftPageIndex, toLeftPageIndex);
+    const high = Math.max(fromLeftPageIndex, toLeftPageIndex);
+    this.book?.labelEls.forEach(({ pageIndex, element }) => {
+      element.classList.toggle('hidden-while-flipping', pageIndex > low && pageIndex <= high);
+    });
   }
   /**
    * Shifts pages related the flip effect directly.
@@ -1084,9 +1221,11 @@ export class FlipView implements IBookView {
     if(!page2El){ return; }
     const isHardSheet = this.isHardSheetTurning;
     this.bookContainerEl.classList.toggle('hard-sheet-turning', isHardSheet);
-    if(isHardSheet){ this.turnHardSheet(mouseGP); return; }
+    // A board turns in one piece, its tabs with it.
+    if(isHardSheet){ this.clearTabsClip(); this.turnHardSheet(mouseGP); return; }
     const pageWH = { width: page2El.offsetWidth*zoomLevel, height: page2El.offsetHeight*zoomLevel }
     const flipData = this.flipManager.flip(mouseGP, pageWH, this.isSpreadOpen);
+    this.clipTabs(flipData, zoomLevel);
 
     const shadow1Paths = this.activePage1El?.querySelectorAll('.shadow1 > path') as NodeListOf<SVGPathElement> | undefined;
     const shadow3Shape = this.activePage2El?.querySelector('.shadow3 > polygon.shape') as SVGPolygonElement | null;
@@ -1136,10 +1275,17 @@ export class FlipView implements IBookView {
     let angle = this.flipManager.getHardSheetAngle(mouseGP, pageWidth, !!this.isLeftPageFlipping);
     if(this.flipManager.eventStatus & EventStatus.AutoFlip){ angle *= HARD_LIFT_SCALE; }
 
+    // The board's shadow falls on the page it leans over: its own side until it stands up,
+    // the far side after. It reaches as far as the board does, and spreads as the board rises.
+    const reach = Math.cos(angle);
+    const lift = Math.sin(angle);
     const cssVar = document.documentElement.style;
     cssVar.setProperty('--hard-gutter', `${(this.flipManager.gutter.left - this.pageContainerRect.left) / zoomLevel}px`);
     cssVar.setProperty('--hard-angle', `${angle}rad`);
-    cssVar.setProperty('--hard-lift', `${Math.sin(angle)}`);
+    cssVar.setProperty('--hard-lift', `${lift}`);
+    cssVar.setProperty('--hard-reach', `${Math.abs(reach) * 100}%`);
+    cssVar.setProperty('--hard-cast-own', `${reach > 0 ? lift : 0}`);
+    cssVar.setProperty('--hard-cast-far', `${reach < 0 ? lift : 0}`);
   }
   /**
    * Sets the status of viewer as Auto Flipping.
@@ -1153,6 +1299,7 @@ export class FlipView implements IBookView {
    */
   private unsetViewerToAutoFlip(){
     this.bookContainerEl.classList.remove('left-page-flipping', 'right-page-flipping', 'hard-sheet-turning');
+    this.clearTabsClip();
   }
   /**
    * Sets the status of viewer as the status Flipping by dragging.
@@ -1167,6 +1314,7 @@ export class FlipView implements IBookView {
    */
   private unsetViewerToFlip(){
     this.bookContainerEl.classList.remove("noselect", 'left-page-flipping', `right-page-flipping`, 'hard-sheet-turning');
+    this.clearTabsClip();
   }
   /**
    * This is the mouseenter event handler on the 6 event zones.
@@ -1208,6 +1356,8 @@ export class FlipView implements IBookView {
     
     const viewport = { x:event.clientX, y:event.clientY };
     this.flipManager.mouseDownGP = viewport;
+    const curLeftPageIndex = this.curOpenLeftPageIndex;
+    this.hideLabelsTurnedOver(curLeftPageIndex, param.zone & Zone.Left ? curLeftPageIndex - 2 : curLeftPageIndex + 2);
     this.setViewerToFlip();
     this.flipManager.setInitFlipping(param.zone, viewport, this.pageContainerRect, this.zoomLevel);
     this.flipPage( viewport );
@@ -1249,6 +1399,8 @@ export class FlipView implements IBookView {
       () => { 
         if(this.flipManager.eventStatus == EventStatus.AutoFlipToCorner){ 
           this.unsetViewerToAutoFlip();
+          // Nothing is turning now, so no label should stay hidden.
+          this.placeLabels();
           this.flipManager.eventStatus = EventStatus.None; 
         }
       }
@@ -1265,7 +1417,7 @@ export class FlipView implements IBookView {
     if(!this.activePage2El){ return }
 
     const viewport = { x:event.clientX, y:event.clientY };
-    const dataToFlip = this.flipManager.getInfoToRelease(viewport);
+    const dataToFlip = this.flipManager.getInfoToRelease(viewport, this.config.flipOnClick !== false);
     this.flipManager.mouseDownGP = undefined;
 
     if(dataToFlip.isSnappingBack){ this.flipManager.eventStatus = EventStatus.SnappingBack; }
@@ -1282,6 +1434,7 @@ export class FlipView implements IBookView {
           this.shiftPages(dataToFlip.isFlippingForward)
         }
         this.unsetViewerToFlip();
+        this.placeLabels();
         this.flipManager.finishFlip();
       }
     );
@@ -1321,6 +1474,8 @@ export class FlipView implements IBookView {
    * @param endGP 
    */
   moveTo(pageIndex:number, offsetY?:number){
+    // A label pressed while a page turns would swap the hidden pages under the turning one.
+    if(this.isFlipping){ return; }
     const targetLeftPageIndex = pageIndex%2 === 0 ? pageIndex -1 : pageIndex;
     if(this.curOpenLeftPageIndex === targetLeftPageIndex){ return }
     else if(this.curOpenLeftPageIndex < targetLeftPageIndex){
@@ -1376,6 +1531,8 @@ export class FlipView implements IBookView {
     // would stay on and draw that page beside the turning one, apart from its shadow.
     this.unsetViewerToAutoFlip();
     this.flipManager.eventStatus = EventStatus.Flipping;
+    const curLeftPageIndex = this.curOpenLeftPageIndex;
+    this.hideLabelsTurnedOver(curLeftPageIndex, targetLeftPageIndex ?? (isMovingForward ? curLeftPageIndex + 2 : curLeftPageIndex - 2));
     this.flipManager.curMouseGP = startGP;
     this.flipManager.eventZone = startZone;
     this.setViewerToFlip();
@@ -1410,6 +1567,7 @@ export class FlipView implements IBookView {
         // if(!this.activePage2El){ return }
         this.shiftPages(isMovingForward, targetLeftPageIndex);
         this.unsetViewerToFlip();
+        this.placeLabels();
         this.flipManager.finishFlip();
       }
     }

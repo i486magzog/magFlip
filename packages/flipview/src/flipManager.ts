@@ -257,10 +257,13 @@ export class Flipping extends PageWindow {
    * A click (the mouse came up where it went down) turns the page all the way across,
    * as a drag past the gutter does; otherwise the page goes to the corner closer to the mouse.
    * @param mouseGP The position of the mouse pointer when it came up.
+   * @param isFlipOnClick False lets a click count as any other release, so the page goes back.
    * @returns An object containing the target corner, snap-back status, and flip direction.
    */
-  getInfoToRelease(mouseGP:Point){
-    const isClick = this.mouseDownGP !== undefined && MZMath.getLength(mouseGP, this.mouseDownGP) < CLICK_DISTANCE;
+  getInfoToRelease(mouseGP:Point, isFlipOnClick = true){
+    const isClick = isFlipOnClick
+      && this.mouseDownGP !== undefined
+      && MZMath.getLength(mouseGP, this.mouseDownGP) < CLICK_DISTANCE;
     return this.getInfoToFlip(isClick ? this.activeCornerOppositeGP : mouseGP);
   }
   /**
