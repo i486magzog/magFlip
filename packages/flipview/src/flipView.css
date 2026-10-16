@@ -516,6 +516,33 @@
   left: var(--mz-label-offset-x);
 }
 
+/* A sheet with a page in the viewer shows its labels on that page (`.page-tabs`), not here. */
+#bookViewer .label-container .page-label.in-page {
+  display: none;
+}
+
+/* The labels of a page, part of it: they lift and turn with it.
+   FlipView cuts them along the fold with clip-path while the page folds. */
+#bookViewer .page > .page-tabs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#bookViewer .page > .page-tabs .page-label-content {
+  pointer-events: auto;
+}
+/* The labels stuck to the other face of the sheet: only what sticks out past the page's edge. */
+#bookViewer .page > .page-tabs > .page-tabs-back {
+  position: absolute;
+  inset: 0;
+}
+#bookViewer .page > .page-tabs > .page-tabs-back.right {
+  clip-path: inset(-200px -200px -200px 100%);
+}
+#bookViewer .page > .page-tabs > .page-tabs-back.left {
+  clip-path: inset(-200px 100% -200px -200px);
+}
+
 /* A label whose page is being turned over hides until the turn ends, then shows on its new side. */
 #bookViewer .page-label.hidden-while-flipping {
   visibility: hidden;

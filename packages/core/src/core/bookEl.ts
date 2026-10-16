@@ -10,11 +10,12 @@ interface IBookElElements {
   // labelRightSubContainerEl: HTMLElement;
 }
 /**
- * A label's element and the page it marks.
+ * A label's element, the page it marks and the data it was made from.
  */
 export interface IPageLabelElement {
   pageIndex: number;
   element: HTMLElement;
+  data: IPageLabelData;
 }
 /**
  * Book element management class
@@ -129,8 +130,15 @@ export class BookEl extends Base {
   private addLabelEl(label:IPageLabelData){ 
     const labelEl = new PageLabelEl(label);
     this.labelContainerEl.appendChild(labelEl.element);
-    this.labelEls.push({ pageIndex: label.pageIndex, element: labelEl.element });
+    this.labelEls.push({ pageIndex: label.pageIndex, element: labelEl.element, data: label });
   }
+  /**
+   * Makes another element for a label, for a view that shows the label in more than one place,
+   * such as on the page it marks as well as in the label container.
+   * @param label The data of the label.
+   * @returns A new element that answers a click as the label does.
+   */
+  createLabelEl(label:IPageLabelData):HTMLElement { return new PageLabelEl(label).element; }
   /**
    * Clears the children elements of the page container's element.
    */

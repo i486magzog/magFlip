@@ -24,7 +24,7 @@ src/
    ├─ bookObjectEl.ts       책 객체 — 밖에서 본 닫힌 책(3D 상자: 표지·책등·종이 면). book.objectEl
    ├─ bookFlight.ts         날아가는 복사본 (Web Animations). canFly / land / cancel
    ├─ page.ts / pageEl.ts   Page extends PageEl(.page[pageIdx] > .content-container > .content)
-   ├─ pageLabel(El).ts      책 옆 라벨 탭 (BookEl.labelEls 에 { pageIndex, element } 로 모임; 어느 쪽에 붙일지는 뷰가 정한다. resetBookEls 는 라벨 컨테이너를 지우지 않는다)
+   ├─ pageLabel(El).ts      책 옆 라벨 탭 (BookEl.labelEls 에 { pageIndex, element, data } 로 모임; 어느 쪽·어디에 그릴지는 뷰가 정하고, 페이지 위에 한 벌 더 그릴 때는 BookEl.createLabelEl(data). resetBookEls 는 라벨 컨테이너를 지우지 않는다)
    ├─ core.css              뷰어 기본 스타일, .book-arriving / .is-closing
    └─ bookObject.css        책 객체의 크기 변수·면·자세·.is-picked-up / .is-flying
 ```
