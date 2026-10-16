@@ -76,4 +76,6 @@ npm run dev              # build:local + serve
 
 ## Git
 
-- 작업 브랜치 `claude`, 기본 브랜치 `main`. `claude` 에서 작업하고 `claude` → `main` PR 로 합친다. 커밋 메시지는 짧은 영어 명령형 (예: `Add docs site`, `Fix rounding error.`).
+- 작업 브랜치 `claude`, 기본 브랜치 `main`. `claude` 에서 작업하고 `claude` → `main` PR 로 합친다.
+- `dev/humain` 은 사람이 직접 코드를 짤 때 쓰는 브랜치다. Claude 는 이 브랜치에 커밋·push 하지 않는다.
+- 커밋 메시지는 짧은 영어 명령형 (예: `Add docs site`, `Fix rounding error.`).
